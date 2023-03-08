@@ -1,0 +1,23 @@
+{
+  "root": true,
+  "env": {
+    "es2021": true,
+    "node": true
+  },
+  "overrides": [
+    {
+      "files": ["*.js"],
+      "extends": ["eslint:recommended", "prettier"]
+    },
+    {
+      "files": ["*.ts"],
+      "parser": "@typescript-eslint/parser",
+      "extends": [
+        "plugin:@typescript-eslint/recommended",
+
+        // prettier config will turn rules off according to prettier, it should always be at the end
+        "prettier"
+      ]
+    }
+  ]
+}
