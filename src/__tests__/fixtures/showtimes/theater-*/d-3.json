@@ -1,0 +1,466 @@
+{
+  "error": false,
+  "message": "next.showtime.on",
+  "results": [
+    {
+      "movie": {
+        "synopsis": "Halim est mari\u00e9 depuis longtemps \u00e0 Mina, avec qui il tient un magasin traditionnel de caftans dans la m\u00e9dina de Sal\u00e9, au Maroc. Le couple vit depuis toujours avec le secret d\u2019Halim, son homosexualit\u00e9 qu\u2019il a appris \u00e0 taire.",
+        "synopsisFull": "Halim est mari\u00e9 depuis longtemps \u00e0 Mina, avec qui il tient un magasin traditionnel de caftans dans la m\u00e9dina de Sal\u00e9, au Maroc. Le couple vit depuis toujours avec le secret d\u2019Halim, son homosexualit\u00e9 qu\u2019il a appris \u00e0 taire. La maladie de Mina et l\u2019arriv\u00e9e d\u2019un jeune apprenti vont bouleverser cet \u00e9quilibre. Unis dans leur amour, chacun va aider l\u2019autre \u00e0 affronter ses peurs.",
+        "__typename": "Movie",
+        "internalId": 297895,
+        "poster": {
+          "__typename": "InternalImage",
+          "id": "SW1hZ2U6MjE5MTcyMTE=",
+          "internalId": 21917211,
+          "url": "https://fr.web.img3.acsta.net/pictures/23/02/16/16/26/1879683.jpg",
+          "path": "/pictures/23/02/16/16/26/1879683.jpg"
+        },
+        "title": "Le Bleu du Caftan",
+        "originalTitle": "Le Bleu du Caftan",
+        "type": "FEATURE_FILM",
+        "runtime": "2h 04min",
+        "genres": [
+          { "id": 13008, "translate": "Drame", "tag": "DRAMA" },
+          { "id": 13024, "translate": "Romance", "tag": "ROMANCE" }
+        ],
+        "languages": ["ARABIC", "FRENCH"],
+        "data": { "__typename": "MovieData", "seo": { "__typename": "Seo", "browsable": true } },
+        "stats": {
+          "userRating": { "score": 4.04, "count": 51 },
+          "userReview": { "count": 10 },
+          "pressReview": null,
+          "metric": { "hits": 48435, "sessions": 27035 },
+          "wantToSeeCount": 235
+        },
+        "editorialReviews": [],
+        "releases": [
+          {
+            "__typename": "MovieRelease",
+            "releaseDate": {
+              "__typename": "PartialDate",
+              "date": "2023-03-22",
+              "precision": "day"
+            },
+            "name": "Released",
+            "certificate": null,
+            "companyLimitation": null,
+            "releaseTags": { "tagTypes": ["THEATER"], "tagFlags": null }
+          }
+        ],
+        "credits": [
+          {
+            "person": {
+              "__typename": "Person",
+              "internalId": 616464,
+              "lastName": "Touzani",
+              "firstName": "Maryam",
+              "seo": { "__typename": "Seo", "browsable": true }
+            },
+            "position": { "__typename": "Position", "name": "DIRECTOR", "department": "DIRECTION" },
+            "rank": 1
+          }
+        ],
+        "cast": {
+          "__typename": "castMemberConnection",
+          "edges": [
+            {
+              "node": {
+                "actor": {
+                  "__typename": "Person",
+                  "internalId": 27346,
+                  "lastName": "Azabal",
+                  "firstName": "Lubna",
+                  "seo": { "__typename": "Seo", "browsable": true }
+                },
+                "voiceActor": null,
+                "originalVoiceActor": null,
+                "rank": 1
+              }
+            },
+            {
+              "node": {
+                "actor": {
+                  "__typename": "Person",
+                  "internalId": 193803,
+                  "lastName": "Bakri",
+                  "firstName": "Saleh",
+                  "seo": { "__typename": "Seo", "browsable": true }
+                },
+                "voiceActor": null,
+                "originalVoiceActor": null,
+                "rank": 2
+              }
+            },
+            {
+              "node": {
+                "actor": {
+                  "__typename": "Person",
+                  "internalId": 948402,
+                  "lastName": "Missioui",
+                  "firstName": "Ayoub",
+                  "seo": { "__typename": "Seo", "browsable": true }
+                },
+                "voiceActor": null,
+                "originalVoiceActor": null,
+                "rank": 3
+              }
+            }
+          ],
+          "nodes": [
+            {
+              "actor": {
+                "__typename": "Person",
+                "internalId": 27346,
+                "lastName": "Azabal",
+                "firstName": "Lubna",
+                "seo": { "__typename": "Seo", "browsable": true }
+              },
+              "voiceActor": null,
+              "originalVoiceActor": null,
+              "rank": 1
+            },
+            {
+              "actor": {
+                "__typename": "Person",
+                "internalId": 193803,
+                "lastName": "Bakri",
+                "firstName": "Saleh",
+                "seo": { "__typename": "Seo", "browsable": true }
+              },
+              "voiceActor": null,
+              "originalVoiceActor": null,
+              "rank": 2
+            },
+            {
+              "actor": {
+                "__typename": "Person",
+                "internalId": 948402,
+                "lastName": "Missioui",
+                "firstName": "Ayoub",
+                "seo": { "__typename": "Seo", "browsable": true }
+              },
+              "voiceActor": null,
+              "originalVoiceActor": null,
+              "rank": 3
+            }
+          ]
+        },
+        "countries": [
+          { "__typename": "Country", "id": 5001, "name": "France", "localizedName": "France" },
+          { "__typename": "Country", "id": 5033, "name": "Morocco", "localizedName": "Maroc" },
+          { "__typename": "Country", "id": 5014, "name": "Belgium", "localizedName": "Belgique" },
+          { "__typename": "Country", "id": 5061, "name": "Denmark", "localizedName": "Danemark" }
+        ],
+        "relatedTags": [
+          {
+            "__typename": "Tag",
+            "internalId": 5259,
+            "name": "Art et essai",
+            "scope": null,
+            "data": {
+              "seo": {
+                "browsable": true,
+                "friendly": false,
+                "scope": {
+                  "userRating": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "pressRating": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "popularity": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "ranking": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  }
+                }
+              }
+            },
+            "tags": { "list": ["Tag.Type.PublicVise"] }
+          },
+          {
+            "__typename": "Tag",
+            "internalId": 2056,
+            "name": "Malade et maladie",
+            "scope": null,
+            "data": {
+              "seo": {
+                "browsable": true,
+                "friendly": false,
+                "scope": {
+                  "userRating": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "pressRating": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "popularity": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "ranking": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  }
+                }
+              }
+            },
+            "tags": { "list": ["Tag.Type.Keyword"] }
+          },
+          {
+            "__typename": "Tag",
+            "internalId": 1728,
+            "name": "Portrait de couple / Relation de couple",
+            "scope": null,
+            "data": {
+              "seo": {
+                "browsable": true,
+                "friendly": false,
+                "scope": {
+                  "userRating": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "pressRating": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "popularity": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "ranking": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  }
+                }
+              }
+            },
+            "tags": { "list": ["Tag.Type.Characteristic"] }
+          },
+          {
+            "__typename": "Tag",
+            "internalId": 757,
+            "name": "Homosexualit\u00e9 / Gay",
+            "scope": null,
+            "data": {
+              "seo": {
+                "browsable": true,
+                "friendly": false,
+                "scope": {
+                  "userRating": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "pressRating": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "popularity": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "ranking": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  }
+                }
+              }
+            },
+            "tags": { "list": ["Tag.Type.Keyword"] }
+          },
+          {
+            "__typename": "Tag",
+            "internalId": 2585,
+            "name": "Maroc",
+            "scope": null,
+            "data": {
+              "seo": {
+                "browsable": true,
+                "friendly": false,
+                "scope": {
+                  "userRating": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "pressRating": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "popularity": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "ranking": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  }
+                }
+              }
+            },
+            "tags": { "list": ["Tag.Type.Location", "Tag.Localization.Country"] }
+          },
+          {
+            "__typename": "Tag",
+            "internalId": 1940,
+            "name": "Magasin / Caisse / Vendeur et vendeuse",
+            "scope": null,
+            "data": {
+              "seo": {
+                "browsable": true,
+                "friendly": false,
+                "scope": {
+                  "userRating": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "pressRating": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "popularity": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "ranking": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  }
+                }
+              }
+            },
+            "tags": { "list": ["Tag.Type.Keyword"] }
+          },
+          {
+            "__typename": "Tag",
+            "internalId": 1000000092,
+            "name": "CANNES_2022",
+            "scope": "TRACKING",
+            "data": {
+              "seo": {
+                "browsable": true,
+                "friendly": false,
+                "scope": {
+                  "userRating": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "pressRating": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "popularity": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "ranking": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  }
+                }
+              }
+            },
+            "tags": { "list": ["Tag.Type.Keyword"] }
+          }
+        ],
+        "flags": {
+          "hasDvdRelease": false,
+          "hasNews": true,
+          "hasOnlineProduct": false,
+          "hasOnlineRelease": false,
+          "hasPhysicalProduct": false,
+          "hasPreview": true,
+          "hasShowtime": true,
+          "hasSoundtrack": false,
+          "hasTheaterRelease": false,
+          "hasTrivia": true,
+          "isClub300Approved": false,
+          "hasClub300News": false,
+          "isComingSoon": true,
+          "isPlayingNow": true,
+          "tvRelease": false
+        },
+        "customFlags": { "isPremiere": true, "weeklyOuting": false }
+      },
+      "showtimes": {
+        "dubbed": [],
+        "original": [
+          {
+            "__typename": "Showtime",
+            "internalId": 1731007216,
+            "startsAt": "2023-03-16T20:15:00",
+            "timeBeforeStart": "PT0H0M0S",
+            "service": null,
+            "experience": null,
+            "comfort": null,
+            "projection": ["DIGITAL"],
+            "picture": null,
+            "sound": null,
+            "tags": ["Localization.Language.Arab", "Format.Projection.Digital"],
+            "data": {
+              "__typename": "ShowtimeData",
+              "ticketing": [
+                {
+                  "__typename": "Ticketing",
+                  "urls": [
+                    "http://www.ugc.fr/reservationAccueil.html?id=330171613998\u0026part=all"
+                  ],
+                  "type": "DESKTOP",
+                  "provider": "default"
+                }
+              ]
+            },
+            "isPreview": true,
+            "isWeeklyMovieOuting": false
+          }
+        ],
+        "local": [],
+        "multiple": []
+      }
+    }
+  ],
+  "nextDate": "2023-03-14",
+  "params": {
+    "experience": null,
+    "projection": null,
+    "comfort": null,
+    "picture": null,
+    "sound": null,
+    "version": null,
+    "page": 1
+  },
+  "facets": {
+    "facets": [
+      {
+        "__typename": "Facets",
+        "name": "showtimes.projection",
+        "values": [
+          { "key": "Digital", "translation": { "tag": "DIGITAL", "name": "Num\u00e9rique" } }
+        ]
+      },
+      { "__typename": "Facets", "name": "showtimes.experience", "values": [] },
+      { "__typename": "Facets", "name": "showtimes.comfort", "values": [] },
+      {
+        "__typename": "Facets",
+        "name": "showtimes.version",
+        "values": [
+          { "key": "Original", "version": "ORIGINAL" },
+          { "key": "Local", "version": "LOCAL" },
+          { "key": "Dubbed", "version": "DUBBED" }
+        ]
+      },
+      { "__typename": "Facets", "name": "showtimes.picture", "values": [] },
+      { "__typename": "Facets", "name": "showtimes.sound", "values": [] },
+      { "__typename": "Facets", "name": "showtimes.service", "values": [] }
+    ]
+  },
+  "pagination": { "page": 1, "totalPages": 1, "itemsPerPage": 15, "totalItems": 1 },
+  "data": { "filters": [] }
+}

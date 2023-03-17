@@ -1,0 +1,80 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model ScrapedUrl {
+  url       String   @id
+  createdAt DateTime @default(now()) @map("created_at")
+  expiresAt DateTime @map("expires_at")
+  content   String
+
+  @@map("scraped_urls")
+}
+
+model Movie {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  allocineId    Int       @unique @map("allocine_id")
+  themoviedbId  Int?      @map("themoviedb_id")
+  releaseDate   DateTime? @map("release_date")
+  title         String    @db.VarChar(255)
+  originalTitle String    @map("original_title") @db.VarChar(255)
+  synopsis      String?
+  duration      Int       @default(0)
+  posterUrl     String?   @map("poster_url")
+  director      String?
+  tags          String[]
+
+  Showtimes Showtime[]
+
+  @@map("movies")
+}
+
+enum Language {
+  VO
+  VF
+}
+
+model Showtime {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  allocineId   Int      @unique @map("allocine_id")
+  date         DateTime
+  isPreview    Boolean  @default(false) @map("is_preview")
+  tags         String[]
+  language     Language
+  ticketingUrl String?
+
+  Theater   Theater @relation(fields: [theaterId], references: [id])
+  theaterId Int     @map("theater_id")
+
+  Movie   Movie @relation(fields: [movieId], references: [id])
+  movieId Int   @map("movie_id")
+
+  @@unique([date, movieId, theaterId])
+  @@map("showtimes")
+}
+
+model Theater {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  allocineId String @unique @map("allocine_id") @db.VarChar(10)
+  name       String @db.VarChar(255)
+  address    String
+  website    String @db.VarChar(255)
+
+  Showtimes Showtime[]
+
+  @@map("theaters")
+}

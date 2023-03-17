@@ -1,0 +1,1 @@
+0 2 * * * curl 127.0.0.1:$PORT/scrap/90 && echo "Trigger scrapping"

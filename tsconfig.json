@@ -1,6 +1,7 @@
 {
+  "exclude": ["dist"],
+  "include": ["**/*.ts", "**/*.tsx"],
   "compilerOptions": {
-    /* Visit https://aka.ms/tsconfig.json to read more about this file */
     "resolveJsonModule": true,
     "target": "ESNext",
     "forceConsistentCasingInFileNames": true,
@@ -9,7 +10,18 @@
     "module": "Node16",
 
     "strict": true,
-    "noImplicitAny": false,
-    "skipLibCheck": true
+    "strictNullChecks": true,
+    "noImplicitAny": true,
+    "skipLibCheck": true,
+
+    "rootDir": ".",
+    "baseUrl": ".",
+    "outDir": "dist",
+    "allowJs": true,
+    "lib": ["DOM", "DOM.Iterable", "ES2019"],
+    "isolatedModules": true,
+    "jsx": "react-jsx",
+    "noEmit": true,
+    "moduleResolution": "node"
   }
 }

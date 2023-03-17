@@ -1,0 +1,2325 @@
+{
+  "error": false,
+  "message": "next.showtime.on",
+  "results": [
+    {
+      "movie": {
+        "synopsis": "Tandis qu\u2019ils passent leurs vacances dans un chalet en pleine nature, une jeune fille et ses parents sont pris en otage par quatre \u00e9trangers arm\u00e9s qui leur imposent de faire un choix impossible. S\u2019ils refusent, l\u2019apocalypse est in\u00e9luctable.",
+        "synopsisFull": "Tandis qu\u2019ils passent leurs vacances dans un chalet en pleine nature, une jeune fille et ses parents sont pris en otage par quatre \u00e9trangers arm\u00e9s qui leur imposent de faire un choix impossible. S\u2019ils refusent, l\u2019apocalypse est in\u00e9luctable. Quasiment coup\u00e9s du monde, les parents de la jeune fille doivent assumer leur d\u00e9cision avant qu\u2019il ne soit trop tard\u2026",
+        "__typename": "Movie",
+        "internalId": 277362,
+        "poster": {
+          "__typename": "InternalImage",
+          "id": "SW1hZ2U6MjE5NjU4NjY=",
+          "internalId": 21965866,
+          "url": "https://fr.web.img2.acsta.net/pictures/22/11/29/08/39/3570477.jpg",
+          "path": "/pictures/22/11/29/08/39/3570477.jpg"
+        },
+        "title": "Knock at the Cabin",
+        "originalTitle": "Knock at the Cabin",
+        "type": "FEATURE_FILM",
+        "runtime": "1h 45min",
+        "genres": [
+          { "id": 13009, "translate": "Epouvante-horreur", "tag": "HORROR" },
+          { "id": 13023, "translate": "Thriller", "tag": "THRILLER" }
+        ],
+        "languages": ["ENGLISH"],
+        "data": { "__typename": "MovieData", "seo": { "__typename": "Seo", "browsable": true } },
+        "stats": {
+          "userRating": { "score": 2.83, "count": 2166 },
+          "userReview": { "count": 254 },
+          "pressReview": { "score": 3.25, "count": 28 },
+          "metric": { "hits": 824640, "sessions": 422556 },
+          "wantToSeeCount": 1766
+        },
+        "editorialReviews": [],
+        "releases": [
+          {
+            "__typename": "MovieRelease",
+            "releaseDate": {
+              "__typename": "PartialDate",
+              "date": "2023-02-01",
+              "precision": "day"
+            },
+            "name": "Released",
+            "certificate": { "label": "Interdit - 12 ans" },
+            "companyLimitation": null,
+            "releaseTags": { "tagTypes": ["THEATER"], "tagFlags": null }
+          }
+        ],
+        "credits": [
+          {
+            "person": {
+              "__typename": "Person",
+              "internalId": 30601,
+              "lastName": "Shyamalan",
+              "firstName": "M. Night",
+              "seo": { "__typename": "Seo", "browsable": true }
+            },
+            "position": { "__typename": "Position", "name": "DIRECTOR", "department": "DIRECTION" },
+            "rank": 1
+          }
+        ],
+        "cast": {
+          "__typename": "castMemberConnection",
+          "edges": [
+            {
+              "node": {
+                "actor": {
+                  "__typename": "Person",
+                  "internalId": 153203,
+                  "lastName": "Groff (II)",
+                  "firstName": "Jonathan",
+                  "seo": { "__typename": "Seo", "browsable": true }
+                },
+                "voiceActor": null,
+                "originalVoiceActor": null,
+                "rank": 1
+              }
+            },
+            {
+              "node": {
+                "actor": {
+                  "__typename": "Person",
+                  "internalId": 262693,
+                  "lastName": "Aldridge",
+                  "firstName": "Ben",
+                  "seo": { "__typename": "Seo", "browsable": true }
+                },
+                "voiceActor": null,
+                "originalVoiceActor": null,
+                "rank": 2
+              }
+            },
+            {
+              "node": {
+                "actor": {
+                  "__typename": "Person",
+                  "internalId": 178123,
+                  "lastName": "Bautista",
+                  "firstName": "Dave",
+                  "seo": { "__typename": "Seo", "browsable": true }
+                },
+                "voiceActor": null,
+                "originalVoiceActor": null,
+                "rank": 3
+              }
+            }
+          ],
+          "nodes": [
+            {
+              "actor": {
+                "__typename": "Person",
+                "internalId": 153203,
+                "lastName": "Groff (II)",
+                "firstName": "Jonathan",
+                "seo": { "__typename": "Seo", "browsable": true }
+              },
+              "voiceActor": null,
+              "originalVoiceActor": null,
+              "rank": 1
+            },
+            {
+              "actor": {
+                "__typename": "Person",
+                "internalId": 262693,
+                "lastName": "Aldridge",
+                "firstName": "Ben",
+                "seo": { "__typename": "Seo", "browsable": true }
+              },
+              "voiceActor": null,
+              "originalVoiceActor": null,
+              "rank": 2
+            },
+            {
+              "actor": {
+                "__typename": "Person",
+                "internalId": 178123,
+                "lastName": "Bautista",
+                "firstName": "Dave",
+                "seo": { "__typename": "Seo", "browsable": true }
+              },
+              "voiceActor": null,
+              "originalVoiceActor": null,
+              "rank": 3
+            }
+          ]
+        },
+        "countries": [
+          { "__typename": "Country", "id": 5002, "name": "USA", "localizedName": "U.S.A." }
+        ],
+        "relatedTags": [
+          {
+            "__typename": "Tag",
+            "internalId": 607,
+            "name": "Famille / Relation familiale",
+            "scope": null,
+            "data": {
+              "seo": {
+                "browsable": true,
+                "friendly": false,
+                "scope": {
+                  "userRating": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "pressRating": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "popularity": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "ranking": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  }
+                }
+              }
+            },
+            "tags": { "list": ["Tag.Type.Keyword"] }
+          },
+          {
+            "__typename": "Tag",
+            "internalId": 5255,
+            "name": "Myst\u00e8re",
+            "scope": "THEME",
+            "data": {
+              "seo": {
+                "browsable": true,
+                "friendly": false,
+                "scope": {
+                  "userRating": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "pressRating": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "popularity": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "ranking": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  }
+                }
+              }
+            },
+            "tags": { "list": ["Tag.Type.Envies"] }
+          },
+          {
+            "__typename": "Tag",
+            "internalId": 2513,
+            "name": "Myst\u00e8re",
+            "scope": null,
+            "data": {
+              "seo": {
+                "browsable": true,
+                "friendly": false,
+                "scope": {
+                  "userRating": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "pressRating": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "popularity": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "ranking": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  }
+                }
+              }
+            },
+            "tags": { "list": ["Tag.Type.Keyword"] }
+          },
+          {
+            "__typename": "Tag",
+            "internalId": 5221,
+            "name": "Relation parent / enfant",
+            "scope": null,
+            "data": {
+              "seo": {
+                "browsable": true,
+                "friendly": false,
+                "scope": {
+                  "userRating": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "pressRating": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "popularity": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "ranking": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  }
+                }
+              }
+            },
+            "tags": { "list": ["Tag.Type.Keyword"] }
+          },
+          {
+            "__typename": "Tag",
+            "internalId": 757,
+            "name": "Homosexualit\u00e9 / Gay",
+            "scope": null,
+            "data": {
+              "seo": {
+                "browsable": true,
+                "friendly": false,
+                "scope": {
+                  "userRating": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "pressRating": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "popularity": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "ranking": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  }
+                }
+              }
+            },
+            "tags": { "list": ["Tag.Type.Keyword"] }
+          },
+          {
+            "__typename": "Tag",
+            "internalId": 4455,
+            "name": "Dilemme / Choix",
+            "scope": null,
+            "data": {
+              "seo": {
+                "browsable": true,
+                "friendly": false,
+                "scope": {
+                  "userRating": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "pressRating": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "popularity": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "ranking": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  }
+                }
+              }
+            },
+            "tags": { "list": ["Tag.Type.Keyword"] }
+          },
+          {
+            "__typename": "Tag",
+            "internalId": 1980,
+            "name": "Menace",
+            "scope": null,
+            "data": {
+              "seo": {
+                "browsable": true,
+                "friendly": false,
+                "scope": {
+                  "userRating": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "pressRating": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "popularity": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "ranking": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  }
+                }
+              }
+            },
+            "tags": { "list": ["Tag.Type.Keyword"] }
+          },
+          {
+            "__typename": "Tag",
+            "internalId": 229,
+            "name": "Huis clos",
+            "scope": null,
+            "data": {
+              "seo": {
+                "browsable": true,
+                "friendly": false,
+                "scope": {
+                  "userRating": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "pressRating": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "popularity": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "ranking": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  }
+                }
+              }
+            },
+            "tags": { "list": ["Tag.Type.Characteristic"] }
+          },
+          {
+            "__typename": "Tag",
+            "internalId": 641,
+            "name": "Fin du monde / Apocalypse",
+            "scope": null,
+            "data": {
+              "seo": {
+                "browsable": true,
+                "friendly": false,
+                "scope": {
+                  "userRating": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "pressRating": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "popularity": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "ranking": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  }
+                }
+              }
+            },
+            "tags": { "list": ["Tag.Type.Keyword"] }
+          }
+        ],
+        "flags": {
+          "hasDvdRelease": false,
+          "hasNews": true,
+          "hasOnlineProduct": false,
+          "hasOnlineRelease": false,
+          "hasPhysicalProduct": false,
+          "hasPreview": false,
+          "hasShowtime": true,
+          "hasSoundtrack": false,
+          "hasTheaterRelease": true,
+          "hasTrivia": true,
+          "isClub300Approved": false,
+          "hasClub300News": false,
+          "isComingSoon": false,
+          "isPlayingNow": true,
+          "tvRelease": false
+        },
+        "customFlags": { "isPremiere": false, "weeklyOuting": false }
+      },
+      "showtimes": {
+        "dubbed": [],
+        "original": [
+          {
+            "__typename": "Showtime",
+            "internalId": 1731007099,
+            "startsAt": "2023-03-13T22:05:00",
+            "timeBeforeStart": "PT0H0M0S",
+            "service": null,
+            "experience": null,
+            "comfort": null,
+            "projection": ["DIGITAL"],
+            "picture": null,
+            "sound": null,
+            "tags": ["Localization.Language.English", "Format.Projection.Digital"],
+            "data": {
+              "__typename": "ShowtimeData",
+              "ticketing": [
+                {
+                  "__typename": "Ticketing",
+                  "urls": [
+                    "http://www.ugc.fr/reservationAccueil.html?id=330171613618\u0026part=all"
+                  ],
+                  "type": "DESKTOP",
+                  "provider": "default"
+                }
+              ]
+            },
+            "isPreview": false,
+            "isWeeklyMovieOuting": false
+          }
+        ],
+        "local": [],
+        "multiple": []
+      }
+    },
+    {
+      "movie": {
+        "synopsis": "Entre ses obligations de maire et son r\u00f4le d\u0027institutrice au sein du petit village de Kerguen, les journ\u00e9es d\u2019Alice sont d\u00e9j\u00e0 bien remplies. L\u2019arriv\u00e9e dans sa classe d\u0027un sexag\u00e9naire au caract\u00e8re explosif, enfin d\u00e9cid\u00e9 \u00e0 apprendre \u00e0 lire et \u00e0 \u00e9crire, va rendre son quotidien ing\u00e9rable.",
+        "synopsisFull": "Entre ses obligations de maire et son r\u00f4le d\u0027institutrice au sein du petit village de Kerguen, les journ\u00e9es d\u2019Alice sont d\u00e9j\u00e0 bien remplies. L\u2019arriv\u00e9e dans sa classe d\u2019Emile, un sexag\u00e9naire au caract\u00e8re explosif, enfin d\u00e9cid\u00e9 \u00e0 apprendre \u00e0 lire et \u00e0 \u00e9crire, va rendre son quotidien ing\u00e9rable. Surtout qu\u2019Alice, qui n\u0027avait rien vu venir, va devoir aussi sauver son village et son \u00e9cole\u2026",
+        "__typename": "Movie",
+        "internalId": 295765,
+        "poster": {
+          "__typename": "InternalImage",
+          "id": "SW1hZ2U6MjE5NjU2ODU=",
+          "internalId": 21965685,
+          "url": "https://fr.web.img2.acsta.net/pictures/23/01/23/15/57/5037530.jpg",
+          "path": "/pictures/23/01/23/15/57/5037530.jpg"
+        },
+        "title": "Les Petites victoires",
+        "originalTitle": "Les Petites victoires",
+        "type": "FEATURE_FILM",
+        "runtime": "1h 30min",
+        "genres": [{ "id": 13005, "translate": "Com\u00e9die", "tag": "COMEDY" }],
+        "languages": ["FRENCH"],
+        "data": { "__typename": "MovieData", "seo": { "__typename": "Seo", "browsable": true } },
+        "stats": {
+          "userRating": { "score": 3.96, "count": 841 },
+          "userReview": { "count": 193 },
+          "pressReview": { "score": 3.58, "count": 19 },
+          "metric": { "hits": 639494, "sessions": 302481 },
+          "wantToSeeCount": 1092
+        },
+        "editorialReviews": [],
+        "releases": [
+          {
+            "__typename": "MovieRelease",
+            "releaseDate": {
+              "__typename": "PartialDate",
+              "date": "2023-03-01",
+              "precision": "day"
+            },
+            "name": "Released",
+            "certificate": null,
+            "companyLimitation": null,
+            "releaseTags": { "tagTypes": ["THEATER"], "tagFlags": null }
+          }
+        ],
+        "credits": [
+          {
+            "person": {
+              "__typename": "Person",
+              "internalId": 843731,
+              "lastName": "Auffret",
+              "firstName": "M\u00e9lanie",
+              "seo": { "__typename": "Seo", "browsable": true }
+            },
+            "position": { "__typename": "Position", "name": "DIRECTOR", "department": "DIRECTION" },
+            "rank": 1
+          }
+        ],
+        "cast": {
+          "__typename": "castMemberConnection",
+          "edges": [
+            {
+              "node": {
+                "actor": {
+                  "__typename": "Person",
+                  "internalId": 4636,
+                  "lastName": "Blanc",
+                  "firstName": "Michel",
+                  "seo": { "__typename": "Seo", "browsable": true }
+                },
+                "voiceActor": null,
+                "originalVoiceActor": null,
+                "rank": 1
+              }
+            },
+            {
+              "node": {
+                "actor": {
+                  "__typename": "Person",
+                  "internalId": 169853,
+                  "lastName": "Piaton",
+                  "firstName": "Julia",
+                  "seo": { "__typename": "Seo", "browsable": true }
+                },
+                "voiceActor": null,
+                "originalVoiceActor": null,
+                "rank": 2
+              }
+            },
+            {
+              "node": {
+                "actor": {
+                  "__typename": "Person",
+                  "internalId": 5083,
+                  "lastName": "Abelanski",
+                  "firstName": "Lionel",
+                  "seo": { "__typename": "Seo", "browsable": true }
+                },
+                "voiceActor": null,
+                "originalVoiceActor": null,
+                "rank": 3
+              }
+            }
+          ],
+          "nodes": [
+            {
+              "actor": {
+                "__typename": "Person",
+                "internalId": 4636,
+                "lastName": "Blanc",
+                "firstName": "Michel",
+                "seo": { "__typename": "Seo", "browsable": true }
+              },
+              "voiceActor": null,
+              "originalVoiceActor": null,
+              "rank": 1
+            },
+            {
+              "actor": {
+                "__typename": "Person",
+                "internalId": 169853,
+                "lastName": "Piaton",
+                "firstName": "Julia",
+                "seo": { "__typename": "Seo", "browsable": true }
+              },
+              "voiceActor": null,
+              "originalVoiceActor": null,
+              "rank": 2
+            },
+            {
+              "actor": {
+                "__typename": "Person",
+                "internalId": 5083,
+                "lastName": "Abelanski",
+                "firstName": "Lionel",
+                "seo": { "__typename": "Seo", "browsable": true }
+              },
+              "voiceActor": null,
+              "originalVoiceActor": null,
+              "rank": 3
+            }
+          ]
+        },
+        "countries": [
+          { "__typename": "Country", "id": 5001, "name": "France", "localizedName": "France" }
+        ],
+        "relatedTags": [
+          {
+            "__typename": "Tag",
+            "internalId": 412,
+            "name": "Mairie",
+            "scope": null,
+            "data": {
+              "seo": {
+                "browsable": true,
+                "friendly": false,
+                "scope": {
+                  "userRating": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "pressRating": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "popularity": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "ranking": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  }
+                }
+              }
+            },
+            "tags": { "list": ["Tag.Type.Environnement"] }
+          },
+          {
+            "__typename": "Tag",
+            "internalId": 3466,
+            "name": "Professeur / Enseignant",
+            "scope": null,
+            "data": {
+              "seo": {
+                "browsable": true,
+                "friendly": false,
+                "scope": {
+                  "userRating": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "pressRating": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "popularity": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "ranking": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  }
+                }
+              }
+            },
+            "tags": { "list": ["Tag.Type.Keyword"] }
+          },
+          {
+            "__typename": "Tag",
+            "internalId": 5257,
+            "name": "Rire",
+            "scope": null,
+            "data": {
+              "seo": {
+                "browsable": true,
+                "friendly": false,
+                "scope": {
+                  "userRating": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "pressRating": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "popularity": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "ranking": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  }
+                }
+              }
+            },
+            "tags": { "list": ["Tag.Type.Envies"] }
+          },
+          {
+            "__typename": "Tag",
+            "internalId": 1927,
+            "name": "Campagne et champs",
+            "scope": null,
+            "data": {
+              "seo": {
+                "browsable": true,
+                "friendly": false,
+                "scope": {
+                  "userRating": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "pressRating": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "popularity": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "ranking": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  }
+                }
+              }
+            },
+            "tags": { "list": ["Tag.Type.Paysage"] }
+          },
+          {
+            "__typename": "Tag",
+            "internalId": 334,
+            "name": "Ville / Village",
+            "scope": null,
+            "data": {
+              "seo": {
+                "browsable": true,
+                "friendly": false,
+                "scope": {
+                  "userRating": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "pressRating": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "popularity": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "ranking": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  }
+                }
+              }
+            },
+            "tags": { "list": ["Tag.Type.Environnement"] }
+          },
+          {
+            "__typename": "Tag",
+            "internalId": 2644,
+            "name": "Com\u00e9die sociale",
+            "scope": null,
+            "data": {
+              "seo": {
+                "browsable": true,
+                "friendly": false,
+                "scope": {
+                  "userRating": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "pressRating": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "popularity": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "ranking": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  }
+                }
+              }
+            },
+            "tags": { "list": ["Tag.Type.SubGenre"] }
+          }
+        ],
+        "flags": {
+          "hasDvdRelease": false,
+          "hasNews": true,
+          "hasOnlineProduct": false,
+          "hasOnlineRelease": false,
+          "hasPhysicalProduct": false,
+          "hasPreview": false,
+          "hasShowtime": true,
+          "hasSoundtrack": false,
+          "hasTheaterRelease": true,
+          "hasTrivia": true,
+          "isClub300Approved": false,
+          "hasClub300News": false,
+          "isComingSoon": false,
+          "isPlayingNow": true,
+          "tvRelease": false
+        },
+        "customFlags": { "isPremiere": false, "weeklyOuting": false }
+      },
+      "showtimes": {
+        "dubbed": [],
+        "original": [],
+        "local": [
+          {
+            "__typename": "Showtime",
+            "internalId": 1731006052,
+            "startsAt": "2023-03-13T09:00:00",
+            "timeBeforeStart": "PT0H0M0S",
+            "service": null,
+            "experience": null,
+            "comfort": null,
+            "projection": ["DIGITAL"],
+            "picture": null,
+            "sound": null,
+            "tags": ["Localization.Language.French", "Format.Projection.Digital"],
+            "data": {
+              "__typename": "ShowtimeData",
+              "ticketing": [
+                {
+                  "__typename": "Ticketing",
+                  "urls": [
+                    "http://www.ugc.fr/reservationAccueil.html?id=330171613194\u0026part=all"
+                  ],
+                  "type": "DESKTOP",
+                  "provider": "default"
+                }
+              ]
+            },
+            "isPreview": false,
+            "isWeeklyMovieOuting": false
+          },
+          {
+            "__typename": "Showtime",
+            "internalId": 1731006053,
+            "startsAt": "2023-03-13T10:50:00",
+            "timeBeforeStart": "PT0H0M0S",
+            "service": null,
+            "experience": null,
+            "comfort": null,
+            "projection": ["DIGITAL"],
+            "picture": null,
+            "sound": null,
+            "tags": ["Localization.Language.French", "Format.Projection.Digital"],
+            "data": {
+              "__typename": "ShowtimeData",
+              "ticketing": [
+                {
+                  "__typename": "Ticketing",
+                  "urls": [
+                    "http://www.ugc.fr/reservationAccueil.html?id=330171613201\u0026part=all"
+                  ],
+                  "type": "DESKTOP",
+                  "provider": "default"
+                }
+              ]
+            },
+            "isPreview": false,
+            "isWeeklyMovieOuting": false
+          },
+          {
+            "__typename": "Showtime",
+            "internalId": 1731006054,
+            "startsAt": "2023-03-13T12:45:00",
+            "timeBeforeStart": "PT0H0M0S",
+            "service": null,
+            "experience": null,
+            "comfort": null,
+            "projection": ["DIGITAL"],
+            "picture": null,
+            "sound": null,
+            "tags": ["Localization.Language.French", "Format.Projection.Digital"],
+            "data": {
+              "__typename": "ShowtimeData",
+              "ticketing": [
+                {
+                  "__typename": "Ticketing",
+                  "urls": [
+                    "http://www.ugc.fr/reservationAccueil.html?id=330171613180\u0026part=all"
+                  ],
+                  "type": "DESKTOP",
+                  "provider": "default"
+                }
+              ]
+            },
+            "isPreview": false,
+            "isWeeklyMovieOuting": false
+          },
+          {
+            "__typename": "Showtime",
+            "internalId": 1731006055,
+            "startsAt": "2023-03-13T14:40:00",
+            "timeBeforeStart": "PT0H0M0S",
+            "service": null,
+            "experience": null,
+            "comfort": null,
+            "projection": ["DIGITAL"],
+            "picture": null,
+            "sound": null,
+            "tags": ["Localization.Language.French", "Format.Projection.Digital"],
+            "data": {
+              "__typename": "ShowtimeData",
+              "ticketing": [
+                {
+                  "__typename": "Ticketing",
+                  "urls": [
+                    "http://www.ugc.fr/reservationAccueil.html?id=330171613187\u0026part=all"
+                  ],
+                  "type": "DESKTOP",
+                  "provider": "default"
+                }
+              ]
+            },
+            "isPreview": false,
+            "isWeeklyMovieOuting": false
+          },
+          {
+            "__typename": "Showtime",
+            "internalId": 1731006056,
+            "startsAt": "2023-03-13T16:35:00",
+            "timeBeforeStart": "PT0H0M0S",
+            "service": null,
+            "experience": null,
+            "comfort": null,
+            "projection": ["DIGITAL"],
+            "picture": null,
+            "sound": null,
+            "tags": ["Localization.Language.French", "Format.Projection.Digital"],
+            "data": {
+              "__typename": "ShowtimeData",
+              "ticketing": [
+                {
+                  "__typename": "Ticketing",
+                  "urls": [
+                    "http://www.ugc.fr/reservationAccueil.html?id=330171613222\u0026part=all"
+                  ],
+                  "type": "DESKTOP",
+                  "provider": "default"
+                }
+              ]
+            },
+            "isPreview": false,
+            "isWeeklyMovieOuting": false
+          },
+          {
+            "__typename": "Showtime",
+            "internalId": 1731006057,
+            "startsAt": "2023-03-13T18:30:00",
+            "timeBeforeStart": "PT0H0M0S",
+            "service": null,
+            "experience": null,
+            "comfort": null,
+            "projection": ["DIGITAL"],
+            "picture": null,
+            "sound": null,
+            "tags": ["Localization.Language.French", "Format.Projection.Digital"],
+            "data": {
+              "__typename": "ShowtimeData",
+              "ticketing": [
+                {
+                  "__typename": "Ticketing",
+                  "urls": [
+                    "http://www.ugc.fr/reservationAccueil.html?id=330171613229\u0026part=all"
+                  ],
+                  "type": "DESKTOP",
+                  "provider": "default"
+                }
+              ]
+            },
+            "isPreview": false,
+            "isWeeklyMovieOuting": false
+          },
+          {
+            "__typename": "Showtime",
+            "internalId": 1731006058,
+            "startsAt": "2023-03-13T20:25:00",
+            "timeBeforeStart": "PT0H0M0S",
+            "service": null,
+            "experience": null,
+            "comfort": null,
+            "projection": ["DIGITAL"],
+            "picture": null,
+            "sound": null,
+            "tags": ["Localization.Language.French", "Format.Projection.Digital"],
+            "data": {
+              "__typename": "ShowtimeData",
+              "ticketing": [
+                {
+                  "__typename": "Ticketing",
+                  "urls": [
+                    "http://www.ugc.fr/reservationAccueil.html?id=330171613208\u0026part=all"
+                  ],
+                  "type": "DESKTOP",
+                  "provider": "default"
+                }
+              ]
+            },
+            "isPreview": false,
+            "isWeeklyMovieOuting": false
+          },
+          {
+            "__typename": "Showtime",
+            "internalId": 1731006059,
+            "startsAt": "2023-03-13T22:15:00",
+            "timeBeforeStart": "PT0H0M0S",
+            "service": null,
+            "experience": null,
+            "comfort": null,
+            "projection": ["DIGITAL"],
+            "picture": null,
+            "sound": null,
+            "tags": ["Localization.Language.French", "Format.Projection.Digital"],
+            "data": {
+              "__typename": "ShowtimeData",
+              "ticketing": [
+                {
+                  "__typename": "Ticketing",
+                  "urls": [
+                    "http://www.ugc.fr/reservationAccueil.html?id=330171613215\u0026part=all"
+                  ],
+                  "type": "DESKTOP",
+                  "provider": "default"
+                }
+              ]
+            },
+            "isPreview": false,
+            "isWeeklyMovieOuting": false
+          }
+        ],
+        "multiple": [
+          {
+            "__typename": "Showtime",
+            "internalId": 1731006052,
+            "startsAt": "2023-03-13T09:00:00",
+            "timeBeforeStart": "PT0H0M0S",
+            "service": null,
+            "experience": null,
+            "comfort": null,
+            "projection": ["DIGITAL"],
+            "picture": null,
+            "sound": null,
+            "tags": ["Localization.Language.French", "Format.Projection.Digital"],
+            "data": {
+              "__typename": "ShowtimeData",
+              "ticketing": [
+                {
+                  "__typename": "Ticketing",
+                  "urls": [
+                    "http://www.ugc.fr/reservationAccueil.html?id=330171613194\u0026part=all"
+                  ],
+                  "type": "DESKTOP",
+                  "provider": "default"
+                }
+              ]
+            },
+            "isPreview": false,
+            "isWeeklyMovieOuting": false
+          },
+          {
+            "__typename": "Showtime",
+            "internalId": 1731006053,
+            "startsAt": "2023-03-13T10:50:00",
+            "timeBeforeStart": "PT0H0M0S",
+            "service": null,
+            "experience": null,
+            "comfort": null,
+            "projection": ["DIGITAL"],
+            "picture": null,
+            "sound": null,
+            "tags": ["Localization.Language.French", "Format.Projection.Digital"],
+            "data": {
+              "__typename": "ShowtimeData",
+              "ticketing": [
+                {
+                  "__typename": "Ticketing",
+                  "urls": [
+                    "http://www.ugc.fr/reservationAccueil.html?id=330171613201\u0026part=all"
+                  ],
+                  "type": "DESKTOP",
+                  "provider": "default"
+                }
+              ]
+            },
+            "isPreview": false,
+            "isWeeklyMovieOuting": false
+          },
+          {
+            "__typename": "Showtime",
+            "internalId": 1731006054,
+            "startsAt": "2023-03-13T12:45:00",
+            "timeBeforeStart": "PT0H0M0S",
+            "service": null,
+            "experience": null,
+            "comfort": null,
+            "projection": ["DIGITAL"],
+            "picture": null,
+            "sound": null,
+            "tags": ["Localization.Language.French", "Format.Projection.Digital"],
+            "data": {
+              "__typename": "ShowtimeData",
+              "ticketing": [
+                {
+                  "__typename": "Ticketing",
+                  "urls": [
+                    "http://www.ugc.fr/reservationAccueil.html?id=330171613180\u0026part=all"
+                  ],
+                  "type": "DESKTOP",
+                  "provider": "default"
+                }
+              ]
+            },
+            "isPreview": false,
+            "isWeeklyMovieOuting": false
+          },
+          {
+            "__typename": "Showtime",
+            "internalId": 1731006055,
+            "startsAt": "2023-03-13T14:40:00",
+            "timeBeforeStart": "PT0H0M0S",
+            "service": null,
+            "experience": null,
+            "comfort": null,
+            "projection": ["DIGITAL"],
+            "picture": null,
+            "sound": null,
+            "tags": ["Localization.Language.French", "Format.Projection.Digital"],
+            "data": {
+              "__typename": "ShowtimeData",
+              "ticketing": [
+                {
+                  "__typename": "Ticketing",
+                  "urls": [
+                    "http://www.ugc.fr/reservationAccueil.html?id=330171613187\u0026part=all"
+                  ],
+                  "type": "DESKTOP",
+                  "provider": "default"
+                }
+              ]
+            },
+            "isPreview": false,
+            "isWeeklyMovieOuting": false
+          },
+          {
+            "__typename": "Showtime",
+            "internalId": 1731006056,
+            "startsAt": "2023-03-13T16:35:00",
+            "timeBeforeStart": "PT0H0M0S",
+            "service": null,
+            "experience": null,
+            "comfort": null,
+            "projection": ["DIGITAL"],
+            "picture": null,
+            "sound": null,
+            "tags": ["Localization.Language.French", "Format.Projection.Digital"],
+            "data": {
+              "__typename": "ShowtimeData",
+              "ticketing": [
+                {
+                  "__typename": "Ticketing",
+                  "urls": [
+                    "http://www.ugc.fr/reservationAccueil.html?id=330171613222\u0026part=all"
+                  ],
+                  "type": "DESKTOP",
+                  "provider": "default"
+                }
+              ]
+            },
+            "isPreview": false,
+            "isWeeklyMovieOuting": false
+          },
+          {
+            "__typename": "Showtime",
+            "internalId": 1731006057,
+            "startsAt": "2023-03-13T18:30:00",
+            "timeBeforeStart": "PT0H0M0S",
+            "service": null,
+            "experience": null,
+            "comfort": null,
+            "projection": ["DIGITAL"],
+            "picture": null,
+            "sound": null,
+            "tags": ["Localization.Language.French", "Format.Projection.Digital"],
+            "data": {
+              "__typename": "ShowtimeData",
+              "ticketing": [
+                {
+                  "__typename": "Ticketing",
+                  "urls": [
+                    "http://www.ugc.fr/reservationAccueil.html?id=330171613229\u0026part=all"
+                  ],
+                  "type": "DESKTOP",
+                  "provider": "default"
+                }
+              ]
+            },
+            "isPreview": false,
+            "isWeeklyMovieOuting": false
+          },
+          {
+            "__typename": "Showtime",
+            "internalId": 1731006058,
+            "startsAt": "2023-03-13T20:25:00",
+            "timeBeforeStart": "PT0H0M0S",
+            "service": null,
+            "experience": null,
+            "comfort": null,
+            "projection": ["DIGITAL"],
+            "picture": null,
+            "sound": null,
+            "tags": ["Localization.Language.French", "Format.Projection.Digital"],
+            "data": {
+              "__typename": "ShowtimeData",
+              "ticketing": [
+                {
+                  "__typename": "Ticketing",
+                  "urls": [
+                    "http://www.ugc.fr/reservationAccueil.html?id=330171613208\u0026part=all"
+                  ],
+                  "type": "DESKTOP",
+                  "provider": "default"
+                }
+              ]
+            },
+            "isPreview": false,
+            "isWeeklyMovieOuting": false
+          },
+          {
+            "__typename": "Showtime",
+            "internalId": 1731006059,
+            "startsAt": "2023-03-13T22:15:00",
+            "timeBeforeStart": "PT0H0M0S",
+            "service": null,
+            "experience": null,
+            "comfort": null,
+            "projection": ["DIGITAL"],
+            "picture": null,
+            "sound": null,
+            "tags": ["Localization.Language.French", "Format.Projection.Digital"],
+            "data": {
+              "__typename": "ShowtimeData",
+              "ticketing": [
+                {
+                  "__typename": "Ticketing",
+                  "urls": [
+                    "http://www.ugc.fr/reservationAccueil.html?id=330171613215\u0026part=all"
+                  ],
+                  "type": "DESKTOP",
+                  "provider": "default"
+                }
+              ]
+            },
+            "isPreview": false,
+            "isWeeklyMovieOuting": false
+          }
+        ]
+      }
+    },
+    {
+      "movie": {
+        "synopsis": "Apr\u00e8s avoir ferm\u00e9 son agence Alibi.com et promis \u00e0 Flo qu\u0027il ne lui mentirait plus jamais, la nouvelle vie de Greg est devenue tranquille, trop tranquille... Plus pour longtemps! Lorsqu\u2019il d\u00e9cide de demander Flo en mariage, Greg est au pied du mur et doit se r\u00e9soudre \u00e0 pr\u00e9senter sa famille.",
+        "synopsisFull": "Apr\u00e8s avoir ferm\u00e9 son agence Alibi.com et promis \u00e0 Flo qu\u0027il ne lui mentirait plus jamais, la nouvelle vie de Greg est devenue tranquille, trop tranquille... Plus pour longtemps! Lorsqu\u2019il d\u00e9cide de demander Flo en mariage, Greg est au pied du mur et doit se r\u00e9soudre \u00e0 pr\u00e9senter sa famille. Mais entre son p\u00e8re escroc et sa m\u00e8re ex-actrice de films de charme, \u00e7a risque fort de ruiner sa future union. Il n\u0027a donc pas d\u0027autre choix que de r\u00e9ouvrir son agence avec ses anciens complices pour un ultime Alibi et de se trouver des faux parents plus pr\u00e9sentables...",
+        "__typename": "Movie",
+        "internalId": 281261,
+        "poster": {
+          "__typename": "InternalImage",
+          "id": "SW1hZ2U6MjE5MjA0NTY=",
+          "internalId": 21920456,
+          "url": "https://fr.web.img3.acsta.net/pictures/22/12/21/17/30/5654138.jpg",
+          "path": "/pictures/22/12/21/17/30/5654138.jpg"
+        },
+        "title": "Alibi.com 2",
+        "originalTitle": "Alibi.com 2",
+        "type": "FEATURE_FILM",
+        "runtime": "1h 28min",
+        "genres": [{ "id": 13005, "translate": "Com\u00e9die", "tag": "COMEDY" }],
+        "languages": ["FRENCH"],
+        "data": { "__typename": "MovieData", "seo": { "__typename": "Seo", "browsable": true } },
+        "stats": {
+          "userRating": { "score": 3.98, "count": 4998 },
+          "userReview": { "count": 1144 },
+          "pressReview": { "score": 3, "count": 17 },
+          "metric": { "hits": 2368741, "sessions": 1182297 },
+          "wantToSeeCount": 2659
+        },
+        "editorialReviews": [],
+        "releases": [
+          {
+            "__typename": "MovieRelease",
+            "releaseDate": {
+              "__typename": "PartialDate",
+              "date": "2023-02-08",
+              "precision": "day"
+            },
+            "name": "Released",
+            "certificate": null,
+            "companyLimitation": null,
+            "releaseTags": { "tagTypes": ["THEATER"], "tagFlags": null }
+          }
+        ],
+        "credits": [
+          {
+            "person": {
+              "__typename": "Person",
+              "internalId": 422283,
+              "lastName": "Lacheau",
+              "firstName": "Philippe",
+              "seo": { "__typename": "Seo", "browsable": true }
+            },
+            "position": { "__typename": "Position", "name": "DIRECTOR", "department": "DIRECTION" },
+            "rank": 1
+          }
+        ],
+        "cast": {
+          "__typename": "castMemberConnection",
+          "edges": [
+            {
+              "node": {
+                "actor": {
+                  "__typename": "Person",
+                  "internalId": 422283,
+                  "lastName": "Lacheau",
+                  "firstName": "Philippe",
+                  "seo": { "__typename": "Seo", "browsable": true }
+                },
+                "voiceActor": null,
+                "originalVoiceActor": null,
+                "rank": 1
+              }
+            },
+            {
+              "node": {
+                "actor": {
+                  "__typename": "Person",
+                  "internalId": 167770,
+                  "lastName": "Fontan",
+                  "firstName": "\u00c9lodie",
+                  "seo": { "__typename": "Seo", "browsable": true }
+                },
+                "voiceActor": null,
+                "originalVoiceActor": null,
+                "rank": 2
+              }
+            },
+            {
+              "node": {
+                "actor": {
+                  "__typename": "Person",
+                  "internalId": 422282,
+                  "lastName": "Boudali",
+                  "firstName": "Tarek",
+                  "seo": { "__typename": "Seo", "browsable": true }
+                },
+                "voiceActor": null,
+                "originalVoiceActor": null,
+                "rank": 3
+              }
+            }
+          ],
+          "nodes": [
+            {
+              "actor": {
+                "__typename": "Person",
+                "internalId": 422283,
+                "lastName": "Lacheau",
+                "firstName": "Philippe",
+                "seo": { "__typename": "Seo", "browsable": true }
+              },
+              "voiceActor": null,
+              "originalVoiceActor": null,
+              "rank": 1
+            },
+            {
+              "actor": {
+                "__typename": "Person",
+                "internalId": 167770,
+                "lastName": "Fontan",
+                "firstName": "\u00c9lodie",
+                "seo": { "__typename": "Seo", "browsable": true }
+              },
+              "voiceActor": null,
+              "originalVoiceActor": null,
+              "rank": 2
+            },
+            {
+              "actor": {
+                "__typename": "Person",
+                "internalId": 422282,
+                "lastName": "Boudali",
+                "firstName": "Tarek",
+                "seo": { "__typename": "Seo", "browsable": true }
+              },
+              "voiceActor": null,
+              "originalVoiceActor": null,
+              "rank": 3
+            }
+          ]
+        },
+        "countries": [
+          { "__typename": "Country", "id": 5001, "name": "France", "localizedName": "France" }
+        ],
+        "relatedTags": [
+          {
+            "__typename": "Tag",
+            "internalId": 1000000095,
+            "name": "Films pour pr\u00e9-ado",
+            "scope": "TRACKING",
+            "data": {
+              "seo": {
+                "browsable": true,
+                "friendly": false,
+                "scope": {
+                  "userRating": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "pressRating": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "popularity": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "ranking": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  }
+                }
+              }
+            },
+            "tags": { "list": ["Tag.Type.PublicVise"] }
+          },
+          {
+            "__typename": "Tag",
+            "internalId": 2512,
+            "name": "Suite / Sequel",
+            "scope": null,
+            "data": {
+              "seo": {
+                "browsable": true,
+                "friendly": false,
+                "scope": {
+                  "userRating": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "pressRating": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "popularity": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "ranking": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  }
+                }
+              }
+            },
+            "tags": { "list": ["Tag.Type.SubGenre"] }
+          },
+          {
+            "__typename": "Tag",
+            "internalId": 2703,
+            "name": "Situation comique / Gag",
+            "scope": null,
+            "data": {
+              "seo": {
+                "browsable": true,
+                "friendly": false,
+                "scope": {
+                  "userRating": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "pressRating": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "popularity": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "ranking": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  }
+                }
+              }
+            },
+            "tags": { "list": ["Tag.Type.Ambiance"] }
+          },
+          {
+            "__typename": "Tag",
+            "internalId": 5257,
+            "name": "Rire",
+            "scope": null,
+            "data": {
+              "seo": {
+                "browsable": true,
+                "friendly": false,
+                "scope": {
+                  "userRating": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "pressRating": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "popularity": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "ranking": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  }
+                }
+              }
+            },
+            "tags": { "list": ["Tag.Type.Envies"] }
+          },
+          {
+            "__typename": "Tag",
+            "internalId": 5221,
+            "name": "Relation parent / enfant",
+            "scope": null,
+            "data": {
+              "seo": {
+                "browsable": true,
+                "friendly": false,
+                "scope": {
+                  "userRating": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "pressRating": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "popularity": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "ranking": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  }
+                }
+              }
+            },
+            "tags": { "list": ["Tag.Type.Keyword"] }
+          },
+          {
+            "__typename": "Tag",
+            "internalId": 1639,
+            "name": "Relation gendres / Beaux-parents",
+            "scope": null,
+            "data": {
+              "seo": {
+                "browsable": true,
+                "friendly": false,
+                "scope": {
+                  "userRating": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "pressRating": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "popularity": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "ranking": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  }
+                }
+              }
+            },
+            "tags": { "list": ["Tag.Type.Keyword"] }
+          },
+          {
+            "__typename": "Tag",
+            "internalId": 1373,
+            "name": "Arnaque / Escroc / Escroquerie",
+            "scope": null,
+            "data": {
+              "seo": {
+                "browsable": true,
+                "friendly": false,
+                "scope": {
+                  "userRating": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "pressRating": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "popularity": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "ranking": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  }
+                }
+              }
+            },
+            "tags": { "list": ["Tag.Type.Keyword"] }
+          },
+          {
+            "__typename": "Tag",
+            "internalId": 4769,
+            "name": "Demande en mariage",
+            "scope": null,
+            "data": {
+              "seo": {
+                "browsable": true,
+                "friendly": false,
+                "scope": {
+                  "userRating": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "pressRating": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "popularity": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "ranking": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  }
+                }
+              }
+            },
+            "tags": { "list": ["Tag.Type.Keyword"] }
+          },
+          {
+            "__typename": "Tag",
+            "internalId": 300,
+            "name": "Mariage",
+            "scope": null,
+            "data": {
+              "seo": {
+                "browsable": true,
+                "friendly": false,
+                "scope": {
+                  "userRating": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "pressRating": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "popularity": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "ranking": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  }
+                }
+              }
+            },
+            "tags": { "list": ["Tag.Type.Keyword"] }
+          },
+          {
+            "__typename": "Tag",
+            "internalId": 1786,
+            "name": "Chanteurs et chanteuses au cin\u00e9ma / S\u00e9rie",
+            "scope": null,
+            "data": {
+              "seo": {
+                "browsable": true,
+                "friendly": false,
+                "scope": {
+                  "userRating": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "pressRating": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "popularity": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "ranking": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  }
+                }
+              }
+            },
+            "tags": { "list": ["Tag.Type.Keyword"] }
+          },
+          {
+            "__typename": "Tag",
+            "internalId": 863,
+            "name": "Film / S\u00e9rie de copains",
+            "scope": null,
+            "data": {
+              "seo": {
+                "browsable": true,
+                "friendly": false,
+                "scope": {
+                  "userRating": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "pressRating": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "popularity": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "ranking": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  }
+                }
+              }
+            },
+            "tags": { "list": ["Tag.Type.SubGenre"] }
+          },
+          {
+            "__typename": "Tag",
+            "internalId": 5251,
+            "name": "D\u00e9tente",
+            "scope": null,
+            "data": {
+              "seo": {
+                "browsable": true,
+                "friendly": false,
+                "scope": {
+                  "userRating": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "pressRating": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "popularity": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  },
+                  "ranking": {
+                    "movie": { "title": null, "subTitle": null, "description": null },
+                    "series": { "title": null, "subTitle": null, "description": null }
+                  }
+                }
+              }
+            },
+            "tags": { "list": ["Tag.Type.Envies"] }
+          }
+        ],
+        "flags": {
+          "hasDvdRelease": false,
+          "hasNews": true,
+          "hasOnlineProduct": false,
+          "hasOnlineRelease": false,
+          "hasPhysicalProduct": false,
+          "hasPreview": false,
+          "hasShowtime": true,
+          "hasSoundtrack": false,
+          "hasTheaterRelease": true,
+          "hasTrivia": true,
+          "isClub300Approved": false,
+          "hasClub300News": false,
+          "isComingSoon": false,
+          "isPlayingNow": true,
+          "tvRelease": false
+        },
+        "customFlags": { "isPremiere": false, "weeklyOuting": false }
+      },
+      "showtimes": {
+        "dubbed": [],
+        "original": [],
+        "local": [
+          {
+            "__typename": "Showtime",
+            "internalId": 1731006108,
+            "startsAt": "2023-03-13T09:05:00",
+            "timeBeforeStart": "PT0H0M0S",
+            "service": null,
+            "experience": null,
+            "comfort": null,
+            "projection": ["DIGITAL"],
+            "picture": null,
+            "sound": null,
+            "tags": ["Localization.Language.French", "Format.Projection.Digital"],
+            "data": {
+              "__typename": "ShowtimeData",
+              "ticketing": [
+                {
+                  "__typename": "Ticketing",
+                  "urls": [
+                    "http://www.ugc.fr/reservationAccueil.html?id=330171613446\u0026part=all"
+                  ],
+                  "type": "DESKTOP",
+                  "provider": "default"
+                }
+              ]
+            },
+            "isPreview": false,
+            "isWeeklyMovieOuting": false
+          },
+          {
+            "__typename": "Showtime",
+            "internalId": 1731006109,
+            "startsAt": "2023-03-13T10:55:00",
+            "timeBeforeStart": "PT0H0M0S",
+            "service": null,
+            "experience": null,
+            "comfort": null,
+            "projection": ["DIGITAL"],
+            "picture": null,
+            "sound": null,
+            "tags": ["Localization.Language.French", "Format.Projection.Digital"],
+            "data": {
+              "__typename": "ShowtimeData",
+              "ticketing": [
+                {
+                  "__typename": "Ticketing",
+                  "urls": [
+                    "http://www.ugc.fr/reservationAccueil.html?id=330171613453\u0026part=all"
+                  ],
+                  "type": "DESKTOP",
+                  "provider": "default"
+                }
+              ]
+            },
+            "isPreview": false,
+            "isWeeklyMovieOuting": false
+          },
+          {
+            "__typename": "Showtime",
+            "internalId": 1731006110,
+            "startsAt": "2023-03-13T12:45:00",
+            "timeBeforeStart": "PT0H0M0S",
+            "service": null,
+            "experience": null,
+            "comfort": null,
+            "projection": ["DIGITAL"],
+            "picture": null,
+            "sound": null,
+            "tags": ["Localization.Language.French", "Format.Projection.Digital"],
+            "data": {
+              "__typename": "ShowtimeData",
+              "ticketing": [
+                {
+                  "__typename": "Ticketing",
+                  "urls": [
+                    "http://www.ugc.fr/reservationAccueil.html?id=330171613432\u0026part=all"
+                  ],
+                  "type": "DESKTOP",
+                  "provider": "default"
+                }
+              ]
+            },
+            "isPreview": false,
+            "isWeeklyMovieOuting": false
+          },
+          {
+            "__typename": "Showtime",
+            "internalId": 1731006111,
+            "startsAt": "2023-03-13T14:40:00",
+            "timeBeforeStart": "PT0H0M0S",
+            "service": null,
+            "experience": null,
+            "comfort": null,
+            "projection": ["DIGITAL"],
+            "picture": null,
+            "sound": null,
+            "tags": ["Localization.Language.French", "Format.Projection.Digital"],
+            "data": {
+              "__typename": "ShowtimeData",
+              "ticketing": [
+                {
+                  "__typename": "Ticketing",
+                  "urls": [
+                    "http://www.ugc.fr/reservationAccueil.html?id=330171613439\u0026part=all"
+                  ],
+                  "type": "DESKTOP",
+                  "provider": "default"
+                }
+              ]
+            },
+            "isPreview": false,
+            "isWeeklyMovieOuting": false
+          },
+          {
+            "__typename": "Showtime",
+            "internalId": 1731006112,
+            "startsAt": "2023-03-13T16:35:00",
+            "timeBeforeStart": "PT0H0M0S",
+            "service": null,
+            "experience": null,
+            "comfort": null,
+            "projection": ["DIGITAL"],
+            "picture": null,
+            "sound": null,
+            "tags": ["Localization.Language.French", "Format.Projection.Digital"],
+            "data": {
+              "__typename": "ShowtimeData",
+              "ticketing": [
+                {
+                  "__typename": "Ticketing",
+                  "urls": [
+                    "http://www.ugc.fr/reservationAccueil.html?id=330171613474\u0026part=all"
+                  ],
+                  "type": "DESKTOP",
+                  "provider": "default"
+                }
+              ]
+            },
+            "isPreview": false,
+            "isWeeklyMovieOuting": false
+          },
+          {
+            "__typename": "Showtime",
+            "internalId": 1731006113,
+            "startsAt": "2023-03-13T18:30:00",
+            "timeBeforeStart": "PT0H0M0S",
+            "service": null,
+            "experience": null,
+            "comfort": null,
+            "projection": ["DIGITAL"],
+            "picture": null,
+            "sound": null,
+            "tags": ["Localization.Language.French", "Format.Projection.Digital"],
+            "data": {
+              "__typename": "ShowtimeData",
+              "ticketing": [
+                {
+                  "__typename": "Ticketing",
+                  "urls": [
+                    "http://www.ugc.fr/reservationAccueil.html?id=330171613481\u0026part=all"
+                  ],
+                  "type": "DESKTOP",
+                  "provider": "default"
+                }
+              ]
+            },
+            "isPreview": false,
+            "isWeeklyMovieOuting": false
+          },
+          {
+            "__typename": "Showtime",
+            "internalId": 1731006114,
+            "startsAt": "2023-03-13T20:25:00",
+            "timeBeforeStart": "PT0H0M0S",
+            "service": null,
+            "experience": null,
+            "comfort": null,
+            "projection": ["DIGITAL"],
+            "picture": null,
+            "sound": null,
+            "tags": ["Localization.Language.French", "Format.Projection.Digital"],
+            "data": {
+              "__typename": "ShowtimeData",
+              "ticketing": [
+                {
+                  "__typename": "Ticketing",
+                  "urls": [
+                    "http://www.ugc.fr/reservationAccueil.html?id=330171613460\u0026part=all"
+                  ],
+                  "type": "DESKTOP",
+                  "provider": "default"
+                }
+              ]
+            },
+            "isPreview": false,
+            "isWeeklyMovieOuting": false
+          },
+          {
+            "__typename": "Showtime",
+            "internalId": 1731006115,
+            "startsAt": "2023-03-13T22:15:00",
+            "timeBeforeStart": "PT0H0M0S",
+            "service": null,
+            "experience": null,
+            "comfort": null,
+            "projection": ["DIGITAL"],
+            "picture": null,
+            "sound": null,
+            "tags": ["Localization.Language.French", "Format.Projection.Digital"],
+            "data": {
+              "__typename": "ShowtimeData",
+              "ticketing": [
+                {
+                  "__typename": "Ticketing",
+                  "urls": [
+                    "http://www.ugc.fr/reservationAccueil.html?id=330171613467\u0026part=all"
+                  ],
+                  "type": "DESKTOP",
+                  "provider": "default"
+                }
+              ]
+            },
+            "isPreview": false,
+            "isWeeklyMovieOuting": false
+          }
+        ],
+        "multiple": [
+          {
+            "__typename": "Showtime",
+            "internalId": 1731006108,
+            "startsAt": "2023-03-13T09:05:00",
+            "timeBeforeStart": "PT0H0M0S",
+            "service": null,
+            "experience": null,
+            "comfort": null,
+            "projection": ["DIGITAL"],
+            "picture": null,
+            "sound": null,
+            "tags": ["Localization.Language.French", "Format.Projection.Digital"],
+            "data": {
+              "__typename": "ShowtimeData",
+              "ticketing": [
+                {
+                  "__typename": "Ticketing",
+                  "urls": [
+                    "http://www.ugc.fr/reservationAccueil.html?id=330171613446\u0026part=all"
+                  ],
+                  "type": "DESKTOP",
+                  "provider": "default"
+                }
+              ]
+            },
+            "isPreview": false,
+            "isWeeklyMovieOuting": false
+          },
+          {
+            "__typename": "Showtime",
+            "internalId": 1731006109,
+            "startsAt": "2023-03-13T10:55:00",
+            "timeBeforeStart": "PT0H0M0S",
+            "service": null,
+            "experience": null,
+            "comfort": null,
+            "projection": ["DIGITAL"],
+            "picture": null,
+            "sound": null,
+            "tags": ["Localization.Language.French", "Format.Projection.Digital"],
+            "data": {
+              "__typename": "ShowtimeData",
+              "ticketing": [
+                {
+                  "__typename": "Ticketing",
+                  "urls": [
+                    "http://www.ugc.fr/reservationAccueil.html?id=330171613453\u0026part=all"
+                  ],
+                  "type": "DESKTOP",
+                  "provider": "default"
+                }
+              ]
+            },
+            "isPreview": false,
+            "isWeeklyMovieOuting": false
+          },
+          {
+            "__typename": "Showtime",
+            "internalId": 1731006110,
+            "startsAt": "2023-03-13T12:45:00",
+            "timeBeforeStart": "PT0H0M0S",
+            "service": null,
+            "experience": null,
+            "comfort": null,
+            "projection": ["DIGITAL"],
+            "picture": null,
+            "sound": null,
+            "tags": ["Localization.Language.French", "Format.Projection.Digital"],
+            "data": {
+              "__typename": "ShowtimeData",
+              "ticketing": [
+                {
+                  "__typename": "Ticketing",
+                  "urls": [
+                    "http://www.ugc.fr/reservationAccueil.html?id=330171613432\u0026part=all"
+                  ],
+                  "type": "DESKTOP",
+                  "provider": "default"
+                }
+              ]
+            },
+            "isPreview": false,
+            "isWeeklyMovieOuting": false
+          },
+          {
+            "__typename": "Showtime",
+            "internalId": 1731006111,
+            "startsAt": "2023-03-13T14:40:00",
+            "timeBeforeStart": "PT0H0M0S",
+            "service": null,
+            "experience": null,
+            "comfort": null,
+            "projection": ["DIGITAL"],
+            "picture": null,
+            "sound": null,
+            "tags": ["Localization.Language.French", "Format.Projection.Digital"],
+            "data": {
+              "__typename": "ShowtimeData",
+              "ticketing": [
+                {
+                  "__typename": "Ticketing",
+                  "urls": [
+                    "http://www.ugc.fr/reservationAccueil.html?id=330171613439\u0026part=all"
+                  ],
+                  "type": "DESKTOP",
+                  "provider": "default"
+                }
+              ]
+            },
+            "isPreview": false,
+            "isWeeklyMovieOuting": false
+          },
+          {
+            "__typename": "Showtime",
+            "internalId": 1731006112,
+            "startsAt": "2023-03-13T16:35:00",
+            "timeBeforeStart": "PT0H0M0S",
+            "service": null,
+            "experience": null,
+            "comfort": null,
+            "projection": ["DIGITAL"],
+            "picture": null,
+            "sound": null,
+            "tags": ["Localization.Language.French", "Format.Projection.Digital"],
+            "data": {
+              "__typename": "ShowtimeData",
+              "ticketing": [
+                {
+                  "__typename": "Ticketing",
+                  "urls": [
+                    "http://www.ugc.fr/reservationAccueil.html?id=330171613474\u0026part=all"
+                  ],
+                  "type": "DESKTOP",
+                  "provider": "default"
+                }
+              ]
+            },
+            "isPreview": false,
+            "isWeeklyMovieOuting": false
+          },
+          {
+            "__typename": "Showtime",
+            "internalId": 1731006113,
+            "startsAt": "2023-03-13T18:30:00",
+            "timeBeforeStart": "PT0H0M0S",
+            "service": null,
+            "experience": null,
+            "comfort": null,
+            "projection": ["DIGITAL"],
+            "picture": null,
+            "sound": null,
+            "tags": ["Localization.Language.French", "Format.Projection.Digital"],
+            "data": {
+              "__typename": "ShowtimeData",
+              "ticketing": [
+                {
+                  "__typename": "Ticketing",
+                  "urls": [
+                    "http://www.ugc.fr/reservationAccueil.html?id=330171613481\u0026part=all"
+                  ],
+                  "type": "DESKTOP",
+                  "provider": "default"
+                }
+              ]
+            },
+            "isPreview": false,
+            "isWeeklyMovieOuting": false
+          },
+          {
+            "__typename": "Showtime",
+            "internalId": 1731006114,
+            "startsAt": "2023-03-13T20:25:00",
+            "timeBeforeStart": "PT0H0M0S",
+            "service": null,
+            "experience": null,
+            "comfort": null,
+            "projection": ["DIGITAL"],
+            "picture": null,
+            "sound": null,
+            "tags": ["Localization.Language.French", "Format.Projection.Digital"],
+            "data": {
+              "__typename": "ShowtimeData",
+              "ticketing": [
+                {
+                  "__typename": "Ticketing",
+                  "urls": [
+                    "http://www.ugc.fr/reservationAccueil.html?id=330171613460\u0026part=all"
+                  ],
+                  "type": "DESKTOP",
+                  "provider": "default"
+                }
+              ]
+            },
+            "isPreview": false,
+            "isWeeklyMovieOuting": false
+          },
+          {
+            "__typename": "Showtime",
+            "internalId": 1731006115,
+            "startsAt": "2023-03-13T22:15:00",
+            "timeBeforeStart": "PT0H0M0S",
+            "service": null,
+            "experience": null,
+            "comfort": null,
+            "projection": ["DIGITAL"],
+            "picture": null,
+            "sound": null,
+            "tags": ["Localization.Language.French", "Format.Projection.Digital"],
+            "data": {
+              "__typename": "ShowtimeData",
+              "ticketing": [
+                {
+                  "__typename": "Ticketing",
+                  "urls": [
+                    "http://www.ugc.fr/reservationAccueil.html?id=330171613467\u0026part=all"
+                  ],
+                  "type": "DESKTOP",
+                  "provider": "default"
+                }
+              ]
+            },
+            "isPreview": false,
+            "isWeeklyMovieOuting": false
+          }
+        ]
+      }
+    }
+  ],
+  "nextDate": "2023-03-14",
+  "params": {
+    "experience": null,
+    "projection": null,
+    "comfort": null,
+    "picture": null,
+    "sound": null,
+    "version": null,
+    "page": 3
+  },
+  "facets": {
+    "facets": [
+      {
+        "__typename": "Facets",
+        "name": "showtimes.projection",
+        "values": [
+          { "key": "Digital", "translation": { "tag": "DIGITAL", "name": "Num\u00e9rique" } }
+        ]
+      },
+      { "__typename": "Facets", "name": "showtimes.experience", "values": [] },
+      { "__typename": "Facets", "name": "showtimes.comfort", "values": [] },
+      {
+        "__typename": "Facets",
+        "name": "showtimes.version",
+        "values": [
+          { "key": "Original", "version": "ORIGINAL" },
+          { "key": "Local", "version": "LOCAL" },
+          { "key": "Dubbed", "version": "DUBBED" }
+        ]
+      },
+      { "__typename": "Facets", "name": "showtimes.picture", "values": [] },
+      { "__typename": "Facets", "name": "showtimes.sound", "values": [] },
+      { "__typename": "Facets", "name": "showtimes.service", "values": [] }
+    ]
+  },
+  "pagination": { "page": "3", "totalPages": 3, "itemsPerPage": 15, "totalItems": 33 },
+  "data": { "filters": [] }
+}

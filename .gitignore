@@ -1,4 +1,5 @@
 .env
+.cache
 
 # Common generated folders
 node_modules
