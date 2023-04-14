@@ -12,10 +12,6 @@ primary_region = "cdg"
 [experimental]
   auto_rollback = true
 
-# [processes]
-#   app = ""
-#   cron = "cron -f"
-
 [[services]]
   http_checks = []
   internal_port = 8080
