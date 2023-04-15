@@ -292,7 +292,7 @@ export function scraperMiddleware(): Middleware<DefaultState, Context> {
           body.append('file', movie.posterUrl!)
           body.append('fileName', movie.id.toString())
           body.append('useUniqueFileName', 'false')
-          body.append('folder', 'posters/')
+          body.append('folder', process.env.ENV === 'development' ? 'posters-dev' : 'posters-prod')
           body.append('customMetadata', JSON.stringify({ title: movie.originalTitle }))
 
           const response = await fetch(API_ENDPOINT, {
