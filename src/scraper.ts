@@ -1,15 +1,16 @@
-import { Language, Prisma, PrismaClient, Showtime, Theater } from '@prisma/client'
+import { Language, Prisma, PrismaClient, Theater } from '@prisma/client'
 import { endOfDay, endOfWeek, endOfYesterday } from 'date-fns'
 import { DefaultState, Middleware } from 'koa'
 import { Context } from './core/context'
 import { log } from './core/logger'
 import { AllocineResponse, Credit, Release } from './interfaces'
 
-const API_ENDPOINT = 'https://api.imagekit.io/v1/files/upload'
-export const URL_ALLOCINE_SHOWTIMES = 'https://www.allocine.fr/_/showtimes'
+const API_ENDPOINT = 'https://api.imagekit.io/v1/files'
+const URL_ALLOCINE_SHOWTIMES = 'https://www.allocine.fr/_/showtimes'
 const URL_THEMOVIEDBID = `https://api.themoviedb.org/3/search/movie?api_key=${process.env.THEMOVIEDBID_API_KEY}&language=fr-FR&query=`
 const URL_THEMOVIEDBID_PICTURES = `https://image.tmdb.org/t/p/original`
 const EXCLUSION_LIST = ['Rex Studios']
+const IMAGEKIT_FOLDER = process.env.ENV === 'development' ? 'posters-dev' : 'posters-prod'
 
 const REGEXP_BY_MOVIE_TAGS = {
   Oscar: new RegExp(/oscar/i),
@@ -29,7 +30,7 @@ const REGEXP_BY_SHOWTIME_TAGS = {
 
 const prisma = new PrismaClient()
 
-export function getUniqueAllocineShowtimes(showtimes: AllocineResponse['results'][0]['showtimes']) {
+function getUniqueAllocineShowtimes(showtimes: AllocineResponse['results'][0]['showtimes']) {
   const showtimesArray = [...showtimes.local, ...showtimes.multiple, ...showtimes.original]
 
   return showtimesArray.reduce<typeof showtimesArray>((acc, showtime) => {
@@ -140,11 +141,25 @@ async function scrapAllocineShowtimes(
 
   const body = await getAllocineShowtimes(url)
 
-  body.results
-    .filter(({ movie }) => !EXCLUSION_LIST.includes(movie.title))
-    .forEach((result) =>
-      getUniqueAllocineShowtimes(result.showtimes).forEach((showtime) => {
-        showtimeCreateInputs[showtime.internalId] = {
+  for (const result of body.results.filter(({ movie }) => !EXCLUSION_LIST.includes(movie.title))) {
+    try {
+      const movie = await prisma.movie.upsert({
+        where: { allocineId: result.movie.internalId },
+        update: {},
+        create: {
+          originalTitle: result.movie.originalTitle,
+          title: result.movie.title,
+          duration: getDuration(result.movie.runtime),
+          synopsis: result.movie.synopsisFull,
+          releaseDate: getReleaseDate(result.movie.releases),
+          allocineId: result.movie.internalId,
+          posterUrl: result.movie.poster?.url,
+          director: getDirector(result.movie.credits),
+        },
+      })
+
+      await prisma.showtime.createMany({
+        data: getUniqueAllocineShowtimes(result.showtimes).map((showtime) => ({
           allocineId: showtime.internalId,
           date: new Date(showtime.startsAt),
           isPreview: showtime.isPreview,
@@ -152,25 +167,15 @@ async function scrapAllocineShowtimes(
             ? Language.VF
             : Language.VO,
           ticketingUrl: showtime.data.ticketing?.[0]?.urls[0],
-          Movie: {
-            connectOrCreate: {
-              where: { allocineId: result.movie.internalId },
-              create: {
-                originalTitle: result.movie.originalTitle,
-                title: result.movie.title,
-                duration: getDuration(result.movie.runtime),
-                synopsis: result.movie.synopsisFull,
-                releaseDate: getReleaseDate(result.movie.releases),
-                allocineId: result.movie.internalId,
-                posterUrl: result.movie.poster?.url,
-                director: getDirector(result.movie.credits),
-              },
-            },
-          },
-          Theater: { connect: { id: theater.id } },
-        }
+          theaterId: theater.id,
+          movieId: movie.id,
+        })),
+        skipDuplicates: true,
       })
-    )
+    } catch (err) {
+      log.error(err)
+    }
+  }
 
   if (Number(body.pagination.page) < body.pagination.totalPages) {
     return scrapAllocineShowtimes(
@@ -194,7 +199,18 @@ async function scrapAllocineShowtimes(
   return Object.values(showtimeCreateInputs)
 }
 
-async function scrapAllocineTicketingUrl(showtimes: Showtime[]): Promise<void> {
+async function scrapAllocineTicketingUrl(): Promise<void> {
+  const showtimes = await prisma.showtime.findMany({
+    where: {
+      ticketingUrl: { not: null },
+    },
+    select: {
+      id: true,
+      movieId: true,
+      ticketingUrl: true,
+    },
+  })
+
   await Promise.allSettled(
     showtimes
       .filter(({ ticketingUrl }) => ticketingUrl)
@@ -215,13 +231,70 @@ async function scrapAllocineTicketingUrl(showtimes: Showtime[]): Promise<void> {
         return prisma.showtime.update({
           where: { id },
           data: {
-            tags: Object.keys(REGEXP_BY_SHOWTIME_TAGS).filter((tag) =>
-              REGEXP_BY_SHOWTIME_TAGS[tag as keyof typeof REGEXP_BY_SHOWTIME_TAGS].test(details)
-            ),
+            tags: {
+              set: Object.keys(REGEXP_BY_SHOWTIME_TAGS).filter((tag) =>
+                REGEXP_BY_SHOWTIME_TAGS[tag as keyof typeof REGEXP_BY_SHOWTIME_TAGS].test(details)
+              ),
+            },
           },
         })
       })
-  ).catch((err) => log.error(err))
+  )
+}
+
+async function getUploadedPosterList(): Promise<{ filePath: string; name: string; url: string }[]> {
+  const response = await fetch(API_ENDPOINT, {
+    method: 'GET',
+    headers: {
+      Authorization: `Basic ${Buffer.from(process.env.IMAGEKIT_API_KEY + ':').toString('base64')}`,
+    },
+  })
+
+  const body = await response.json()
+
+  return body.filter((file: Record<string, unknown>) =>
+    (file.filePath as string).includes(IMAGEKIT_FOLDER)
+  )
+}
+
+async function scrapAllocinePosters() {
+  const movies = await prisma.movie.findMany({
+    where: { posterUrl: { not: null } },
+    select: { id: true, originalTitle: true, posterUrl: true },
+    orderBy: { id: 'asc' },
+  })
+
+  const posters = await getUploadedPosterList()
+
+  for (const movie of movies) {
+    const poster = posters.find((poster) => parseInt(poster.name) === movie.id)
+    if (poster) {
+      log.info(`${poster.url} - existing`)
+    } else {
+      try {
+        const body = new FormData()
+        body.append('file', movie.posterUrl!)
+        body.append('fileName', movie.id.toString())
+        body.append('useUniqueFileName', 'false')
+        body.append('folder', IMAGEKIT_FOLDER)
+        body.append('customMetadata', JSON.stringify({ title: movie.originalTitle }))
+
+        const response = await fetch(`${API_ENDPOINT}/upload`, {
+          method: 'POST',
+          headers: {
+            Authorization: `Basic ${Buffer.from(process.env.IMAGEKIT_API_KEY + ':').toString(
+              'base64'
+            )}`,
+          },
+          body,
+        })
+
+        log.info((await response.json()).url)
+      } catch (err) {
+        log.error(err)
+      }
+    }
+  }
 }
 
 export async function scrap(maxDay: number = 10, reset = false) {
@@ -242,21 +315,11 @@ export async function scrap(maxDay: number = 10, reset = false) {
     }),
   ])
 
-  const allocineShowtimes = await scrapAllocineShowtimes(theaters, maxDay)
+  await scrapAllocineShowtimes(theaters, maxDay)
 
-  const showtimes = await prisma.$transaction(
-    allocineShowtimes.map((showtime) =>
-      prisma.showtime.upsert({
-        where: {
-          allocineId: showtime.allocineId,
-        },
-        update: showtime,
-        create: showtime,
-      })
-    )
-  )
+  await scrapAllocineTicketingUrl()
 
-  await scrapAllocineTicketingUrl(showtimes)
+  await scrapAllocinePosters()
 }
 
 export function scraperMiddleware(): Middleware<DefaultState, Context> {
@@ -280,36 +343,6 @@ export function scraperMiddleware(): Middleware<DefaultState, Context> {
       const days = match ? parseInt(match[0]) : 90
 
       await scrap(days)
-
-      const movies = await prisma.movie.findMany({
-        where: { posterUrl: { not: null } },
-        select: { id: true, originalTitle: true, posterUrl: true },
-      })
-
-      for (const movie of movies) {
-        try {
-          const body = new FormData()
-          body.append('file', movie.posterUrl!)
-          body.append('fileName', movie.id.toString())
-          body.append('useUniqueFileName', 'false')
-          body.append('folder', process.env.ENV === 'development' ? 'posters-dev' : 'posters-prod')
-          body.append('customMetadata', JSON.stringify({ title: movie.originalTitle }))
-
-          const response = await fetch(API_ENDPOINT, {
-            method: 'POST',
-            headers: {
-              Authorization: `Basic ${Buffer.from(process.env.IMAGEKIT_API_KEY + ':').toString(
-                'base64'
-              )}`,
-            },
-            body,
-          })
-
-          log.info(JSON.stringify(await response.json()))
-        } catch (err) {
-          log.error(err)
-        }
-      }
 
       const [countCacheItemsAfter, countShowtimesAfter, countMoviesAfter] = await Promise.all([
         ctx.prisma.scrapedUrl.count(),

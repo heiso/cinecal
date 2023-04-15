@@ -4,6 +4,10 @@ import { format } from 'date-fns'
 import { Context } from '../../core/context'
 import { Poster } from '../poster'
 
+const IMAGEKIT_URL = `https://ik.imagekit.io/cinecal/posters-${
+  process.env.ENV === 'development' ? 'dev' : 'prod'
+}/`
+
 export const loader = async ({ context, params }: LoaderArgs) => {
   const ctx = context as unknown as Context
 
@@ -35,6 +39,7 @@ export const loader = async ({ context, params }: LoaderArgs) => {
     movie: {
       ...movie,
       ...(movie.releaseDate && { releaseYear: format(movie.releaseDate, 'yyyy') }),
+      posterUrl: `${IMAGEKIT_URL}/${movie.id}`,
     },
   })
 }
@@ -47,7 +52,7 @@ export default function Details() {
       <div className="relative w-full aspect-[62/85]">
         <Poster
           className="absolute top-0 left-0 right-0 bottom-0 transition-opacity duration-700"
-          movieId={movie.id}
+          url={movie.posterUrl}
           alt={movie.title}
           width={640}
           height={1000}

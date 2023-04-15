@@ -8,6 +8,9 @@ const SHOWTIMES_COUNT_TO_BE_FEATURED = 2
 const POSTER_RATIO = 62 / 85
 const POSTER_WIDTH = 310
 const POSTER_SIZE = { w: POSTER_WIDTH, h: Math.round(POSTER_WIDTH / POSTER_RATIO) }
+const IMAGEKIT_URL = `https://ik.imagekit.io/cinecal/posters-${
+  process.env.ENV === 'development' ? 'dev' : 'prod'
+}/`
 
 export const loader = async ({ context }: LoaderArgs) => {
   const ctx = context as unknown as Context
@@ -55,6 +58,7 @@ export const loader = async ({ context }: LoaderArgs) => {
           movie.Showtimes.length <= SHOWTIMES_COUNT_TO_BE_FEATURED,
         tags: [...new Set(tags)],
         count: movie.Showtimes.length,
+        posterUrl: `${IMAGEKIT_URL}/${movie.id}`,
       }
     })
     .sort((movieA, movieB) =>
@@ -92,7 +96,7 @@ export default function Index() {
             <Poster
               className="w-full h-full"
               key={movie.id}
-              movieId={movie.id}
+              url={movie.posterUrl}
               alt={movie.title}
               width={POSTER_SIZE.w}
               height={POSTER_SIZE.h}
