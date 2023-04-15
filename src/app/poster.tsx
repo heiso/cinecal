@@ -2,7 +2,9 @@ import { useState } from 'react'
 import { BlurredImage } from './blurred-image'
 
 const LOW_DEF_IMAGE_WIDTH = 2
-const IMAGEKIT_URL = 'https://ik.imagekit.io/cinecal/posters/'
+const IMAGEKIT_URL = `https://ik.imagekit.io/cinecal/posters-${
+  process.env.ENV === 'development' ? 'dev' : 'prod'
+}/`
 
 function getCropedPosterUrl(url: string | null, width: number, height: number) {
   if (!url) return '/favicon.ico'
