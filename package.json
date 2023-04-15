@@ -16,7 +16,7 @@
     "restart": "pm2 delete ecosystem.config.js && pm2 start ecosystem.config.js",
     "test": "jest",
     "node": "SWCRC=true TS_NODE_PROJECT=tsconfig.json node --require dotenv/config --require @swc-node/register",
-    "dev": "npm run node --watch-preserve-output --inspect=0.0.0.0:9229 ./src/index.ts",
+    "dev": "npm run node -- --watch-preserve-output --inspect=0.0.0.0:9229 ./src/index.ts",
     "build": "remix build && tsc -p tsconfig.build.json",
     "lint": "tsc --noEmit && eslint . && prettier --check .",
     "reset-database": "prisma migrate reset -f --skip-generate"
