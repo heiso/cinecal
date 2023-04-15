@@ -92,7 +92,7 @@ export default function Index() {
             <Poster
               className="w-full h-full"
               key={movie.id}
-              src={movie.posterUrl}
+              movieId={movie.id}
               alt={movie.title}
               width={POSTER_SIZE.w}
               height={POSTER_SIZE.h}

@@ -5,6 +5,7 @@ import { Context } from './core/context'
 import { log } from './core/logger'
 import { AllocineResponse, Credit, Release } from './interfaces'
 
+const API_ENDPOINT = 'https://api.imagekit.io/v1/files/upload'
 export const URL_ALLOCINE_SHOWTIMES = 'https://www.allocine.fr/_/showtimes'
 const URL_THEMOVIEDBID = `https://api.themoviedb.org/3/search/movie?api_key=${process.env.THEMOVIEDBID_API_KEY}&language=fr-FR&query=`
 const URL_THEMOVIEDBID_PICTURES = `https://image.tmdb.org/t/p/original`
@@ -257,6 +258,7 @@ export async function scrap(maxDay: number = 10, reset = false) {
 
   await scrapAllocineTicketingUrl(showtimes)
 }
+
 export function scraperMiddleware(): Middleware<DefaultState, Context> {
   return async function scraperMiddleware(ctx, next) {
     if (
@@ -278,6 +280,36 @@ export function scraperMiddleware(): Middleware<DefaultState, Context> {
       const days = match ? parseInt(match[0]) : 90
 
       await scrap(days)
+
+      const movies = await prisma.movie.findMany({
+        where: { posterUrl: { not: null } },
+        select: { id: true, originalTitle: true, posterUrl: true },
+      })
+
+      for (const movie of movies) {
+        try {
+          const body = new FormData()
+          body.append('file', movie.posterUrl!)
+          body.append('fileName', movie.id.toString())
+          body.append('useUniqueFileName', 'false')
+          body.append('folder', 'posters/')
+          body.append('customMetadata', JSON.stringify({ title: movie.originalTitle }))
+
+          const response = await fetch(API_ENDPOINT, {
+            method: 'POST',
+            headers: {
+              Authorization: `Basic ${Buffer.from(process.env.IMAGEKIT_API_KEY + ':').toString(
+                'base64'
+              )}`,
+            },
+            body,
+          })
+
+          log.info(JSON.stringify(await response.json()))
+        } catch (err) {
+          log.error(err)
+        }
+      }
 
       const [countCacheItemsAfter, countShowtimesAfter, countMoviesAfter] = await Promise.all([
         ctx.prisma.scrapedUrl.count(),

@@ -17,6 +17,7 @@ declare module 'process' {
         readonly REDIS_URL: string
         readonly DATABASE_URL: string | undefined
         readonly THEMOVIEDBID_API_KEY: string | undefined
+        readonly IMAGEKIT_API_KEY: string
       }
     }
   }

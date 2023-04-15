@@ -49,7 +49,7 @@ export function BlurredImage({ src, srcLowDefinition, alt, ...rest }: BlurredIma
       className="relative w-full h-full bg-no-repeat bg-cover bg-top overflow-hidden"
       style={{ backgroundImage: `url('${srcLowDefinition}')` }}
     >
-      <div className="absolute left-0 top-0 w-full h-full backdrop-blur-2xl"></div>
+      <div className="absolute left-0 top-0 w-full h-full"></div>
       <img
         // See https://github.com/kentcdodds/kentcdodds.com/commit/54d11cefd15ece5a3ff0f1ab7233dfe2422fead8
         // React doesn't like the extra onload prop the server's going to send,
@@ -74,7 +74,7 @@ export function BlurredImage({ src, srcLowDefinition, alt, ...rest }: BlurredIma
 
       <noscript>
         <div className="absolute top-0 left-0 bottom-0 right-0">
-          <div className="absolute top-0 left-0 bottom-0 right-0 backdrop-blur-2xl"></div>
+          <div className="absolute top-0 left-0 bottom-0 right-0"></div>
           <img width="100%" height="100%" src={srcLowDefinition} loading="eager" />
         </div>
         <img

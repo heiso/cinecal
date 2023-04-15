@@ -47,7 +47,7 @@ export default function Details() {
       <div className="relative w-full aspect-[62/85]">
         <Poster
           className="absolute top-0 left-0 right-0 bottom-0 transition-opacity duration-700"
-          src={movie.posterUrl}
+          movieId={movie.id}
           alt={movie.title}
           width={640}
           height={1000}
