@@ -1,24 +1,31 @@
+import { blurhashToDataUri } from '@unpic/placeholder'
 import { useEffect, useId, useRef, useState } from 'react'
 
-const LOW_DEF_IMAGE_WIDTH = 5
+export const LOW_DEF_IMAGE_WIDTH = 5
+export const IMAGEKIT_FOLDER = process.env.ENV === 'development' ? 'posters-dev' : 'posters-prod'
+export const IMAGEKIT_URL = `https://ik.imagekit.io/cinecal/${IMAGEKIT_FOLDER}`
+export const POSTER_RATIO = 62 / 85
+export const POSTER_RATIO_STRING = '62-85'
 
 const isServer = typeof document === 'undefined'
 
 type PosterProps = React.HTMLAttributes<HTMLDivElement> & {
   url: string
+  blurHash: string | null
   width: number
   height?: number
   alt: string
 }
 
-export function Poster({ url, width, height, alt, ...rest }: PosterProps) {
-  const [src] = useState<string>(`${url}/tr:w-${width}${height ? `,h-${height}` : ''}`)
-
+export function Poster({ url, blurHash, width, height, alt, ...rest }: PosterProps) {
   const [srcLowDef] = useState<string>(
-    `${url}/tr:w-${LOW_DEF_IMAGE_WIDTH},${
-      height ? `,h-${Math.round((LOW_DEF_IMAGE_WIDTH * height) / width)}` : ''
-    }`
+    blurhashToDataUri(
+      blurHash!,
+      LOW_DEF_IMAGE_WIDTH,
+      Math.round(LOW_DEF_IMAGE_WIDTH / POSTER_RATIO)
+    )
   )
+  const [src] = useState<string>(`${url}/tr:w-${width},ar-${POSTER_RATIO_STRING}`)
 
   const id = useId()
 
@@ -55,12 +62,9 @@ export function Poster({ url, width, height, alt, ...rest }: PosterProps) {
   }, [])
 
   return (
-    <div
-      {...rest}
-      className="relative w-full h-full bg-no-repeat bg-cover bg-top overflow-hidden"
-      style={{ backgroundImage: `url('${srcLowDef}')` }}
-    >
-      <div className="absolute left-0 top-0 w-full h-full backdrop-blur-2xl"></div>
+    <div {...rest} className="relative w-full overflow-hidden aspect-[62/85]">
+      <img className="absolute" src={srcLowDef} width="100%" />
+      <div className="absolute backdrop-blur-2xl h-full w-full"></div>
       <img
         // See https://github.com/kentcdodds/kentcdodds.com/commit/54d11cefd15ece5a3ff0f1ab7233dfe2422fead8
         // React doesn't like the extra onload prop the server's going to send,
@@ -80,22 +84,9 @@ export function Poster({ url, width, height, alt, ...rest }: PosterProps) {
         ref={ref}
         loading="lazy"
         width="100%"
-        height="100%"
       />
-
       <noscript>
-        <div className="absolute top-0 left-0 bottom-0 right-0">
-          <div className="absolute top-0 left-0 bottom-0 right-0 backdrop-blur-2xl"></div>
-          <img width="100%" height="100%" src={srcLowDef} loading="eager" />
-        </div>
-        <img
-          className="absolute top-0 left-0 bottom-0 right-0"
-          src={src}
-          alt={alt}
-          loading="lazy"
-          width="100%"
-          height="100%"
-        />
+        <img className="absolute" src={src} alt={alt} loading="lazy" width="100%" />
       </noscript>
     </div>
   )

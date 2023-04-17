@@ -2,15 +2,13 @@ import { json, LoaderArgs } from '@remix-run/node'
 import { Link, useLoaderData } from '@remix-run/react'
 import { isBefore } from 'date-fns'
 import { Context } from '../../core/context'
-import { Poster } from '../poster'
+import { Poster, POSTER_RATIO } from '../poster'
 
 const SHOWTIMES_COUNT_TO_BE_FEATURED = 2
-const POSTER_RATIO = 62 / 85
 const POSTER_WIDTH = 310
-const POSTER_SIZE = { w: POSTER_WIDTH, h: Math.round(POSTER_WIDTH / POSTER_RATIO) }
 const IMAGEKIT_URL = `https://ik.imagekit.io/cinecal/posters-${
   process.env.ENV === 'development' ? 'dev' : 'prod'
-}/`
+}`
 
 export const loader = async ({ context }: LoaderArgs) => {
   const ctx = context as unknown as Context
@@ -28,6 +26,7 @@ export const loader = async ({ context }: LoaderArgs) => {
       title: true,
       releaseDate: true,
       posterUrl: true,
+      posterBlurHash: true,
       tags: true,
       Showtimes: {
         select: {
@@ -97,9 +96,9 @@ export default function Index() {
               className="w-full h-full"
               key={movie.id}
               url={movie.posterUrl}
+              blurHash={movie.posterBlurHash}
               alt={movie.title}
-              width={POSTER_SIZE.w}
-              height={POSTER_SIZE.h}
+              width={POSTER_WIDTH}
             />
             <div className="absolute bottom-0 left-0">
               <div className="bg-white text-black pl-2 pr-2 text-sm font-bold w-fit">

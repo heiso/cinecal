@@ -2,11 +2,7 @@ import { json, LoaderArgs, Response } from '@remix-run/node'
 import { Outlet, useLoaderData } from '@remix-run/react'
 import { format } from 'date-fns'
 import { Context } from '../../core/context'
-import { Poster } from '../poster'
-
-const IMAGEKIT_URL = `https://ik.imagekit.io/cinecal/posters-${
-  process.env.ENV === 'development' ? 'dev' : 'prod'
-}/`
+import { IMAGEKIT_URL, Poster } from '../poster'
 
 export const loader = async ({ context, params }: LoaderArgs) => {
   const ctx = context as unknown as Context
@@ -24,6 +20,7 @@ export const loader = async ({ context, params }: LoaderArgs) => {
       title: true,
       releaseDate: true,
       posterUrl: true,
+      posterBlurHash: true,
       tags: true,
       synopsis: true,
       director: true,
@@ -53,6 +50,7 @@ export default function Details() {
         <Poster
           className="absolute top-0 left-0 right-0 bottom-0"
           url={movie.posterUrl}
+          blurHash={movie.posterBlurHash}
           alt={movie.title}
           width={640}
         />
