@@ -21,17 +21,18 @@ model Movie {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  allocineId     Int       @unique @map("allocine_id")
-  themoviedbId   Int?      @map("themoviedb_id")
-  releaseDate    DateTime? @map("release_date")
-  title          String    @db.VarChar(255)
-  originalTitle  String    @map("original_title") @db.VarChar(255)
-  synopsis       String?
-  duration       Int       @default(0)
-  director       String?
-  tags           String[]
-  posterUrl      String?   @map("poster_url")
-  posterBlurHash String?   @map("poster_blur_hash")
+  allocineId        Int       @unique @map("allocine_id")
+  themoviedbId      Int?      @map("themoviedb_id")
+  releaseDate       DateTime? @map("release_date")
+  title             String    @db.VarChar(255)
+  originalTitle     String    @map("original_title") @db.VarChar(255)
+  synopsis          String?
+  duration          Int       @default(0)
+  director          String?
+  tags              String[]
+  posterAllocineUrl String?   @map("poster_allocine_url")
+  posterUrl         String?   @map("poster_url")
+  posterBlurHash    String?   @map("poster_blur_hash")
 
   Showtimes Showtime[]
 

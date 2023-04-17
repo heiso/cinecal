@@ -2,7 +2,7 @@ import { json, LoaderArgs, Response } from '@remix-run/node'
 import { Outlet, useLoaderData } from '@remix-run/react'
 import { format } from 'date-fns'
 import { Context } from '../../core/context'
-import { IMAGEKIT_URL, Poster } from '../poster'
+import { Poster } from '../poster'
 
 export const loader = async ({ context, params }: LoaderArgs) => {
   const ctx = context as unknown as Context
@@ -36,7 +36,6 @@ export const loader = async ({ context, params }: LoaderArgs) => {
     movie: {
       ...movie,
       ...(movie.releaseDate && { releaseYear: format(movie.releaseDate, 'yyyy') }),
-      posterUrl: `${IMAGEKIT_URL}/${movie.id}`,
     },
   })
 }
@@ -47,14 +46,16 @@ export default function Details() {
   return (
     <>
       <div className="relative w-full aspect-[62/85]">
-        <Poster
-          className="absolute top-0 left-0 right-0 bottom-0"
-          movieId={movie.id}
-          url={movie.posterUrl}
-          blurHash={movie.posterBlurHash}
-          alt={movie.title}
-          width={640}
-        />
+        {movie.posterUrl && (
+          <Poster
+            className="absolute top-0 left-0 right-0 bottom-0"
+            movieId={movie.id}
+            url={movie.posterUrl}
+            blurHash={movie.posterBlurHash}
+            alt={movie.title}
+            width={640}
+          />
+        )}
         <div className="absolute top-0 left-0 right-0 bottom-0 bg-gradient-to-t from-background to-transparent bg-no-repeat"></div>
       </div>
       <div className="m-4 space-y-2">

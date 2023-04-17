@@ -155,7 +155,7 @@ async function scrapAllocineShowtimes(
           synopsis: result.movie.synopsisFull,
           releaseDate: getReleaseDate(result.movie.releases),
           allocineId: result.movie.internalId,
-          posterUrl: result.movie.poster?.url,
+          posterAllocineUrl: result.movie.poster?.url,
           director: getDirector(result.movie.credits),
         },
       })
@@ -244,7 +244,9 @@ async function scrapAllocineTicketingUrl(): Promise<void> {
   )
 }
 
-async function getUploadedPosterList(): Promise<{ filePath: string; name: string; url: string }[]> {
+async function getUploadedPosterList(): Promise<
+  { filePath: string; name: string; url: string; customMetadata: Record<string, unknown> }[]
+> {
   const response = await fetch(API_ENDPOINT, {
     method: 'GET',
     headers: {
@@ -261,15 +263,19 @@ async function getUploadedPosterList(): Promise<{ filePath: string; name: string
 
 async function scrapAllocinePosters() {
   const movies = await prisma.movie.findMany({
-    where: { posterUrl: { not: null } },
-    select: { id: true, originalTitle: true, posterUrl: true },
+    where: { posterAllocineUrl: { not: null } },
+    select: { id: true, originalTitle: true, posterAllocineUrl: true },
     orderBy: { id: 'asc' },
   })
 
   const posters = await getUploadedPosterList()
 
   for (const movie of movies) {
-    const poster = posters.find((poster) => parseInt(poster.name) === movie.id)
+    const poster = posters.find(
+      (poster) =>
+        Number(poster.customMetadata.id) === movie.id &&
+        poster.customMetadata.originalTitle === movie.originalTitle
+    )
     if (poster) {
       log.info(`${poster.url} - existing`)
       continue
@@ -277,11 +283,16 @@ async function scrapAllocinePosters() {
 
     try {
       const body = new FormData()
-      body.append('file', movie.posterUrl!)
+      body.append('file', movie.posterAllocineUrl!)
       body.append('fileName', movie.id.toString())
-      body.append('useUniqueFileName', 'false')
       body.append('folder', IMAGEKIT_FOLDER)
-      body.append('customMetadata', JSON.stringify({ title: movie.originalTitle }))
+      body.append(
+        'customMetadata',
+        JSON.stringify({
+          id: movie.id,
+          title: movie.originalTitle,
+        })
+      )
 
       const response = await fetch(`${API_ENDPOINT}/upload`, {
         method: 'POST',
@@ -293,7 +304,11 @@ async function scrapAllocinePosters() {
         body,
       })
 
-      log.info((await response.json()).url)
+      const json = await response.json()
+
+      await prisma.movie.update({ where: { id: movie.id }, data: { posterUrl: json.name } })
+
+      log.info(json.url)
     } catch (err) {
       log.error(err)
     }
@@ -308,7 +323,7 @@ async function savePosterBlurHashes() {
   })
 
   for (const movie of movies) {
-    const url = `${IMAGEKIT_URL}/${movie.id}/tr:w-500,q-50,ar-${POSTER_RATIO_STRING}`
+    const url = `${IMAGEKIT_URL}/${movie.posterUrl}/tr:w-500,q-50,ar-${POSTER_RATIO_STRING}`
     const pixels = await getPixels(url)
     const data = Uint8ClampedArray.from(pixels.data)
     const blurHash = encode(data, pixels.width, pixels.height, Math.round(9 * POSTER_RATIO), 9)

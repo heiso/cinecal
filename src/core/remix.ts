@@ -1,3 +1,4 @@
+import { AppLoadContext } from '@remix-run/node'
 import { createRequestHandler } from '@remix-run/server-runtime'
 import type { DefaultState, Middleware } from 'koa'
 import { join } from 'path'
@@ -39,7 +40,7 @@ export function remixMiddleware(): Middleware<DefaultState, Context> {
       body: ctx.body ? (ctx.body as unknown as BodyInit) : null,
     })
 
-    const response = await handleRequest(request, { ...ctx })
+    const response = await handleRequest(request, ctx as unknown as AppLoadContext)
 
     response.headers.forEach((value, key) => ctx.set(key, value))
 

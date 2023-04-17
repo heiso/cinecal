@@ -1,5 +1,5 @@
 import { blurhashToDataUri } from '@unpic/placeholder'
-import { useEffect, useId, useRef, useState } from 'react'
+import { useEffect, useId, useMemo, useRef, useState } from 'react'
 
 export const LOW_DEF_IMAGE_WIDTH = 5
 export const IMAGEKIT_FOLDER = process.env.ENV === 'development' ? 'posters-dev' : 'posters-prod'
@@ -19,7 +19,7 @@ type PosterProps = React.HTMLAttributes<HTMLDivElement> & {
 }
 
 export function Poster({ movieId, url, blurHash, width, height, alt, ...rest }: PosterProps) {
-  const [srcLowDef] = useState<string>(() => {
+  const srcLowDef = useMemo<string>(() => {
     if (!blurHash) {
       return ``
     }
@@ -29,8 +29,9 @@ export function Poster({ movieId, url, blurHash, width, height, alt, ...rest }: 
       LOW_DEF_IMAGE_WIDTH,
       Math.round(LOW_DEF_IMAGE_WIDTH / POSTER_RATIO)
     )
-  })
-  const [src] = useState<string>(`${url}/tr:w-${width},ar-${POSTER_RATIO_STRING}`)
+  }, [blurHash])
+
+  const src = `${IMAGEKIT_URL}/${url}/tr:w-${width},ar-${POSTER_RATIO_STRING}`
 
   const id = useId()
 

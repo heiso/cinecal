@@ -2,7 +2,7 @@ import { json, LoaderArgs } from '@remix-run/node'
 import { Link, useLoaderData } from '@remix-run/react'
 import { isBefore } from 'date-fns'
 import { Context } from '../../core/context'
-import { IMAGEKIT_URL, Poster, POSTER_RATIO } from '../poster'
+import { Poster, POSTER_RATIO } from '../poster'
 
 const SHOWTIMES_COUNT_TO_BE_FEATURED = 2
 const POSTER_WIDTH = 310
@@ -54,7 +54,6 @@ export const loader = async ({ context }: LoaderArgs) => {
           movie.Showtimes.length <= SHOWTIMES_COUNT_TO_BE_FEATURED,
         tags: [...new Set(tags)],
         count: movie.Showtimes.length,
-        posterUrl: `${IMAGEKIT_URL}/${movie.id}`,
       }
     })
     .sort((movieA, movieB) =>
@@ -89,15 +88,17 @@ export default function Index() {
           }}
         >
           <Link to={`/details/${movie.id}/showtimes`} className="relative block w-full h-full">
-            <Poster
-              className="w-full h-full"
-              key={movie.id}
-              movieId={movie.id}
-              url={movie.posterUrl}
-              blurHash={movie.posterBlurHash}
-              alt={movie.title}
-              width={POSTER_WIDTH}
-            />
+            {movie.posterUrl && (
+              <Poster
+                className="w-full h-full"
+                key={movie.id}
+                movieId={movie.id}
+                url={movie.posterUrl}
+                blurHash={movie.posterBlurHash}
+                alt={movie.title}
+                width={POSTER_WIDTH}
+              />
+            )}
             <div className="absolute bottom-0 left-0">
               <div className="bg-white text-black pl-2 pr-2 text-sm font-bold w-fit">
                 {movie.count}
