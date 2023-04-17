@@ -15,16 +15,21 @@ type PosterProps = React.HTMLAttributes<HTMLDivElement> & {
   width: number
   height?: number
   alt: string
+  movieId: number
 }
 
-export function Poster({ url, blurHash, width, height, alt, ...rest }: PosterProps) {
-  const [srcLowDef] = useState<string>(
-    blurhashToDataUri(
-      blurHash!,
+export function Poster({ movieId, url, blurHash, width, height, alt, ...rest }: PosterProps) {
+  const [srcLowDef] = useState<string>(() => {
+    if (!blurHash) {
+      return ``
+    }
+
+    return blurhashToDataUri(
+      blurHash,
       LOW_DEF_IMAGE_WIDTH,
       Math.round(LOW_DEF_IMAGE_WIDTH / POSTER_RATIO)
     )
-  )
+  })
   const [src] = useState<string>(`${url}/tr:w-${width},ar-${POSTER_RATIO_STRING}`)
 
   const id = useId()
