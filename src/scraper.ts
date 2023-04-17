@@ -272,9 +272,7 @@ async function scrapAllocinePosters() {
 
   for (const movie of movies) {
     const poster = posters.find(
-      (poster) =>
-        Number(poster.customMetadata.id) === movie.id &&
-        poster.customMetadata.originalTitle === movie.originalTitle
+      (poster) => poster.customMetadata.allocineUrl === movie.posterAllocineUrl
     )
     if (poster) {
       log.info(`${poster.url} - existing`)
@@ -291,6 +289,7 @@ async function scrapAllocinePosters() {
         JSON.stringify({
           id: movie.id,
           title: movie.originalTitle,
+          allocineUrl: movie.posterAllocineUrl,
         })
       )
 
