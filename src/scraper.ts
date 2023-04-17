@@ -304,6 +304,10 @@ async function scrapAllocinePosters() {
         body,
       })
 
+      if (response.status !== 200) {
+        log.error(await response.text())
+      }
+
       const json = await response.json()
 
       await prisma.movie.update({ where: { id: movie.id }, data: { posterUrl: json.name } })
@@ -323,14 +327,18 @@ async function savePosterBlurHashes() {
   })
 
   for (const movie of movies) {
-    const url = `${IMAGEKIT_URL}/${movie.posterUrl}/tr:w-500,q-50,ar-${POSTER_RATIO_STRING}`
-    const pixels = await getPixels(url)
-    const data = Uint8ClampedArray.from(pixels.data)
-    const blurHash = encode(data, pixels.width, pixels.height, Math.round(9 * POSTER_RATIO), 9)
+    try {
+      const url = `${IMAGEKIT_URL}/${movie.posterUrl}/tr:w-500,q-50,ar-${POSTER_RATIO_STRING}`
+      const pixels = await getPixels(url)
+      const data = Uint8ClampedArray.from(pixels.data)
+      const blurHash = encode(data, pixels.width, pixels.height, Math.round(9 * POSTER_RATIO), 9)
 
-    log.info(`${url} -> ${blurHash}`)
+      log.info(`${url} -> ${blurHash}`)
 
-    await prisma.movie.update({ where: { id: movie.id }, data: { posterBlurHash: blurHash } })
+      await prisma.movie.update({ where: { id: movie.id }, data: { posterBlurHash: blurHash } })
+    } catch (err) {
+      log.error(err)
+    }
   }
 }
 
