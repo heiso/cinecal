@@ -51,13 +51,12 @@ export default function Details() {
     <>
       <div className="relative w-full aspect-[62/85]">
         <Poster
-          className="absolute top-0 left-0 right-0 bottom-0 transition-opacity duration-700"
+          className="absolute top-0 left-0 right-0 bottom-0"
           url={movie.posterUrl}
           alt={movie.title}
           width={640}
-          height={1000}
         />
-        <div className="absolute top-0 left-0 right-0 bottom-0 bg-gradient-to-t from-background to-transparent"></div>
+        <div className="absolute top-0 left-0 right-0 bottom-0 bg-gradient-to-t from-background to-transparent bg-no-repeat"></div>
       </div>
       <div className="m-4 space-y-2">
         <h1 className="text-white text-3xl inline-block">{movie.title}</h1>
@@ -72,7 +71,7 @@ export default function Details() {
         <p className="text-white text-sm">{movie.synopsis}</p>
       </div>
 
-      <div className="m-4">
+      <div className="m-4 pb-48">
         <Outlet />
       </div>
     </>
