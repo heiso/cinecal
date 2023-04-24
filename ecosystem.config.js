@@ -24,7 +24,7 @@ const config = {
     {
       ...common,
       name: 'api',
-      watch: ['src/**/*'],
+      watch: ['src/**/*', '.env'],
       ignore_watch: ['src/app'],
       script: 'npm run dev',
     },
