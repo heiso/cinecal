@@ -218,14 +218,26 @@ async function scrapAllocineTicketingUrl(): Promise<void> {
       .filter(({ ticketingUrl }) => ticketingUrl)
       .map(async ({ id, movieId, ticketingUrl }) => {
         const details = await getAllocineTicketingDetails(ticketingUrl!)
+        let prices: { label: string; description?: string | null; price: number }[] = []
 
-        const regx = new RegExp(/<p>([^<]*)(?:<a[^<]*>i<\/a>)?<span[^<]*[^>]*>(\d*.\d*)\ &euro;/g)
-        const matches = [...details.matchAll(regx)]
+        try {
+          const regx = new RegExp(
+            /<p>([^<]*)(?:<a[^<]*title\=\"([^<]*)"[^<]*>i<\/a>)?<span[^<]*[^>]*>(\d*.\d*)\ &euro;/g
+          )
+          const matches = [...details.matchAll(regx)]
 
-        const prices = matches.map<{ price: number; label: string }>((match) => ({
-          label: match[1],
-          price: parseInt(match[2]),
-        }))
+          prices = matches.map((match) => ({
+            label: match[1]
+              ?.replace(/&#128;/g, '€')
+              .replace(/(&#(\d+);)/g, (match, capture, charCode) => String.fromCharCode(charCode)),
+            description: match[2]
+              ?.replace(/&#128;/g, '€')
+              .replace(/(&#(\d+);)/g, (match, capture, charCode) => String.fromCharCode(charCode)),
+            price: parseInt(match[3]),
+          }))
+        } catch (err) {
+          log.error(err)
+        }
 
         await prisma.movie.update({
           where: { id: movieId },
