@@ -219,6 +219,14 @@ async function scrapAllocineTicketingUrl(): Promise<void> {
       .map(async ({ id, movieId, ticketingUrl }) => {
         const details = await getAllocineTicketingDetails(ticketingUrl!)
 
+        const regx = new RegExp(/<p>([^<]*)(?:<a[^<]*>i<\/a>)?<span[^<]*[^>]*>(\d*.\d*)\ &euro;/g)
+        const matches = [...details.matchAll(regx)]
+
+        const prices = matches.map<{ price: number; label: string }>((match) => ({
+          label: match[1],
+          price: parseInt(match[2]),
+        }))
+
         await prisma.movie.update({
           where: { id: movieId },
           data: {
@@ -230,7 +238,12 @@ async function scrapAllocineTicketingUrl(): Promise<void> {
           },
         })
 
-        return prisma.showtime.update({
+        const oldPrices = await prisma.price.findMany({
+          where: { showtimeId: id },
+          select: { id: true },
+        })
+
+        await prisma.showtime.update({
           where: { id },
           data: {
             tags: {
@@ -238,7 +251,14 @@ async function scrapAllocineTicketingUrl(): Promise<void> {
                 REGEXP_BY_SHOWTIME_TAGS[tag as keyof typeof REGEXP_BY_SHOWTIME_TAGS].test(details)
               ),
             },
+            Prices: {
+              createMany: { data: prices },
+            },
           },
+        })
+
+        return prisma.price.deleteMany({
+          where: { id: { in: oldPrices.map((price) => price.id) } },
         })
       })
   )
@@ -271,47 +291,51 @@ async function scrapAllocinePosters() {
   const posters = await getUploadedPosterList()
 
   for (const movie of movies) {
-    const poster = posters.find(
-      (poster) => poster.customMetadata.allocineUrl === movie.posterAllocineUrl
-    )
-    if (poster) {
-      log.info(`${poster.url} - existing`)
-      continue
-    }
-
     try {
-      const body = new FormData()
-      body.append('file', movie.posterAllocineUrl!)
-      body.append('fileName', movie.id.toString())
-      body.append('folder', IMAGEKIT_FOLDER)
-      body.append(
-        'customMetadata',
-        JSON.stringify({
-          id: movie.id,
-          title: movie.originalTitle,
-          allocineUrl: movie.posterAllocineUrl,
-        })
+      let posterUrl: string
+
+      const poster = posters.find(
+        (poster) => poster.customMetadata.allocineUrl === movie.posterAllocineUrl
       )
 
-      const response = await fetch(`${API_ENDPOINT}/upload`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Basic ${Buffer.from(process.env.IMAGEKIT_API_KEY + ':').toString(
-            'base64'
-          )}`,
-        },
-        body,
-      })
+      if (poster) {
+        log.info(`${poster.url} - existing`)
+        posterUrl = poster.name
+      } else {
+        const body = new FormData()
+        body.append('file', movie.posterAllocineUrl!)
+        body.append('fileName', movie.id.toString())
+        body.append('folder', IMAGEKIT_FOLDER)
+        body.append(
+          'customMetadata',
+          JSON.stringify({
+            id: movie.id,
+            title: movie.originalTitle,
+            allocineUrl: movie.posterAllocineUrl,
+          })
+        )
 
-      if (response.status !== 200) {
-        log.error(await response.text())
+        const response = await fetch(`${API_ENDPOINT}/upload`, {
+          method: 'POST',
+          headers: {
+            Authorization: `Basic ${Buffer.from(process.env.IMAGEKIT_API_KEY + ':').toString(
+              'base64'
+            )}`,
+          },
+          body,
+        })
+
+        if (response.status !== 200) {
+          log.error(await response.text())
+        }
+
+        const json = await response.json()
+        posterUrl = json.name
+
+        log.info(json.url)
       }
 
-      const json = await response.json()
-
-      await prisma.movie.update({ where: { id: movie.id }, data: { posterUrl: json.name } })
-
-      log.info(json.url)
+      await prisma.movie.update({ where: { id: movie.id }, data: { posterUrl } })
     } catch (err) {
       log.error(err)
     }

@@ -44,6 +44,17 @@ enum Language {
   VF
 }
 
+model Price {
+  id    Int    @id @default(autoincrement())
+  label String
+  price Float
+
+  Showtime   Showtime? @relation(fields: [showtimeId], references: [id], onDelete: Cascade)
+  showtimeId Int?
+
+  @@map("prices")
+}
+
 model Showtime {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now()) @map("created_at")
@@ -56,10 +67,12 @@ model Showtime {
   language     Language
   ticketingUrl String?
 
-  Theater   Theater @relation(fields: [theaterId], references: [id])
+  Prices Price[]
+
+  Theater   Theater @relation(fields: [theaterId], references: [id], onDelete: Cascade)
   theaterId Int     @map("theater_id")
 
-  Movie   Movie @relation(fields: [movieId], references: [id])
+  Movie   Movie @relation(fields: [movieId], references: [id], onDelete: Cascade)
   movieId Int   @map("movie_id")
 
   @@unique([date, movieId, theaterId])

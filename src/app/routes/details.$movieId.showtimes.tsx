@@ -1,5 +1,5 @@
 import { Movie, Showtime as PrismaShowtime, Theater } from '@prisma/client'
-import { json, LoaderArgs, Response } from '@remix-run/node'
+import { LoaderArgs, Response, json } from '@remix-run/node'
 import { Link, useLoaderData } from '@remix-run/react'
 import { add, format } from 'date-fns'
 import { fr } from 'date-fns/locale'
@@ -67,6 +67,12 @@ export const loader = async ({ context, params }: LoaderArgs) => {
           ticketingUrl: true,
           isPreview: true,
           language: true,
+          Prices: {
+            select: {
+              label: true,
+              price: true,
+            },
+          },
           Movie: {
             select: {
               duration: true,
@@ -113,6 +119,7 @@ export default function Showtimes() {
             >
               {showtime.date} ({showtime.language}) {showtime.isPreview ? '(AvP) ' : ''}
               {showtime.tags.map((tag) => `(${tag})`).join(' ')}
+              {showtime.Prices.map(({ label, price }) => `(${label}: ${price}€)`).join(' ')}
             </Link>
           ))}
         </div>
