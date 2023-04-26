@@ -3,7 +3,7 @@ import { getPixels } from '@unpic/pixels'
 import { encode } from 'blurhash'
 import { endOfDay, endOfWeek, endOfYesterday } from 'date-fns'
 import { DefaultState, Middleware } from 'koa'
-import { IMAGEKIT_FOLDER, IMAGEKIT_URL, POSTER_RATIO, POSTER_RATIO_STRING } from './app/poster'
+import { POSTER_RATIO, POSTER_RATIO_STRING } from './app/poster'
 import { Context } from './core/context'
 import { log } from './core/logger'
 import { AllocineResponse, Credit, Release } from './interfaces'
@@ -13,6 +13,8 @@ const URL_ALLOCINE_SHOWTIMES = 'https://www.allocine.fr/_/showtimes'
 const URL_THEMOVIEDBID = `https://api.themoviedb.org/3/search/movie?api_key=${process.env.THEMOVIEDBID_API_KEY}&language=fr-FR&query=`
 const URL_THEMOVIEDBID_PICTURES = `https://image.tmdb.org/t/p/original`
 const EXCLUSION_LIST = ['Rex Studios']
+const IMAGEKIT_FOLDER = process.env.ENV === 'development' ? 'posters-dev' : 'posters-prod'
+const IMAGEKIT_URL = `https://ik.imagekit.io/cinecal/${IMAGEKIT_FOLDER}`
 
 const REGEXP_BY_MOVIE_TAGS = {
   Oscar: new RegExp(/oscar/i),

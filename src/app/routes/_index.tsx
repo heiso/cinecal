@@ -9,6 +9,9 @@ const POSTER_WIDTH = 310
 
 export const loader = async ({ context }: LoaderArgs) => {
   const ctx = context as unknown as Context
+  const IMAGEKIT_URL = `https://ik.imagekit.io/cinecal/${
+    process.env.ENV === 'development' ? 'posters-dev' : 'posters-prod'
+  }`
 
   const movies = await ctx.prisma.movie.findMany({
     where: {
@@ -54,6 +57,7 @@ export const loader = async ({ context }: LoaderArgs) => {
           movie.Showtimes.length <= SHOWTIMES_COUNT_TO_BE_FEATURED,
         tags: [...new Set(tags)],
         count: movie.Showtimes.length,
+        posterUrl: movie.posterUrl ? `${IMAGEKIT_URL}/${movie.posterUrl}` : null,
       }
     })
     .sort((movieA, movieB) =>

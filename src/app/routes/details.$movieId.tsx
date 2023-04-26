@@ -1,11 +1,15 @@
 import { json, LoaderArgs, Response } from '@remix-run/node'
-import { Outlet, useLoaderData } from '@remix-run/react'
+import { Outlet, useLoaderData, useNavigate } from '@remix-run/react'
 import { format } from 'date-fns'
+import { useEffect } from 'react'
 import { Context } from '../../core/context'
 import { Poster } from '../poster'
 
 export const loader = async ({ context, params }: LoaderArgs) => {
   const ctx = context as unknown as Context
+  const IMAGEKIT_URL = `https://ik.imagekit.io/cinecal/${
+    process.env.ENV === 'development' ? 'posters-dev' : 'posters-prod'
+  }`
 
   if (!params.movieId || isNaN(Number(params.movieId))) {
     throw new Response('Not Found', { status: 404, statusText: 'Not Found' })
@@ -36,6 +40,7 @@ export const loader = async ({ context, params }: LoaderArgs) => {
     movie: {
       ...movie,
       ...(movie.releaseDate && { releaseYear: format(movie.releaseDate, 'yyyy') }),
+      posterUrl: movie.posterUrl ? `${IMAGEKIT_URL}/${movie.posterUrl}` : null,
     },
   })
 }

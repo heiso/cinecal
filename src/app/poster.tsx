@@ -2,8 +2,6 @@ import { blurhashToDataUri } from '@unpic/placeholder'
 import { useEffect, useId, useMemo, useRef, useState } from 'react'
 
 export const LOW_DEF_IMAGE_WIDTH = 5
-export const IMAGEKIT_FOLDER = process.env.ENV === 'development' ? 'posters-dev' : 'posters-prod'
-export const IMAGEKIT_URL = `https://ik.imagekit.io/cinecal/${IMAGEKIT_FOLDER}`
 export const POSTER_RATIO = 62 / 85
 export const POSTER_RATIO_STRING = '62-85'
 
@@ -31,7 +29,7 @@ export function Poster({ movieId, url, blurHash, width, height, alt, ...rest }: 
     )
   }, [blurHash])
 
-  const src = `${IMAGEKIT_URL}/${url}/tr:w-${width},ar-${POSTER_RATIO_STRING}`
+  const src = `${url}/tr:w-${width},ar-${POSTER_RATIO_STRING}`
 
   const id = useId()
 

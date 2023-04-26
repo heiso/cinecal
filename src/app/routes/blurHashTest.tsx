@@ -3,12 +3,16 @@ import { useLoaderData } from '@remix-run/react'
 import { getPixels } from '@unpic/pixels'
 import { blurhashToDataUri } from '@unpic/placeholder'
 import { encode } from 'blurhash'
-import { IMAGEKIT_URL, POSTER_RATIO, POSTER_RATIO_STRING } from '../poster'
+import { POSTER_RATIO, POSTER_RATIO_STRING } from '../poster'
 
 const LOW_DEF_IMAGE_WIDTH = 10
 const ID = 10
 
 export const loader = async () => {
+  const IMAGEKIT_URL = `https://ik.imagekit.io/cinecal/${
+    process.env.ENV === 'development' ? 'posters-dev' : 'posters-prod'
+  }`
+
   const url = `${IMAGEKIT_URL}/${ID}/tr:w-500,q-50,ar-${POSTER_RATIO_STRING}`
   const pixels = await getPixels(url)
   const data = Uint8ClampedArray.from(pixels.data)
@@ -34,6 +38,7 @@ export const loader = async () => {
   const base64 = `data:${mime};base64,${Buffer.from(buffer).toString('base64')}`
 
   return json({
+    IMAGEKIT_URL,
     uri,
     blurHash2,
     uri2,
@@ -42,7 +47,7 @@ export const loader = async () => {
 }
 
 export default function BlurHashTest() {
-  const { uri, blurHash2, uri2, base64 } = useLoaderData<typeof loader>()
+  const { IMAGEKIT_URL, uri, blurHash2, uri2, base64 } = useLoaderData<typeof loader>()
   const uri3 = blurhashToDataUri(
     blurHash2,
     LOW_DEF_IMAGE_WIDTH,
