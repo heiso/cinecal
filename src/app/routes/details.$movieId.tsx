@@ -48,6 +48,26 @@ export const loader = async ({ context, params }: LoaderArgs) => {
 export default function Details() {
   const { movie } = useLoaderData<typeof loader>()
 
+  const navigate = useNavigate()
+  useEffect(() => {
+    function handleKeyup(event: KeyboardEvent) {
+      if (
+        !event.defaultPrevented &&
+        !['input', 'textarea'].includes(
+          (event.target as HTMLElement).tagName.toLocaleLowerCase()
+        ) &&
+        event.key === 'Escape'
+      ) {
+        event.preventDefault()
+        navigate('/')
+      }
+    }
+
+    document.addEventListener('keyup', handleKeyup)
+
+    return () => document.removeEventListener('keyup', handleKeyup)
+  }, [navigate])
+
   return (
     <>
       <div className="relative w-full aspect-[62/85]">
