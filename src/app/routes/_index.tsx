@@ -85,10 +85,9 @@ export default function Index() {
       {movies.map((movie) => (
         <div
           key={movie.id}
-          className="shadow-white"
+          className="rounded-xl overflow-hidden"
           style={{
             aspectRatio: POSTER_RATIO,
-            ...(movie.isFeatured && { boxShadow: '4px 4px' }),
           }}
         >
           <Link to={`/details/${movie.id}/showtimes`} className="relative block w-full h-full">
@@ -103,16 +102,29 @@ export default function Index() {
                 width={POSTER_WIDTH}
               />
             )}
-            <div className="absolute bottom-0 left-0">
-              <div className="bg-white text-black pl-2 pr-2 text-sm font-bold w-fit">
-                {movie.count}
+            <div className="absolute top-2 left-2">
+              <div
+                style={{ textShadow: '0 0 1px rgba(0,0,0,.5)' }}
+                className="text-white pt-1 pb-1 pl-3 pr-3 text-xs font-bold backdrop-blur-xl rounded-full bg-opacity-40 bg-black"
+              >
+                <span>{movie.count}</span>
+                <span className="text-xs font-light"> Séance{movie.count > 1 ? 's' : ''}</span>
               </div>
-              {movie.tags.map((tag) => (
-                <div key={tag} className="bg-white text-black pl-2 pr-2 text-sm font-bold w-fit">
-                  {tag}
-                </div>
-              ))}
             </div>
+            {movie.tags.length && (
+              <div className="absolute bottom-0 left-0 right-0">
+                <div className="backdrop-blur-xl bg-opacity-40 bg-black p-1 rounded-xl w-fit m-auto mb-2">
+                  {movie.tags.map((tag) => (
+                    <div
+                      key={tag}
+                      className="text-white pl-2 pr-2 w-full text-center text-xs font-light"
+                    >
+                      <span>{tag}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </Link>
         </div>
       ))}
