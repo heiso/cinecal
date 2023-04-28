@@ -10,7 +10,7 @@ export function remixMiddleware(): Middleware<DefaultState, Context> {
   return async function remixMiddleware(ctx, next) {
     const handleRequest = createRequestHandler(require(BUILD_DIR), process.env.NODE_ENV)
 
-    if (process.env.ENV === 'development') {
+    if (process.env.NODE_ENV === 'development') {
       // purge require cache on requests for "server side HMR" this won't let
       // you have in-memory objects between requests in development,
       // alternatively you can set up nodemon/pm2-dev to restart the server on
