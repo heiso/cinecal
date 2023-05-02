@@ -86,7 +86,13 @@ async function getAllocineTicketingDetails(url: string) {
   }
 
   log.info(url)
+
   const res = await fetch(url)
+
+  if (!res.ok) {
+    throw new Error(`${url} - error`)
+  }
+
   const content = await res.text()
 
   await prisma.scrapedUrl.upsert({
@@ -113,10 +119,22 @@ async function getAllocineShowtimes(url: string) {
   }
 
   log.info(url)
+
   const res = await fetch(url, {
     method: 'post',
   })
+
+  if (!res.ok) {
+    throw new Error(`${url} - error`)
+  }
+
   const content = await res.text()
+
+  const json = JSON.parse(content) as AllocineResponse
+
+  if (json.error) {
+    throw new Error(`${url} - error`)
+  }
 
   await prisma.scrapedUrl.upsert({
     where: { url },
@@ -124,7 +142,7 @@ async function getAllocineShowtimes(url: string) {
     update: { content, expiresAt: endOfDay(new Date()) },
   })
 
-  return JSON.parse(content) as AllocineResponse
+  return json
 }
 
 async function scrapAllocineShowtimes(
@@ -143,53 +161,59 @@ async function scrapAllocineShowtimes(
   const dayParam = day > 0 ? `d-${day}/` : ''
   const url = `${URL_ALLOCINE_SHOWTIMES}/theater-${theater.allocineId}/${dayParam}${pageParam}`
 
-  const body = await getAllocineShowtimes(url)
+  try {
+    const body = await getAllocineShowtimes(url)
 
-  for (const result of body.results.filter(({ movie }) => !EXCLUSION_LIST.includes(movie.title))) {
-    try {
-      const movie = await prisma.movie.upsert({
-        where: { allocineId: result.movie.internalId },
-        update: {},
-        create: {
-          originalTitle: result.movie.originalTitle,
-          title: result.movie.title,
-          duration: getDuration(result.movie.runtime),
-          synopsis: result.movie.synopsisFull,
-          releaseDate: getReleaseDate(result.movie.releases),
-          allocineId: result.movie.internalId,
-          posterAllocineUrl: result.movie.poster?.url,
-          director: getDirector(result.movie.credits),
-        },
-      })
+    for (const result of body.results.filter(
+      ({ movie }) => !EXCLUSION_LIST.includes(movie.title)
+    )) {
+      try {
+        const movie = await prisma.movie.upsert({
+          where: { allocineId: result.movie.internalId },
+          update: {},
+          create: {
+            originalTitle: result.movie.originalTitle,
+            title: result.movie.title,
+            duration: getDuration(result.movie.runtime),
+            synopsis: result.movie.synopsisFull,
+            releaseDate: getReleaseDate(result.movie.releases),
+            allocineId: result.movie.internalId,
+            posterAllocineUrl: result.movie.poster?.url,
+            director: getDirector(result.movie.credits),
+          },
+        })
 
-      await prisma.showtime.createMany({
-        data: getUniqueAllocineShowtimes(result.showtimes).map((showtime) => ({
-          allocineId: showtime.internalId,
-          date: new Date(showtime.startsAt),
-          isPreview: showtime.isPreview,
-          language: showtime.tags.includes('Localization.Language.French')
-            ? Language.VF
-            : Language.VO,
-          ticketingUrl: showtime.data.ticketing?.[0]?.urls[0],
-          theaterId: theater.id,
-          movieId: movie.id,
-        })),
-        skipDuplicates: true,
-      })
-    } catch (err) {
-      log.error(err)
+        await prisma.showtime.createMany({
+          data: getUniqueAllocineShowtimes(result.showtimes).map((showtime) => ({
+            allocineId: showtime.internalId,
+            date: new Date(showtime.startsAt),
+            isPreview: showtime.isPreview,
+            language: showtime.tags.includes('Localization.Language.French')
+              ? Language.VF
+              : Language.VO,
+            ticketingUrl: showtime.data.ticketing?.[0]?.urls[0],
+            theaterId: theater.id,
+            movieId: movie.id,
+          })),
+          skipDuplicates: true,
+        })
+      } catch (err) {
+        log.error(err)
+      }
     }
-  }
 
-  if (Number(body.pagination.page) < body.pagination.totalPages) {
-    return scrapAllocineShowtimes(
-      theaters,
-      theaterIndex,
-      maxDay,
-      day,
-      page + 1,
-      showtimeCreateInputs
-    )
+    if (Number(body.pagination.page) < body.pagination.totalPages) {
+      return scrapAllocineShowtimes(
+        theaters,
+        theaterIndex,
+        maxDay,
+        day,
+        page + 1,
+        showtimeCreateInputs
+      )
+    }
+  } catch (err) {
+    log.error(err)
   }
 
   if (day < maxDay) {
