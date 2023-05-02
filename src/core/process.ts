@@ -11,6 +11,7 @@ declare global {
       DATABASE_URL: string
       IMAGEKIT_API_KEY: string
       THEMOVIEDBID_API_KEY: string | undefined
+      SENTRY_DSN: string | undefined
     }
   }
 }
