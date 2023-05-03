@@ -1,5 +1,4 @@
-import { blurhashToDataUri } from '@unpic/placeholder'
-import { useEffect, useId, useMemo, useRef, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 
 export const LOW_DEF_IMAGE_WIDTH = 5
 export const POSTER_RATIO = 62 / 85
@@ -9,26 +8,14 @@ const isServer = typeof document === 'undefined'
 
 type PosterProps = React.HTMLAttributes<HTMLDivElement> & {
   url: string
-  blurHash: string | null
+  srcLowDef: string | null
   width: number
   height?: number
   alt: string
   movieId: number
 }
 
-export function Poster({ movieId, url, blurHash, width, height, alt, ...rest }: PosterProps) {
-  const srcLowDef = useMemo<string>(() => {
-    if (!blurHash) {
-      return ``
-    }
-
-    return blurhashToDataUri(
-      blurHash,
-      LOW_DEF_IMAGE_WIDTH,
-      Math.round(LOW_DEF_IMAGE_WIDTH / POSTER_RATIO)
-    )
-  }, [blurHash])
-
+export function Poster({ movieId, url, srcLowDef, width, height, alt, ...rest }: PosterProps) {
   const src = `${url}/tr:w-${width},ar-${POSTER_RATIO_STRING}`
 
   const id = useId()
@@ -66,8 +53,8 @@ export function Poster({ movieId, url, blurHash, width, height, alt, ...rest }: 
   }, [])
 
   return (
-    <div {...rest} className="relative w-full overflow-hidden aspect-[62/85]">
-      <img className="absolute" src={srcLowDef} width="100%" alt={alt} />
+    <div {...rest} className="relative w-full overflow-hidden aspect-[62/85] rounded-xl">
+      {srcLowDef && <img className="absolute" src={srcLowDef} width="100%" alt={alt} />}
       <div className="absolute backdrop-blur-2xl h-full w-full"></div>
       <img
         // See https://github.com/kentcdodds/kentcdodds.com/commit/54d11cefd15ece5a3ff0f1ab7233dfe2422fead8

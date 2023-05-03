@@ -1,19 +1,17 @@
-import type { LinksFunction, MetaFunction } from '@remix-run/node'
+import type { LinksFunction, V2_MetaFunction } from '@remix-run/node'
 import { Links, LiveReload, Meta, Outlet, Scripts, ScrollRestoration } from '@remix-run/react'
 import styles from './tailwind.css'
 
-export const meta: MetaFunction = () => ({
-  charset: 'utf-8',
-  title: 'Cinecal',
-  viewport: 'width=device-width,initial-scale=1',
-})
+export const meta: V2_MetaFunction = () => [{ title: 'Cinecal' }]
 
 export const links: LinksFunction = () => [{ rel: 'stylesheet', href: styles }]
 
 export default function App() {
   return (
-    <html lang="en" className="dark bg-background w-full h-full text-white">
+    <html lang="fr" className="dark bg-background w-full h-full text-white">
       <head>
+        <meta charSet="utf-8" />
+        <meta name="viewport" content="width=device-width,initial-scale=1" />
         <Meta />
         <Links />
       </head>

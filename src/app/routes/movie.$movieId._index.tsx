@@ -77,6 +77,7 @@ export const loader = async ({ context, params }: LoaderArgs) => {
             select: {
               duration: true,
               title: true,
+              tags: true,
             },
           },
         },
@@ -90,14 +91,40 @@ export const loader = async ({ context, params }: LoaderArgs) => {
     },
   })
 
+  function mapShowtime(
+    showtime: (typeof theaters)[0]['Showtimes'][0],
+    theater: (typeof theaters)[0]
+  ) {
+    return {
+      ...showtime,
+      hour: format(showtime.date, `HH'h'mm`, { locale: fr }),
+      addToCalendarUrl: buildAddToCalendarURL(showtime, showtime.Movie, theater),
+      tags: [
+        ...new Set([
+          ...showtime.tags,
+          ...showtime.Movie.tags,
+          ...(showtime.isPreview ? ['Avant première'] : []),
+        ]),
+      ],
+    }
+  }
+
   return json({
     theaters: theaters.map((theater) => ({
       ...theater,
-      Showtimes: theater.Showtimes.map((showtime) => ({
-        ...showtime,
-        date: format(showtime.date, `E dd LLL - HH'h'mm`, { locale: fr }),
-        addToCalendarUrl: buildAddToCalendarURL(showtime, showtime.Movie, theater),
-      })),
+      days: theater.Showtimes.reduce<
+        { day: string; showtimes: ReturnType<typeof mapShowtime>[] }[]
+      >((acc, showtime) => {
+        const day = format(showtime.date, `E dd LLL`, { locale: fr })
+        const item = acc.find((item) => item.day === day)
+        const extendedShowtime = mapShowtime(showtime, theater)
+        if (item) {
+          item.showtimes.push(extendedShowtime)
+        } else {
+          acc.push({ day, showtimes: [extendedShowtime] })
+        }
+        return acc
+      }, []),
     })),
   })
 }
@@ -108,19 +135,49 @@ export default function Showtimes() {
   return (
     <div>
       {theaters?.map((theater) => (
-        <div className="mt-4" key={theater.id}>
-          <h2>{theater.name}</h2>
-          {theater.Showtimes.map((showtime) => (
-            <Link
-              className="block"
-              key={showtime.id}
-              to={showtime.addToCalendarUrl}
-              target="_blank"
-            >
-              {showtime.date} ({showtime.language}) {showtime.isPreview ? '(AvP) ' : ''}
-              {showtime.tags.map((tag) => `(${tag})`).join(' ')}
-              {showtime.Prices.map(({ label, price }) => `(${label}: ${price}€)`).join(' ')}
-            </Link>
+        <div key={theater.id}>
+          <h2 className="text-center m-4 font-medium text-lg">{theater.name}</h2>
+          {theater.days.map(({ day, showtimes }) => (
+            <div key={day} className="mb-8">
+              <div className="text-sm mb-4">{day}</div>
+              <div className="pl-4 w-full">
+                <table className="table-auto w-full">
+                  <tbody>
+                    {showtimes.map((showtime) => (
+                      <tr key={showtime.id}>
+                        <td className="text-sm">{showtime.hour}</td>
+                        <td className="space-x-2 pt-2 pb-2 ">
+                          <div className="inline-block text-xs border-gray rounded-md border text-gray p-1 w-fit">
+                            {showtime.language}
+                          </div>
+                          {showtime.tags.map((tag) => (
+                            <div
+                              key={tag}
+                              className="inline-block text-xs border-gray rounded-md border text-gray p-1 w-fit"
+                            >
+                              {tag}
+                            </div>
+                          ))}
+                        </td>
+                        {/* {showtime.Prices.map(({ label, price }) => `(${label}: ${price}€)`).join(' ')} */}
+                        <td className="text-right text-primary">
+                          {showtime.ticketingUrl && (
+                            <Link key={showtime.id} to={showtime.ticketingUrl} target="_blank">
+                              rez
+                            </Link>
+                          )}
+                        </td>
+                        <td className="text-right text-primary">
+                          <Link key={showtime.id} to={showtime.addToCalendarUrl} target="_blank">
+                            cal
+                          </Link>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
           ))}
         </div>
       ))}

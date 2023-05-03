@@ -1,8 +1,9 @@
 import { json, LoaderArgs } from '@remix-run/node'
 import { Link, useLoaderData } from '@remix-run/react'
+import { blurhashToDataUri } from '@unpic/placeholder'
 import { isBefore } from 'date-fns'
 import { Context } from '../../core/context'
-import { Poster, POSTER_RATIO } from '../poster'
+import { LOW_DEF_IMAGE_WIDTH, Poster, POSTER_RATIO } from '../poster'
 
 const SHOWTIMES_COUNT_TO_BE_FEATURED = 2
 const POSTER_WIDTH = 310
@@ -72,6 +73,13 @@ export const loader = async ({ context, params }: LoaderArgs) => {
         tags: [...new Set(tags)],
         count: movie.Showtimes.length,
         posterUrl: movie.posterUrl ? `${IMAGEKIT_URL}/${movie.posterUrl}` : null,
+        posterUrlLowDef: movie.posterBlurHash
+          ? blurhashToDataUri(
+              movie.posterBlurHash,
+              LOW_DEF_IMAGE_WIDTH,
+              Math.round(LOW_DEF_IMAGE_WIDTH / POSTER_RATIO)
+            )
+          : null,
       }
     })
     .sort((movieA, movieB) =>
@@ -128,41 +136,43 @@ export default function Index() {
           <Link
             key={movie.id}
             to={`/movie/${movie.id}`}
-            className="rounded-xl overflow-hidden relative block w-full h-full"
+            className=" relative block w-full h-full"
             style={{
               aspectRatio: POSTER_RATIO,
             }}
           >
             {movie.posterUrl && (
-              <Poster
-                className="w-full h-full"
-                key={movie.id}
-                movieId={movie.id}
-                url={movie.posterUrl}
-                blurHash={movie.posterBlurHash}
-                alt={movie.title}
-                width={POSTER_WIDTH}
-              />
+              <>
+                <div
+                  className="absolute z-0 top-0 left-0 w-full h-full bg-no-repeat bg-cover bg-center overflow-hidden blur-3xl opacity-50 rounded-xl"
+                  style={{ backgroundImage: `url('${movie.posterUrlLowDef}')` }}
+                ></div>
+                <Poster
+                  key={movie.id}
+                  movieId={movie.id}
+                  url={movie.posterUrl}
+                  srcLowDef={movie.posterUrlLowDef}
+                  alt={movie.title}
+                  width={POSTER_WIDTH}
+                />
+              </>
             )}
             <div className="absolute top-2 left-2">
               <div
                 style={{ textShadow: '0 0 1px rgba(0,0,0,.5)' }}
-                className="text-white pt-1 pb-1 pl-3 pr-3 text-xs font-bold backdrop-blur-xl rounded-full bg-opacity-40 bg-black"
+                className="text-white pt-1 pb-1 pl-3 pr-3 text-xs font-bold backdrop-blur-xl rounded-full bg-opacity-50 bg-black"
               >
                 <span>{movie.count}</span>
                 <span className="text-xs font-light"> Séance{movie.count > 1 ? 's' : ''}</span>
               </div>
             </div>
-            {movie.tags.filter((tag) => tag !== 'featured').length && (
+            {movie.tags.filter((tag) => tag !== 'featured').length > 0 && (
               <div className="absolute bottom-0 left-0 right-0">
-                <div className="backdrop-blur-xl bg-opacity-40 bg-black p-1 rounded-xl w-fit m-auto mb-2">
+                <div className="backdrop-blur-xl bg-opacity-50 bg-black p-1 rounded-xl w-fit m-auto mb-2">
                   {movie.tags
                     .filter((tag) => tag !== 'featured')
                     .map((tag) => (
-                      <div
-                        key={tag}
-                        className="text-white pl-2 pr-2 w-full text-center text-xs font-light"
-                      >
+                      <div key={tag} className="text-white pl-2 pr-2 w-full text-center text-xs">
                         <span>{capitalize(tag)}</span>
                       </div>
                     ))}

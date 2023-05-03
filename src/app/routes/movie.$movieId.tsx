@@ -1,9 +1,12 @@
-import { json, LoaderArgs, Response } from '@remix-run/node'
+import { json, LoaderArgs, Response, V2_MetaFunction } from '@remix-run/node'
 import { Outlet, useLoaderData, useNavigate } from '@remix-run/react'
+import { blurhashToDataUri } from '@unpic/placeholder'
 import { format } from 'date-fns'
 import { useEffect } from 'react'
 import { Context } from '../../core/context'
-import { Poster } from '../poster'
+import { LOW_DEF_IMAGE_WIDTH, Poster, POSTER_RATIO } from '../poster'
+
+const POSTER_WIDTH = 310
 
 export const loader = async ({ context, params }: LoaderArgs) => {
   const ctx = context as unknown as Context
@@ -41,8 +44,19 @@ export const loader = async ({ context, params }: LoaderArgs) => {
       ...movie,
       ...(movie.releaseDate && { releaseYear: format(movie.releaseDate, 'yyyy') }),
       posterUrl: movie.posterUrl ? `${IMAGEKIT_URL}/${movie.posterUrl}` : null,
+      posterUrlLowDef: movie.posterBlurHash
+        ? blurhashToDataUri(
+            movie.posterBlurHash,
+            LOW_DEF_IMAGE_WIDTH,
+            Math.round(LOW_DEF_IMAGE_WIDTH / POSTER_RATIO)
+          )
+        : null,
     },
   })
+}
+
+export const meta: V2_MetaFunction<typeof loader> = ({ data }) => {
+  return [{ title: `Cinecal - ${data.movie.title}` }]
 }
 
 export default function Details() {
@@ -70,33 +84,44 @@ export default function Details() {
 
   return (
     <>
-      <div className="relative w-full aspect-[62/85]">
-        {movie.posterUrl && (
-          <Poster
-            className="absolute top-0 left-0 right-0 bottom-0"
-            movieId={movie.id}
-            url={movie.posterUrl}
-            blurHash={movie.posterBlurHash}
-            alt={movie.title}
-            width={640}
-          />
-        )}
-        <div className="absolute top-0 left-0 right-0 bottom-0 bg-gradient-to-t from-background to-transparent bg-no-repeat"></div>
+      <div className="relative m-6 pb-6">
+        <div
+          className="absolute z-0 top-0 left-0 w-full h-full bg-no-repeat bg-cover bg-center overflow-hidden blur-3xl"
+          style={{ backgroundImage: `url('${movie.posterUrlLowDef}')` }}
+        ></div>
+        <div
+          className="w-1/2 m-auto"
+          style={{
+            aspectRatio: POSTER_RATIO,
+          }}
+        >
+          {movie.posterUrl && (
+            <Poster
+              key={movie.id}
+              movieId={movie.id}
+              url={movie.posterUrl}
+              srcLowDef={movie.posterUrlLowDef}
+              alt={movie.title}
+              width={POSTER_WIDTH}
+            />
+          )}
+        </div>
       </div>
-      <div className="m-4 space-y-2">
+      <div className="relative z-1 m-6 space-y-4 -mt-6">
         <h1 className="text-white text-3xl inline-block">{movie.title}</h1>
-        <div>
+        <div className="space-x-2">
           <span className="inline-block text-xs border-gray rounded-md border text-gray p-1">
             {movie.duration} min
           </span>
+          <span className="text-gray text-sm">
+            {movie.releaseYear}, {movie.director}
+          </span>
         </div>
-        <p className="text-gray text-sm">
-          {movie.releaseYear}, {movie.director}
-        </p>
+
         <p className="text-white text-sm">{movie.synopsis}</p>
       </div>
 
-      <div className="m-4 pb-48">
+      <div className="m-6 pb-48">
         <Outlet />
       </div>
     </>
