@@ -29,6 +29,12 @@ async function main() {
         address: 'Forum des Halles, 2 rue du Cinéma 75001 Paris',
         website: 'https://www.forumdesimages.fr',
       },
+      {
+        name: "L'Archipel",
+        allocineId: 'C0134',
+        address: '17 bd de Strasbourg 75010 Paris',
+        website: 'https://larchipel.net',
+      },
     ],
   })
 }

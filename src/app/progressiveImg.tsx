@@ -1,23 +1,12 @@
 import { useEffect, useId, useRef, useState } from 'react'
 
-export const LOW_DEF_IMAGE_WIDTH = 5
-export const POSTER_RATIO = 62 / 85
-export const POSTER_RATIO_STRING = '62-85'
-
 const isServer = typeof document === 'undefined'
 
-type PosterProps = React.HTMLAttributes<HTMLDivElement> & {
-  url: string
-  srcLowDef: string | null
-  width: number
-  height?: number
-  alt: string
-  movieId: number
+type ProgressiveImgProps = React.ComponentProps<'img'> & {
+  srcLowDef: string
 }
 
-export function Poster({ movieId, url, srcLowDef, width, height, alt, ...rest }: PosterProps) {
-  const src = `${url}/tr:w-${width},ar-${POSTER_RATIO_STRING}`
-
+export function ProgressiveImg({ srcLowDef, className, ...rest }: ProgressiveImgProps) {
   const id = useId()
 
   const [isVisible, setVisible] = useState(() => {
@@ -53,10 +42,11 @@ export function Poster({ movieId, url, srcLowDef, width, height, alt, ...rest }:
   }, [])
 
   return (
-    <div {...rest} className="relative w-full overflow-hidden aspect-[62/85] rounded-xl">
-      {srcLowDef && <img className="absolute" src={srcLowDef} width="100%" alt={alt} />}
+    <div className={className} style={{ position: 'relative' }}>
+      <img className="absolute" src={srcLowDef} width="100%" alt="blured image" />
       <div className="absolute backdrop-blur-2xl h-full w-full"></div>
       <img
+        {...rest}
         // See https://github.com/kentcdodds/kentcdodds.com/commit/54d11cefd15ece5a3ff0f1ab7233dfe2422fead8
         // React doesn't like the extra onload prop the server's going to send,
         // but it also doesn't like an onload prop and recommends onLoad instead.
@@ -70,14 +60,11 @@ export function Poster({ movieId, url, srcLowDef, width, height, alt, ...rest }:
         onLoad={() => setVisible(true)}
         id={id}
         className={`absolute left-0 top-0 transition-opacity ${isVisible ? '' : 'opacity-0'} `}
-        src={src}
-        alt={alt}
         ref={ref}
-        loading="lazy"
         width="100%"
       />
       <noscript>
-        <img className="absolute" src={src} alt={alt} loading="lazy" width="100%" />
+        <img className="absolute" width="100%" {...rest} />
       </noscript>
     </div>
   )

@@ -3,7 +3,6 @@ import { getPixels } from '@unpic/pixels'
 import { encode } from 'blurhash'
 import { endOfDay, endOfWeek, endOfYesterday } from 'date-fns'
 import { DefaultState, Middleware } from 'koa'
-import { POSTER_RATIO, POSTER_RATIO_STRING } from './app/poster'
 import { Context } from './core/context'
 import { log } from './core/logger'
 import { AllocineResponse, Credit, Release } from './interfaces'
@@ -15,6 +14,7 @@ const URL_THEMOVIEDBID_PICTURES = `https://image.tmdb.org/t/p/original`
 const EXCLUSION_LIST = ['Rex Studios']
 const IMAGEKIT_FOLDER = process.env.ENV === 'development' ? 'posters-dev' : 'posters-prod'
 const IMAGEKIT_URL = `https://ik.imagekit.io/cinecal/${IMAGEKIT_FOLDER}`
+const POSTER_RATIO = 62 / 85
 
 const REGEXP_BY_MOVIE_TAGS = {
   Oscar: new RegExp(/oscar/i),
@@ -389,7 +389,7 @@ async function savePosterBlurHashes() {
 
   for (const movie of movies) {
     try {
-      const url = `${IMAGEKIT_URL}/${movie.posterUrl}/tr:w-500,q-50,ar-${POSTER_RATIO_STRING}`
+      const url = `${IMAGEKIT_URL}/${movie.posterUrl}/tr:w-500,q-50,ar-62-85`
       const pixels = await getPixels(url)
       const data = Uint8ClampedArray.from(pixels.data)
       const blurHash = encode(data, pixels.width, pixels.height, Math.round(9 * POSTER_RATIO), 9)

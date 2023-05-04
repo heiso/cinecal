@@ -3,10 +3,11 @@ import { useLoaderData } from '@remix-run/react'
 import { getPixels } from '@unpic/pixels'
 import { blurhashToDataUri } from '@unpic/placeholder'
 import { encode } from 'blurhash'
-import { POSTER_RATIO, POSTER_RATIO_STRING } from '../poster'
 
 const LOW_DEF_IMAGE_WIDTH = 10
 const ID = 10
+const POSTER_RATIO = 62 / 85
+const POSTER_RATIO_STRING = '62-85'
 
 export const loader = async () => {
   const IMAGEKIT_URL = `https://ik.imagekit.io/cinecal/${
@@ -56,35 +57,35 @@ export default function BlurHashTest() {
 
   return (
     <>
-      <div className="w-1/4 m-1 aspect-[62/85] float-left overflow-hidden">
+      <div className="w-1/4 m-1 aspect-poster float-left overflow-hidden">
         <img src={`${IMAGEKIT_URL}/${ID}/tr:w-500,ar-${POSTER_RATIO_STRING}`} />
       </div>
-      <div className="w-1/4 m-1 aspect-[62/85] float-left overflow-hidden">
+      <div className="w-1/4 m-1 aspect-poster float-left overflow-hidden">
         <img src={`${IMAGEKIT_URL}/${ID}/tr:w-500,ar-${POSTER_RATIO_STRING},q-1`} />
       </div>
-      <div className="w-1/4 m-1 aspect-[62/85] float-left overflow-hidden">
+      <div className="w-1/4 m-1 aspect-poster float-left overflow-hidden">
         <img src={`${IMAGEKIT_URL}/${ID}/tr:w-500,ar-${POSTER_RATIO_STRING},bl-50`} />
       </div>
-      <div className="w-1/4 m-1 aspect-[62/85] float-left overflow-hidden">
+      <div className="w-1/4 m-1 aspect-poster float-left overflow-hidden">
         <img src={`${IMAGEKIT_URL}/${ID}/tr:w-500,ar-${POSTER_RATIO_STRING},q-1,bl-50`} />
       </div>
-      <div className="w-1/4 m-1 aspect-[62/85] float-left overflow-hidden">
+      <div className="w-1/4 m-1 aspect-poster float-left overflow-hidden">
         <img
           src={`${IMAGEKIT_URL}/${ID}/tr:w-${LOW_DEF_IMAGE_WIDTH},ar-${POSTER_RATIO_STRING},bl-1`}
           width="100%"
         />
       </div>
-      <div className="w-1/4 m-1 aspect-[62/85] float-left overflow-hidden">
+      <div className="w-1/4 m-1 aspect-poster float-left overflow-hidden">
         <img src={uri} width="100%" />
       </div>
-      <div className="w-1/4 m-1 aspect-[62/85] float-left overflow-hidden">
+      <div className="w-1/4 m-1 aspect-poster float-left overflow-hidden">
         <img src={uri2} width="100%" />
       </div>
-      <div className="w-1/4 m-1 aspect-[62/85] float-left overflow-hidden relative">
+      <div className="w-1/4 m-1 aspect-poster float-left overflow-hidden relative">
         <img className="absolute" src={uri} width="100%" />
         <div className="absolute backdrop-blur-2xl h-full w-full"></div>
       </div>
-      <div className="w-1/4 m-1 aspect-[62/85] float-left overflow-hidden relative">
+      <div className="w-1/4 m-1 aspect-poster float-left overflow-hidden relative">
         <img
           className="absolute"
           src={`${IMAGEKIT_URL}/${ID}/tr:w-${LOW_DEF_IMAGE_WIDTH},ar-${POSTER_RATIO_STRING}`}
@@ -92,11 +93,11 @@ export default function BlurHashTest() {
         />
         <div className="absolute backdrop-blur-2xl h-full w-full"></div>
       </div>
-      <div className="w-1/4 m-1 aspect-[62/85] float-left overflow-hidden relative">
+      <div className="w-1/4 m-1 aspect-poster float-left overflow-hidden relative">
         <img className="absolute" src={base64} width="100%" />
         <div className="absolute backdrop-blur-2xl h-full w-full"></div>
       </div>
-      <div className="w-1/4 m-1 aspect-[62/85] float-left overflow-hidden relative">
+      <div className="w-1/4 m-1 aspect-poster float-left overflow-hidden relative">
         <img className="absolute" src={uri3} width="100%" />
         <div className="absolute backdrop-blur-2xl h-full w-full"></div>
       </div>

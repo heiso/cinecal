@@ -13,6 +13,9 @@ module.exports = {
       background: '#0D1116',
       primary: '#009DDC',
     },
+    aspectRatio: {
+      poster: '62/85',
+    },
     extend: {},
   },
   plugins: [],

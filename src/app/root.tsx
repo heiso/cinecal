@@ -1,4 +1,4 @@
-import type { LinksFunction, V2_MetaFunction } from '@remix-run/node'
+import { LinksFunction, V2_MetaFunction } from '@remix-run/node'
 import { Links, LiveReload, Meta, Outlet, Scripts, ScrollRestoration } from '@remix-run/react'
 import styles from './tailwind.css'
 
@@ -15,7 +15,7 @@ export default function App() {
         <Meta />
         <Links />
       </head>
-      <body className="w-full h-full xl:w-4/6 m-auto">
+      <body className="w-full h-full xl:w-4/6 m-auto flex flex-col">
         <Outlet />
         <ScrollRestoration />
         <Scripts />
