@@ -16,6 +16,19 @@ model ScrapedUrl {
   @@map("scraped_urls")
 }
 
+model Tag {
+  id Int @id @default(autoincrement())
+
+  name            String  @unique @db.VarChar(255)
+  regExp          String  @db.VarChar(255)
+  isFilterEnabled Boolean @default(false) @map("is_filter_enabled")
+
+  Movies    Movie[]
+  Showtimes Showtime[]
+
+  @@map("tags")
+}
+
 model Movie {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now()) @map("created_at")
@@ -29,12 +42,12 @@ model Movie {
   synopsis          String?
   duration          Int       @default(0)
   director          String?
-  tags              String[]
   posterAllocineUrl String?   @map("poster_allocine_url")
   posterUrl         String?   @map("poster_url")
   posterBlurHash    String?   @map("poster_blur_hash")
 
   Showtimes Showtime[]
+  Tags      Tag[]
 
   @@map("movies")
 }
@@ -64,11 +77,11 @@ model Showtime {
   allocineId   Int      @unique @map("allocine_id")
   date         DateTime
   isPreview    Boolean  @default(false) @map("is_preview")
-  tags         String[]
   language     Language
   ticketingUrl String?
 
   Prices Price[]
+  Tags   Tag[]
 
   Theater   Theater @relation(fields: [theaterId], references: [id], onDelete: Cascade)
   theaterId Int     @map("theater_id")

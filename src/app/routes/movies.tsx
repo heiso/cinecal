@@ -1,4 +1,4 @@
-import { Prisma } from '@prisma/client'
+import { Prisma, Tag } from '@prisma/client'
 import { LoaderArgs, json } from '@remix-run/node'
 import { Link, Outlet, useLoaderData, useLocation } from '@remix-run/react'
 import { blurhashToDataUri } from '@unpic/placeholder'
@@ -26,7 +26,7 @@ export const loader = async ({ context, params, request }: LoaderArgs) => {
   const filters = {
     title: search.get('title'),
     date: search.get('date'),
-    tags: search.getAll('tags'),
+    tags: search.getAll('tags').map((id) => parseInt(id)),
     theaters: search.getAll('theaters').map((id) => parseInt(id)),
   }
 
@@ -78,10 +78,11 @@ export const loader = async ({ context, params, request }: LoaderArgs) => {
           ...(filters.theaters.length > 0 && {
             theaterId: { in: filters.theaters },
           }),
-          ...(filters.tags.length > 0 &&
-            {
-              // do something
-            }),
+          ...(filters.tags.length > 0 && {
+            Tags: {
+              some: { id: { in: filters.tags } },
+            },
+          }),
         },
       },
     },
@@ -90,11 +91,27 @@ export const loader = async ({ context, params, request }: LoaderArgs) => {
       title: true,
       posterUrl: true,
       posterBlurHash: true,
-      tags: true,
+      Tags: {
+        select: {
+          id: true,
+          name: true,
+        },
+        where: {
+          isFilterEnabled: true,
+        },
+      },
       Showtimes: {
         select: {
           id: true,
-          tags: true,
+          Tags: {
+            select: {
+              id: true,
+              name: true,
+            },
+            where: {
+              isFilterEnabled: true,
+            },
+          },
           date: true,
           Theater: {
             select: {
@@ -108,10 +125,11 @@ export const loader = async ({ context, params, request }: LoaderArgs) => {
           ...(filters.theaters.length > 0 && {
             theaterId: { in: filters.theaters },
           }),
-          ...(filters.tags.length > 0 &&
-            {
-              // do something
-            }),
+          ...(filters.tags.length > 0 && {
+            Tags: {
+              some: { id: { in: filters.tags } },
+            },
+          }),
         },
         orderBy: {
           date: 'asc',
@@ -121,14 +139,14 @@ export const loader = async ({ context, params, request }: LoaderArgs) => {
   })
 
   return json({
-    tags: [
-      ...new Set(
-        movies.flatMap((movie) => [
-          ...movie.tags,
-          ...movie.Showtimes.flatMap((showtime) => showtime.tags),
-        ])
-      ),
-    ].map((tag) => tag.toLowerCase()),
+    tags: movies
+      .flatMap((movie) => [...movie.Tags, ...movie.Showtimes.flatMap(({ Tags }) => Tags)])
+      .reduce<Pick<Tag, 'id' | 'name'>[]>((acc, tag) => {
+        if (!acc.find(({ id }) => id === tag.id)) {
+          acc.push(tag)
+        }
+        return acc
+      }, []),
 
     theaters: movies
       .flatMap(({ Showtimes }) => Showtimes.flatMap(({ Theater }) => Theater))
@@ -160,21 +178,26 @@ export const loader = async ({ context, params, request }: LoaderArgs) => {
         return {
           id: movie.id,
           showtimeCount: movie.Showtimes.length,
-          tags: [
-            ...new Set([...movie.tags, ...movie.Showtimes.flatMap((showtime) => showtime.tags)]),
-          ].map((tag) => tag.toLowerCase()),
+          tags: [...movie.Tags, ...movie.Showtimes.flatMap((showtime) => showtime.Tags)].reduce<
+            Pick<Tag, 'id' | 'name'>[]
+          >((acc, tag) => {
+            if (!acc.find(({ id }) => id === tag.id)) {
+              acc.push(tag)
+            }
+            return acc
+          }, []),
           title: movie.title,
           url: `${movie.id}`,
           src,
           srcLowDef,
           srcBlur,
         }
-      })
-      .filter(
-        (movie) =>
-          filters.tags.length === 0 ||
-          movie.tags.find((tag) => filters.tags.includes(tag.toLowerCase()))
-      ),
+      }),
+    // .filter(
+    //   (movie) =>
+    //     filters.tags.length === 0 ||
+    //     movie.tags.find((tag) => filters.tags.includes(tag.toLowerCase()))
+    // ),
   })
 }
 
@@ -216,16 +239,14 @@ export default function Index() {
                   </span>
                 </div>
               </div>
-              {movie.tags.filter((tag) => tag !== 'featured').length > 0 && (
+              {movie.tags.length > 0 && (
                 <div className="absolute bottom-0 left-0 right-0">
                   <div className="backdrop-blur-xl bg-opacity-50 bg-black p-1 rounded-xl w-fit m-auto mb-2">
-                    {movie.tags
-                      .filter((tag) => tag !== 'featured')
-                      .map((tag) => (
-                        <div key={tag} className="text-white pl-2 pr-2 w-full text-center text-xs">
-                          <span>{tag}</span>
-                        </div>
-                      ))}
+                    {movie.tags.map((tag) => (
+                      <div key={tag.id} className="text-white pl-2 pr-2 w-full text-center text-xs">
+                        <span>{tag.name}</span>
+                      </div>
+                    ))}
                   </div>
                 </div>
               )}

@@ -35,7 +35,12 @@ export const loader = async ({ context, params, request }: LoaderArgs) => {
       releaseDate: true,
       posterUrl: true,
       posterBlurHash: true,
-      tags: true,
+      Tags: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
       synopsis: true,
       director: true,
       duration: true,
@@ -70,7 +75,12 @@ export const loader = async ({ context, params, request }: LoaderArgs) => {
           id: true,
           date: true,
           language: true,
-          tags: true,
+          Tags: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
           ticketingUrl: true,
           isPreview: true,
         },
@@ -110,12 +120,12 @@ export const loader = async ({ context, params, request }: LoaderArgs) => {
     )
     url.searchParams.append('text', `${theater.name} - ${movie.title}`)
     url.searchParams.append('location', theater.address)
-    if (showtime.tags) {
+    if (showtime.Tags.length) {
       url.searchParams.append(
         'details',
         `Ticket: <a href="${showtime.ticketingUrl}">${
           showtime.ticketingUrl
-        }</a>\nTags: ${showtime.tags.join(', ')}`
+        }</a>\nTags: ${showtime.Tags.map(({ name }) => name).join(', ')}`
       )
     }
 
@@ -125,7 +135,7 @@ export const loader = async ({ context, params, request }: LoaderArgs) => {
       id: showtime.id,
       date: format(showtime.date, `HH'h'mm`, { locale: fr }),
       language: showtime.language,
-      tags: [...new Set([...showtime.tags, ...(showtime.isPreview ? ['Avant première'] : [])])],
+      tags: showtime.Tags,
       ticketingUrl: showtime.ticketingUrl,
       addToCalendarUrl,
     }
@@ -133,7 +143,7 @@ export const loader = async ({ context, params, request }: LoaderArgs) => {
 
   return json({
     movie: {
-      tags: [...new Set(movie.tags)],
+      tags: movie.Tags,
       title: movie.title,
       src,
       srcLowDef,
@@ -244,10 +254,10 @@ export default function Index() {
                             </div>
                             {showtime.tags.map((tag) => (
                               <div
-                                key={tag}
+                                key={tag.id}
                                 className="inline-block text-xs border-gray rounded-md border text-gray p-1 w-fit"
                               >
-                                {tag}
+                                {tag.name}
                               </div>
                             ))}
                           </td>

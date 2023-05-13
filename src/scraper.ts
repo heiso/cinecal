@@ -194,6 +194,13 @@ async function scrapAllocineShowtimes(
             ticketingUrl: showtime.data.ticketing?.[0]?.urls[0],
             theaterId: theater.id,
             movieId: movie.id,
+            ...(showtime.isPreview && {
+              Tags: {
+                connect: {
+                  name: 'Avant première',
+                },
+              },
+            }),
           })),
           skipDuplicates: true,
         })
@@ -228,6 +235,8 @@ async function scrapAllocineShowtimes(
 }
 
 async function scrapAllocineTicketingUrl(): Promise<void> {
+  const tags = await prisma.tag.findMany()
+
   const showtimes = await prisma.showtime.findMany({
     where: {
       ticketingUrl: { not: null },
@@ -268,10 +277,12 @@ async function scrapAllocineTicketingUrl(): Promise<void> {
         await prisma.movie.update({
           where: { id: movieId },
           data: {
-            tags: {
-              push: Object.keys(REGEXP_BY_MOVIE_TAGS).filter((tag) =>
-                REGEXP_BY_MOVIE_TAGS[tag as keyof typeof REGEXP_BY_MOVIE_TAGS].test(details)
-              ),
+            Tags: {
+              connect: tags
+                .filter(({ regExp }) => new RegExp(regExp, 'i').test(details))
+                .map(({ id }) => ({
+                  id,
+                })),
             },
           },
         })
@@ -284,10 +295,12 @@ async function scrapAllocineTicketingUrl(): Promise<void> {
         await prisma.showtime.update({
           where: { id },
           data: {
-            tags: {
-              set: Object.keys(REGEXP_BY_SHOWTIME_TAGS).filter((tag) =>
-                REGEXP_BY_SHOWTIME_TAGS[tag as keyof typeof REGEXP_BY_SHOWTIME_TAGS].test(details)
-              ),
+            Tags: {
+              connect: tags
+                .filter(({ regExp }) => new RegExp(regExp, 'i').test(details))
+                .map(({ id }) => ({
+                  id,
+                })),
             },
             Prices: {
               createMany: { data: prices },

@@ -105,15 +105,15 @@ export default function Index() {
       <div className="flex gap-3 flex-row flex-wrap">
         {tags.length > 0 &&
           tags.map((tag) => (
-            <div key={tag} className="space-x-2 capitalize">
-              <label htmlFor={tag}>{tag}</label>
+            <div key={tag.id} className="space-x-2 capitalize">
+              <label htmlFor={tag.id.toString()}>{tag.name}</label>
               <input
-                id={tag}
+                id={tag.id.toString()}
                 className=""
                 type="checkbox"
                 name="tags"
-                value={tag.toLowerCase()}
-                checked={searchParamTags.includes(tag)}
+                value={tag.id}
+                checked={searchParamTags.includes(tag.id.toString())}
                 onChange={() => {}}
               />
             </div>

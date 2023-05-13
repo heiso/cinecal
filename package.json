@@ -22,6 +22,7 @@
     "reset-database": "prisma migrate reset -f --skip-generate"
   },
   "dependencies": {
+    "@heroicons/react": "^2.0.18",
     "@prisma/client": "^4.14.0",
     "@remix-run/node": "^1.16.0",
     "@remix-run/react": "^1.16.0",

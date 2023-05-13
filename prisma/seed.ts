@@ -37,6 +37,36 @@ async function main() {
       },
     ],
   })
+
+  await prisma.tag.createMany({
+    data: [
+      {
+        name: 'Le Gand Large',
+        regExp: 'grand large',
+        isFilterEnabled: true,
+      },
+      {
+        name: 'Marathon',
+        regExp: 'marathon',
+        isFilterEnabled: true,
+      },
+      {
+        name: 'Oscar',
+        regExp: 'oscar',
+        isFilterEnabled: true,
+      },
+      {
+        name: 'César',
+        regExp: 'c&eacute;sar',
+        isFilterEnabled: true,
+      },
+      {
+        name: 'Avant première',
+        regExp: 'avant premi',
+        isFilterEnabled: true,
+      },
+    ],
+  })
 }
 
 main()
