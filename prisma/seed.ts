@@ -61,8 +61,8 @@ async function main() {
         isFilterEnabled: true,
       },
       {
-        name: 'Avant première',
-        regExp: 'avant premi',
+        name: 'Avant-première',
+        regExp: 'avant-premi',
         isFilterEnabled: true,
       },
     ],

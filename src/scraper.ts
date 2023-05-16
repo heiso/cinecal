@@ -194,13 +194,6 @@ async function scrapAllocineShowtimes(
             ticketingUrl: showtime.data.ticketing?.[0]?.urls[0],
             theaterId: theater.id,
             movieId: movie.id,
-            ...(showtime.isPreview && {
-              Tags: {
-                connect: {
-                  name: 'Avant première',
-                },
-              },
-            }),
           })),
           skipDuplicates: true,
         })
