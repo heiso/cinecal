@@ -37,7 +37,7 @@ export default function Index() {
 
   return (
     <Form
-      className="fixed bottom-0 w-full z-10 bg-background rounded-tr-xl rounded-tl-xl border-t border-white border-opacity-30 p-8 space-y-4"
+      className="fixed bottom-0 w-full xl:w-4/6 z-10 bg-background rounded-tr-xl rounded-tl-xl border-t border-white border-opacity-30 p-8 space-y-4"
       method="get"
       onChange={(event) => submit(event.currentTarget, { method: 'get' })}
     >

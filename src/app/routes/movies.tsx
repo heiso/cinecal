@@ -193,11 +193,6 @@ export const loader = async ({ context, params, request }: LoaderArgs) => {
           srcBlur,
         }
       }),
-    // .filter(
-    //   (movie) =>
-    //     filters.tags.length === 0 ||
-    //     movie.tags.find((tag) => filters.tags.includes(tag.toLowerCase()))
-    // ),
   })
 }
 
@@ -207,7 +202,7 @@ export default function Index() {
 
   return (
     <>
-      <div className="grow shrink-0 pb-20">
+      <div className="pb-20">
         <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-6 p-6 ">
           {movies.map((movie) => (
             <Link
@@ -255,7 +250,7 @@ export default function Index() {
         </div>
       </div>
 
-      <div className="fixed bottom-0 z-5 p-8 w-full">
+      <div className="fixed bottom-0 z-5 p-8 w-full xl:w-4/6">
         <Link
           className="block rounded-full bg-primary p-2 pl-4 pr-4 w-full text-center"
           to={{ pathname: 'filters', search: location.search }}
