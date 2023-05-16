@@ -176,8 +176,15 @@ export const loader = async ({ context, params, request }: LoaderArgs) => {
   })
 }
 
-export const meta: V2_MetaFunction<typeof loader> = ({ data }) => {
-  return [{ title: `Cinecal - ${data.movie.title}` }]
+export const meta: V2_MetaFunction<typeof loader> = ({ data, location }) => {
+  return [
+    { title: `Cinecal - ${data.movie.title}` },
+    { property: 'og:type', content: 'website' },
+    { property: 'og:url', content: location.pathname },
+    { property: 'og:title', content: data.movie.title },
+    { property: 'og:description', content: data.movie.synopsis },
+    { property: 'og:image', content: data.movie.src },
+  ]
 }
 
 export default function Index() {
