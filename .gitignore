@@ -1,5 +1,6 @@
 .env
 .cache
+src/app/styles.css
 
 # Common generated folders
 node_modules

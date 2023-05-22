@@ -177,6 +177,7 @@ export const loader = async ({ context, params, request }: LoaderArgs) => {
 }
 
 export const meta: V2_MetaFunction<typeof loader> = ({ data, location }) => {
+  if (!data) return []
   return [
     { title: `Cinecal - ${data.movie.title}` },
     { property: 'og:type', content: 'website' },
@@ -213,10 +214,10 @@ export default function Index() {
   return (
     <>
       <div className="relative m-6 pb-6">
-        <div
+        {/* <div
           className="absolute z-0 top-0 left-0 w-full h-full bg-no-repeat bg-cover bg-center overflow-hidden blur-3xl"
           style={{ backgroundImage: `url('${movie.srcLowDef}')` }}
-        ></div>
+        ></div> */}
         <ProgressiveImg
           className="w-1/2 m-auto aspect-poster overflow-hidden rounded-xl"
           src={movie.src}

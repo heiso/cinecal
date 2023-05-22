@@ -6,7 +6,6 @@
 const config = {
   appDirectory: 'src/app',
   future: {
-    unstable_tailwind: true,
     v2_routeConvention: true,
     v2_meta: true,
   },

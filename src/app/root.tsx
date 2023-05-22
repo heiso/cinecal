@@ -1,6 +1,6 @@
 import { LinksFunction, V2_MetaFunction } from '@remix-run/node'
 import { Links, LiveReload, Meta, Outlet, Scripts, ScrollRestoration } from '@remix-run/react'
-import styles from './tailwind.css'
+import styles from './styles.css'
 
 export const meta: V2_MetaFunction = () => [{ title: 'Cinecal' }]
 

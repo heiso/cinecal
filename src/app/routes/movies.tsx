@@ -210,10 +210,10 @@ export default function Index() {
               to={{ pathname: movie.url, search: location.search }}
               className="relative block aspect-poster"
             >
-              <div
+              {/* <div
                 className="absolute z-0 top-0 left-0 w-full h-full bg-no-repeat bg-cover bg-center overflow-hidden blur-3xl opacity-50 rounded-xl"
                 style={{ backgroundImage: `url('${movie.srcBlur}')` }}
-              ></div>
+              ></div> */}
               <ProgressiveImg
                 className="w-full overflow-hidden aspect-poster rounded-xl"
                 key={movie.id}

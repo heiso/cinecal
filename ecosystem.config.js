@@ -23,6 +23,13 @@ const config = {
 
     {
       ...common,
+      name: 'css',
+      script: 'npx tailwindcss -i ./src/app/tailwind.css -o ./src/app/styles.css --watch',
+      watch: ['tailwind.config.js'],
+    },
+
+    {
+      ...common,
       name: 'api',
       watch: ['src/**/*', '.env'],
       ignore_watch: ['src/app'],
