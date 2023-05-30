@@ -139,6 +139,19 @@ export const loader = async ({ context, params, request }: LoaderArgs) => {
   })
 
   return json({
+    filterCount: Object.keys(filters).reduce((acc, key) => {
+      const filter = filters[key as keyof typeof filters]
+
+      if (Array.isArray(filter)) {
+        if (filter.length > 0) {
+          acc = acc + filter.length
+        }
+      } else if (filter) {
+        acc++
+      }
+      return acc
+    }, 0),
+
     tags: movies
       .flatMap((movie) => [...movie.Tags, ...movie.Showtimes.flatMap(({ Tags }) => Tags)])
       .reduce<Pick<Tag, 'id' | 'name'>[]>((acc, tag) => {
@@ -197,13 +210,15 @@ export const loader = async ({ context, params, request }: LoaderArgs) => {
 }
 
 export default function Index() {
-  const { movies } = useLoaderData<typeof loader>()
+  const { movies, filterCount } = useLoaderData<typeof loader>()
   const location = useLocation()
 
   return (
     <>
-      <div className="pb-20">
-        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-6 p-6 ">
+      <div className={`pb-20 ${location.pathname.includes('filters') ? 'hidden' : ''}`}>
+        <h1 className="text-4xl p-6 pb-0">Séances</h1>
+        <p className="p-6 pt-0 pb-0 text-gray">Explorez le cinéma à votre rythme</p>
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-6 p-6">
           {movies.map((movie) => (
             <Link
               key={movie.id}
@@ -255,7 +270,7 @@ export default function Index() {
           className="block rounded-full bg-primary p-2 pl-4 pr-4 w-full text-center"
           to={{ pathname: 'filters', search: location.search }}
         >
-          Filtres
+          Filtres {filterCount > 0 ? `(${filterCount})` : ''}
         </Link>
       </div>
 
