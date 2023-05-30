@@ -16,22 +16,6 @@ const IMAGEKIT_FOLDER = process.env.ENV === 'development' ? 'posters-dev' : 'pos
 const IMAGEKIT_URL = `https://ik.imagekit.io/cinecal/${IMAGEKIT_FOLDER}`
 const POSTER_RATIO = 62 / 85
 
-const REGEXP_BY_MOVIE_TAGS = {
-  Oscar: new RegExp(/oscar/i),
-  César: new RegExp(/c\&eacute\;sar/i),
-}
-const REGEXP_BY_SHOWTIME_TAGS = {
-  'Grand Large': new RegExp(/grand large/i),
-  'Salle 1': new RegExp(/salle grand rex/i),
-  // 'Salle 2': new RegExp(/salle rex 2/i),
-  // 'Salle 3': new RegExp(/salle rex 3/i),
-  // 'Salle 4': new RegExp(/salle rex 4/i),
-  // 'Salle 5': new RegExp(/salle rex 5/i),
-  // 'Salle 6': new RegExp(/salle rex 6/i),
-  // 'Salle 7': new RegExp(/salle rex 7/i),
-  Marathon: new RegExp(/marathon/i),
-}
-
 const prisma = new PrismaClient()
 
 function getUniqueAllocineShowtimes(showtimes: AllocineResponse['results'][0]['showtimes']) {
@@ -241,71 +225,69 @@ async function scrapAllocineTicketingUrl(): Promise<void> {
     },
   })
 
-  await Promise.allSettled(
-    showtimes
-      .filter(({ ticketingUrl }) => ticketingUrl)
-      .map(async ({ id, movieId, ticketingUrl }) => {
-        const details = await getAllocineTicketingDetails(ticketingUrl!)
-        let prices: { label: string; description?: string | null; price: number }[] = []
+  for (const { id, movieId, ticketingUrl } of showtimes.filter(
+    ({ ticketingUrl }) => ticketingUrl
+  )) {
+    try {
+      const details = await getAllocineTicketingDetails(ticketingUrl!)
+      let prices: { label: string; description?: string | null; price: number }[] = []
 
-        try {
-          const regx = new RegExp(
-            /<p>([^<]*)(?:<a[^<]*title\=\"([^<]*)"[^<]*>i<\/a>)?<span[^<]*[^>]*>(\d*.\d*)\ &euro;/g
-          )
-          const matches = [...details.matchAll(regx)]
+      const regx = new RegExp(
+        /<p>([^<]*)(?:<a[^<]*title\=\"([^<]*)"[^<]*>i<\/a>)?<span[^<]*[^>]*>(\d*.\d*)\ &euro;/g
+      )
+      const matches = [...details.matchAll(regx)]
 
-          prices = matches.map((match) => ({
-            label: match[1]
-              ?.replace(/&#128;/g, '€')
-              .replace(/(&#(\d+);)/g, (match, capture, charCode) => String.fromCharCode(charCode)),
-            description: match[2]
-              ?.replace(/&#128;/g, '€')
-              .replace(/(&#(\d+);)/g, (match, capture, charCode) => String.fromCharCode(charCode)),
-            price: parseInt(match[3]),
-          }))
-        } catch (err) {
-          log.error(err)
-        }
+      prices = matches.map((match) => ({
+        label: match[1]
+          ?.replace(/&#128;/g, '€')
+          .replace(/(&#(\d+);)/g, (match, capture, charCode) => String.fromCharCode(charCode)),
+        description: match[2]
+          ?.replace(/&#128;/g, '€')
+          .replace(/(&#(\d+);)/g, (match, capture, charCode) => String.fromCharCode(charCode)),
+        price: parseInt(match[3]),
+      }))
 
-        await prisma.movie.update({
-          where: { id: movieId },
-          data: {
-            Tags: {
-              connect: tags
-                .filter(({ regExp }) => new RegExp(regExp, 'i').test(details))
-                .map(({ id }) => ({
-                  id,
-                })),
-            },
+      await prisma.movie.update({
+        where: { id: movieId },
+        data: {
+          Tags: {
+            connect: tags
+              .filter(({ regExp }) => new RegExp(regExp, 'i').test(details))
+              .map(({ id }) => ({
+                id,
+              })),
           },
-        })
-
-        const oldPrices = await prisma.price.findMany({
-          where: { showtimeId: id },
-          select: { id: true },
-        })
-
-        await prisma.showtime.update({
-          where: { id },
-          data: {
-            Tags: {
-              connect: tags
-                .filter(({ regExp }) => new RegExp(regExp, 'i').test(details))
-                .map(({ id }) => ({
-                  id,
-                })),
-            },
-            Prices: {
-              createMany: { data: prices },
-            },
-          },
-        })
-
-        return prisma.price.deleteMany({
-          where: { id: { in: oldPrices.map((price) => price.id) } },
-        })
+        },
       })
-  )
+
+      const oldPrices = await prisma.price.findMany({
+        where: { showtimeId: id },
+        select: { id: true },
+      })
+
+      await prisma.showtime.update({
+        where: { id },
+        data: {
+          Tags: {
+            connect: tags
+              .filter(({ regExp }) => new RegExp(regExp, 'i').test(details))
+              .map(({ id }) => ({
+                id,
+              })),
+          },
+          Prices: {
+            createMany: { data: prices },
+          },
+        },
+      })
+
+      await prisma.price.deleteMany({
+        where: { id: { in: oldPrices.map((price) => price.id) } },
+      })
+    } catch (err) {
+      log.error(err)
+    }
+  }
 }
 
 async function getUploadedPosterList(): Promise<
@@ -395,7 +377,7 @@ async function savePosterBlurHashes() {
 
   for (const movie of movies) {
     try {
-      const url = `${IMAGEKIT_URL}/${movie.posterUrl}/tr:w-500,q-50,ar-62-85`
+      const url = `${IMAGEKIT_URL}/${movie.posterUrl}/tr:w-400,q-50,ar-62-85`
       const pixels = await getPixels(url)
       const data = Uint8ClampedArray.from(pixels.data)
       const blurHash = encode(data, pixels.width, pixels.height, Math.round(9 * POSTER_RATIO), 9)
