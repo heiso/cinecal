@@ -1,6 +1,6 @@
 import { Prisma, Tag } from '@prisma/client'
 import { LoaderArgs, json } from '@remix-run/node'
-import { Link, Outlet, useLoaderData, useLocation } from '@remix-run/react'
+import { Link, useLoaderData, useLocation } from '@remix-run/react'
 import { blurhashToDataUri } from '@unpic/placeholder'
 import { add, endOfDay, endOfWeek, isBefore, startOfWeek } from 'date-fns'
 import { fr } from 'date-fns/locale'
@@ -146,7 +146,9 @@ export const loader = async ({ context, params, request }: LoaderArgs) => {
         if (filter.length > 0) {
           acc = acc + filter.length
         }
-      } else if (filter) {
+      } else if (filter && key === 'date' && filter != DATE_FILTER.DEFAULT) {
+        acc++
+      } else if (filter && key === 'title' && filter) {
         acc++
       }
       return acc
@@ -215,10 +217,18 @@ export default function Index() {
 
   return (
     <>
-      <div className={`pb-20 ${location.pathname.includes('filters') ? 'hidden' : ''}`}>
-        <h1 className="text-4xl p-6 pb-0">Séances</h1>
-        <p className="p-6 pt-0 pb-0 text-gray">Explorez le cinéma à votre rythme</p>
-        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-6 p-6">
+      <h1 className="text-4xl p-6 pb-0">Séances</h1>
+      <p className="p-6 pt-0 pb-0 text-gray">Explorez le cinéma à votre rythme</p>
+      {movies.length === 0 && (
+        <div className="flex w-full h-1/3">
+          <div className="self-end grow text-center text-lg">
+            Aucune séance <br />
+            :'(
+          </div>
+        </div>
+      )}
+      {movies.length > 0 && (
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-6 p-6 pb-28">
           {movies.map((movie) => (
             <Link
               key={movie.id}
@@ -263,18 +273,16 @@ export default function Index() {
             </Link>
           ))}
         </div>
-      </div>
+      )}
 
-      <div className="fixed bottom-0 z-5 p-8 w-full xl:w-4/6">
+      <div className="fixed bottom-0 z-5 p-6 w-full xl:w-4/6">
         <Link
-          className="block rounded-full bg-primary p-2 pl-4 pr-4 w-full text-center"
+          className="block rounded-md bg-primary p-4 text-center"
           to={{ pathname: 'filters', search: location.search }}
         >
-          Filtres {filterCount > 0 ? `(${filterCount})` : ''}
+          Filtrer {filterCount > 0 ? `(${filterCount})` : ''}
         </Link>
       </div>
-
-      <Outlet />
     </>
   )
 }
