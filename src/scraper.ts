@@ -18,6 +18,8 @@ const POSTER_RATIO = 62 / 85
 
 const prisma = new PrismaClient()
 
+let foundShowtimeAllocineIds: number[] = []
+
 function getUniqueAllocineShowtimes(showtimes: AllocineResponse['results'][0]['showtimes']) {
   const showtimesArray = [...showtimes.local, ...showtimes.multiple, ...showtimes.original]
 
@@ -167,20 +169,27 @@ async function scrapAllocineShowtimes(
           },
         })
 
+        const data = getUniqueAllocineShowtimes(result.showtimes).map((showtime) => ({
+          allocineId: showtime.internalId,
+          date: new Date(showtime.startsAt),
+          isPreview: showtime.isPreview,
+          language: showtime.tags.includes('Localization.Language.French')
+            ? Language.VF
+            : Language.VO,
+          ticketingUrl: showtime.data.ticketing?.[0]?.urls[0],
+          theaterId: theater.id,
+          movieId: movie.id,
+        }))
+
         await prisma.showtime.createMany({
-          data: getUniqueAllocineShowtimes(result.showtimes).map((showtime) => ({
-            allocineId: showtime.internalId,
-            date: new Date(showtime.startsAt),
-            isPreview: showtime.isPreview,
-            language: showtime.tags.includes('Localization.Language.French')
-              ? Language.VF
-              : Language.VO,
-            ticketingUrl: showtime.data.ticketing?.[0]?.urls[0],
-            theaterId: theater.id,
-            movieId: movie.id,
-          })),
+          data,
           skipDuplicates: true,
         })
+
+        foundShowtimeAllocineIds = [
+          ...foundShowtimeAllocineIds,
+          ...data.map(({ allocineId }) => allocineId),
+        ]
       } catch (err) {
         log.error(err)
       }
@@ -416,6 +425,10 @@ export async function scrap(maxDay: number = 10, reset = false) {
   await scrapAllocinePosters()
 
   await savePosterBlurHashes()
+
+  await prisma.showtime.deleteMany({
+    where: { allocineId: { notIn: foundShowtimeAllocineIds } },
+  })
 }
 
 export function scraperMiddleware(): Middleware<DefaultState, Context> {
