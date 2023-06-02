@@ -213,11 +213,11 @@ export default function Index() {
 
   return (
     <>
-      <div className="relative m-6 pb-6">
-        {/* <div
-          className="absolute z-0 top-0 left-0 w-full h-full bg-no-repeat bg-cover bg-center overflow-hidden blur-3xl"
+      <div className="relative p-6 mb-6">
+        <div
+          className="absolute z-0 top-0 left-0 w-full h-full bg-no-repeat bg-cover bg-center blur-3xl"
           style={{ backgroundImage: `url('${movie.srcLowDef}')` }}
-        ></div> */}
+        ></div>
         <ProgressiveImg
           className="w-1/2 m-auto aspect-poster overflow-hidden rounded-xl"
           src={movie.src}
@@ -225,6 +225,7 @@ export default function Index() {
           alt={movie.title}
         />
       </div>
+
       <div className="relative z-1 m-6 space-y-4 -mt-6">
         <h1 className="text-white text-3xl inline-block">{movie.title}</h1>
         <div className="space-x-2">
