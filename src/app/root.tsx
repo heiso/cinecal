@@ -2,7 +2,10 @@ import { LinksFunction, V2_MetaFunction } from '@remix-run/node'
 import { Links, LiveReload, Meta, Outlet, Scripts, ScrollRestoration } from '@remix-run/react'
 import styles from './styles.css'
 
-export const meta: V2_MetaFunction = () => [{ title: 'Cinecal' }]
+export const meta: V2_MetaFunction = () => [
+  { title: 'Cinecal' },
+  { property: 'description', content: 'Explorez le cinéma à votre rythme' },
+]
 
 export const links: LinksFunction = () => [{ rel: 'stylesheet', href: styles }]
 

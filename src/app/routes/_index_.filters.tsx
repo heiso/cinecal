@@ -1,6 +1,5 @@
 import CheckIcon from '@heroicons/react/20/solid/CheckIcon'
 import BackIcon from '@heroicons/react/20/solid/XMarkIcon'
-import { Prisma } from '@prisma/client'
 import { LoaderArgs, json } from '@remix-run/node'
 import {
   Form,
@@ -11,83 +10,56 @@ import {
   useSearchParams,
   useSubmit,
 } from '@remix-run/react'
-import { add, endOfDay, endOfWeek, startOfWeek } from 'date-fns'
-import { fr } from 'date-fns/locale'
 import { useEffect, useState } from 'react'
 import { Context } from '../../core/context'
-import { DATE_FILTER } from './movies'
+import { CUSTOM_TAG_LABELS, DATE_FILTER, DATE_FILTER_LABELS } from '../filters'
+import { getFilters, getWhereInputs } from '../filters.server'
 
 export const loader = async ({ context, params, request }: LoaderArgs) => {
   const ctx = context as unknown as Context
 
-  const url = new URL(request.url)
-  const search = new URLSearchParams(url.search)
-  const filters = {
-    title: search.get('title'),
-    date: search.get('date'),
-    tags: search.getAll('tags').map((id) => parseInt(id)),
-    theaters: search.getAll('theaters').map((id) => parseInt(id)),
-  }
-
-  if (
-    (filters.date && !DATE_FILTER[filters.date as DATE_FILTER]) ||
-    (filters.theaters && filters.theaters.some((id) => isNaN(Number(id))))
-  ) {
-    throw new Response('Not Found', { status: 404, statusText: 'Not Found' })
-  }
-
   const now = new Date()
+  const filters = getFilters(request)
+  const where = getWhereInputs(filters)
 
-  const dateFilter: Prisma.ShowtimeWhereInput = (() => {
-    switch (filters.date) {
-      case DATE_FILTER.TODAY: {
-        return { date: { gte: now, lt: endOfDay(now) } }
-      }
-
-      case DATE_FILTER.THIS_WEEK: {
-        return { date: { gte: now, lt: endOfWeek(now, { locale: fr }) } }
-      }
-
-      case DATE_FILTER.NEXT_WEEK: {
-        return {
-          date: {
-            gt: startOfWeek(add(now, { weeks: 1 }), { locale: fr }),
-            lte: endOfWeek(add(now, { weeks: 1 }), { locale: fr }),
-          },
-        }
-      }
-
-      case DATE_FILTER.DEFAULT:
-      default: {
-        return { date: { gte: now } }
-      }
-    }
-  })()
-
-  const resultCount = await ctx.prisma.movie.count({
+  let results = await ctx.prisma.movie.findMany({
     where: {
-      ...(filters.title && { title: { contains: filters.title, mode: 'insensitive' } }),
+      ...where.movieWhereInput,
       Showtimes: {
         some: {
-          ...dateFilter,
-          ...(filters.theaters.length > 0 && {
-            theaterId: { in: filters.theaters },
-          }),
-          ...(filters.tags.length > 0 && {
-            Tags: {
-              some: { id: { in: filters.tags } },
-            },
-          }),
+          ...where.showtimeWhereInput,
+        },
+      },
+    },
+    select: {
+      id: true,
+      Showtimes: {
+        select: {
+          id: true,
         },
       },
     },
   })
 
   return json({
+    dates: (Object.keys(DATE_FILTER_LABELS) as Array<keyof typeof DATE_FILTER_LABELS>).map(
+      (value) => ({
+        value,
+        label: DATE_FILTER_LABELS[value],
+      })
+    ),
+
     tags: await ctx.prisma.tag.findMany({
       where: { Showtimes: { some: { date: { gte: now } } } },
       select: { id: true, name: true },
     }),
+
+    customTags: (Object.keys(CUSTOM_TAG_LABELS) as Array<keyof typeof CUSTOM_TAG_LABELS>).map(
+      (id) => ({
+        id,
+        name: CUSTOM_TAG_LABELS[id],
+      })
+    ),
 
     theaters: await ctx.prisma.theater.findMany({
       where: { Showtimes: { some: { date: { gte: now } } } },
@@ -103,7 +75,9 @@ export const loader = async ({ context, params, request }: LoaderArgs) => {
       },
     })) || { title: 'Perfect Blue' },
 
-    resultCount,
+    resultCount: results.length,
+
+    filterCount: filters.count,
   })
 }
 
@@ -156,7 +130,8 @@ function Checkbox({ id, name, value, label, defaultChecked, ...rest }: CheckboxP
 }
 
 export default function Index() {
-  const { resultCount, tags, theaters, randomMovie } = useLoaderData<typeof loader>()
+  const { resultCount, tags, customTags, theaters, randomMovie, dates, filterCount } =
+    useLoaderData<typeof loader>()
   const submit = useSubmit()
   const [searchParams] = useSearchParams()
   const navigation = useNavigation()
@@ -168,13 +143,15 @@ export default function Index() {
       : searchParams
 
   const searchParamTitle = optimisticSearchParams.get('title') ?? ''
-  const searchParamDate = optimisticSearchParams.get('date') || DATE_FILTER.DEFAULT
+  const searchParamDate = optimisticSearchParams.get('date') ?? DATE_FILTER.DEFAULT
   const searchParamTags = optimisticSearchParams.getAll('tags') ?? ''
+  const searchParamCustomTags = optimisticSearchParams.getAll('customTags') ?? ''
   const searchParamTheaters = optimisticSearchParams.getAll('theaters') ?? ''
 
   const [searchedTitle, setTitle] = useState(searchParamTitle)
   const [selectedDate, setDate] = useState(searchParamDate)
   const [selectedTags, setTags] = useState(searchParamTags)
+  const [selectedCustomTags, setCustomTags] = useState(searchParamCustomTags)
   const [selectedTheaters, setTheaters] = useState(searchParamTheaters)
 
   useEffect(() => {
@@ -182,12 +159,16 @@ export default function Index() {
   }, [searchParamTitle])
 
   useEffect(() => {
-    setDate(searchParamDate || DATE_FILTER.DEFAULT)
+    setDate(searchParamDate ?? '')
   }, [searchParamDate])
 
   useEffect(() => {
     setTags(selectedTags ?? [])
   }, [selectedTags])
+
+  useEffect(() => {
+    setCustomTags(selectedCustomTags ?? [])
+  }, [selectedCustomTags])
 
   useEffect(() => {
     setTheaters(selectedTheaters ?? [])
@@ -201,23 +182,24 @@ export default function Index() {
     >
       <div className="p-6 pb-28">
         <div className="grid grid-flow-col grid-cols-3 items-center">
-          <Link to={{ pathname: '/movies' }} className="w-fit">
+          <Link to={{ pathname: '/' }} className="w-fit">
             <BackIcon className="h-8" />
           </Link>
           <h1 className="text-center">Filtrer</h1>
           <Link
+            style={{ textShadow: '0 0 1px rgba(0,0,0,.5)' }}
             to={{ pathname: location.pathname }}
             className={`w-fit justify-self-end bg-primary rounded-md p-1 pl-2 pr-2 ${
-              location.search ? 'block' : 'hidden'
+              filterCount ? 'block' : 'hidden'
             }`}
           >
             Effacer
           </Link>
         </div>
 
-        <p className="pt-4">Titre</p>
         <input
-          className="mt-4 mb-4 appearance-none block text-white bg-white bg-opacity-10 border border-white border-opacity-20 rounded-lg w-full p-3 pl-4 pr-4 ring-0 focus:ring-0 focus-active:ring-0
+          id="title"
+          className="mt-4 mb-4 appearance-none block text-white bg-white bg-opacity-10 border border-white border-opacity-20 rounded-md w-full p-3 pl-4 pr-4 ring-0 focus:ring-0 focus-active:ring-0
           outline-none"
           type="text"
           placeholder={`Essayez ${randomMovie.title}`}
@@ -225,28 +207,6 @@ export default function Index() {
           value={searchedTitle}
           onChange={(event) => setTitle(event.target.value)}
         />
-
-        <p className="pt-4">Date</p>
-        <ul>
-          {[
-            { label: 'Peu importe', value: DATE_FILTER.DEFAULT },
-            { label: "Aujourd'hui", value: DATE_FILTER.TODAY },
-            { label: 'Cette semaine', value: DATE_FILTER.THIS_WEEK },
-            { label: 'Semaine prochaine', value: DATE_FILTER.NEXT_WEEK },
-          ].map(({ label, value }) => (
-            <Radio
-              key={`date-${value}`}
-              id={`date-${value}`}
-              name="date"
-              value={value}
-              checked={selectedDate === value}
-              onChange={(event) => setDate(event.target.value)}
-              label={label}
-            />
-          ))}
-        </ul>
-
-        <p className="pt-4">Tags</p>
         <ul>
           {tags.length > 0 &&
             tags.map((tag) => (
@@ -258,6 +218,36 @@ export default function Index() {
                 checked={searchParamTags.includes(tag.id.toString())}
                 onChange={(event) => setTags([...selectedTags, event.target.value])}
                 label={tag.name}
+              />
+            ))}
+        </ul>
+        <ul>
+          {customTags.length > 0 &&
+            customTags.map((tag) => (
+              <Checkbox
+                key={`customTag-${tag.id.toString()}`}
+                id={`customTag-${tag.id.toString()}`}
+                name="customTags"
+                value={tag.id}
+                checked={searchParamCustomTags.includes(tag.id.toString())}
+                onChange={(event) => setTags([...selectedCustomTags, event.target.value])}
+                label={tag.name}
+              />
+            ))}
+        </ul>
+
+        <p className="pt-4">Date de séance</p>
+        <ul>
+          {dates.length > 0 &&
+            dates.map(({ label, value }) => (
+              <Radio
+                key={`date-${value}`}
+                id={`date-${value}`}
+                name="date"
+                value={value}
+                checked={selectedDate === value}
+                onChange={(event) => setDate(event.target.value)}
+                label={label}
               />
             ))}
         </ul>
@@ -281,7 +271,8 @@ export default function Index() {
 
       <div className="fixed bottom-0 z-5 p-6 w-full xl:w-4/6">
         <Link
-          to={{ pathname: '/movies', search: location.search }}
+          style={{ textShadow: '0 0 1px rgba(0,0,0,.5)' }}
+          to={{ pathname: '/', search: location.search }}
           className="block rounded-md bg-primary p-4 w-full text-center"
         >
           Montrer {resultCount} film{resultCount > 1 ? 's' : ''}

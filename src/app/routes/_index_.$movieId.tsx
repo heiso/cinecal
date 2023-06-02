@@ -1,23 +1,28 @@
 import { json, LoaderArgs, Response, V2_MetaFunction } from '@remix-run/node'
 import { Link, useLoaderData, useNavigate } from '@remix-run/react'
-import { blurhashToDataUri } from '@unpic/placeholder'
 import { add, format } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import { useEffect } from 'react'
 import { Context } from '../../core/context'
+import { getPosterSrc } from '../poster.server'
 import { ProgressiveImg } from '../progressiveImg'
 
-const POSTER_WIDTH = 310
-const LOW_DEF_IMAGE_WIDTH = 5
-const POSTER_RATIO = 62 / 85
 const GOOGLE_CALENDAR_DATE_FORMAT = "yyyyMMdd'T'HHmmss"
+
+export const meta: V2_MetaFunction<typeof loader> = ({ data, location }) => {
+  if (!data) return []
+  return [
+    { title: `Cinecal - ${data.movie.title}` },
+    { property: 'og:type', content: 'website' },
+    { property: 'og:url', content: location.pathname },
+    { property: 'og:title', content: data.movie.title },
+    { property: 'og:description', content: data.movie.synopsis },
+    { property: 'og:image', content: data.movie.src },
+  ]
+}
 
 export const loader = async ({ context, params, request }: LoaderArgs) => {
   const ctx = context as unknown as Context
-
-  const imagekitUrl = `https://ik.imagekit.io/cinecal/${
-    process.env.ENV === 'development' ? 'posters-dev' : 'posters-prod'
-  }`
 
   if (!params.movieId || isNaN(Number(params.movieId))) {
     throw new Response('Not Found', { status: 404, statusText: 'Not Found' })
@@ -94,16 +99,7 @@ export const loader = async ({ context, params, request }: LoaderArgs) => {
     },
   })
 
-  const src = movie.posterUrl
-    ? `${imagekitUrl}/${movie.posterUrl}/tr:w-${POSTER_WIDTH},ar-62-85`
-    : ''
-  const srcLowDef = movie.posterBlurHash
-    ? blurhashToDataUri(
-        movie.posterBlurHash,
-        LOW_DEF_IMAGE_WIDTH,
-        Math.round(LOW_DEF_IMAGE_WIDTH / POSTER_RATIO)
-      )
-    : ''
+  const { src, srcLowDef } = getPosterSrc(movie.posterUrl, movie.posterBlurHash)
 
   const mapShowtime = (
     showtime: (typeof theaters)[0]['Showtimes'][0],
@@ -174,18 +170,6 @@ export const loader = async ({ context, params, request }: LoaderArgs) => {
       }
     }),
   })
-}
-
-export const meta: V2_MetaFunction<typeof loader> = ({ data, location }) => {
-  if (!data) return []
-  return [
-    { title: `Cinecal - ${data.movie.title}` },
-    { property: 'og:type', content: 'website' },
-    { property: 'og:url', content: location.pathname },
-    { property: 'og:title', content: data.movie.title },
-    { property: 'og:description', content: data.movie.synopsis },
-    { property: 'og:image', content: data.movie.src },
-  ]
 }
 
 export default function Index() {

@@ -41,7 +41,7 @@ async function main() {
   await prisma.tag.createMany({
     data: [
       {
-        name: 'Le Gand Large',
+        name: 'Grand Large',
         regExp: 'grand large',
         isFilterEnabled: true,
       },
