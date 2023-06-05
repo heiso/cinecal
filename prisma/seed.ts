@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient, TagCategory } from '@prisma/client'
 
 const prisma = new PrismaClient()
 
@@ -38,32 +38,47 @@ async function main() {
     ],
   })
 
-  await prisma.tag.createMany({
+  await prisma.showtimeTag.createMany({
     data: [
       {
         name: 'Grand Large',
         regExp: 'grand large',
         isFilterEnabled: true,
+        category: TagCategory.SHOWTIME_CONTEXT,
+        featured: true,
       },
       {
         name: 'Marathon',
         regExp: 'marathon',
         isFilterEnabled: true,
-      },
-      {
-        name: 'Oscar',
-        regExp: 'oscar',
-        isFilterEnabled: true,
-      },
-      {
-        name: 'César',
-        regExp: 'c&eacute;sar',
-        isFilterEnabled: true,
+        category: TagCategory.SHOWTIME_CONTEXT,
+        featured: true,
       },
       {
         name: 'Avant-première',
         regExp: 'avant-premi',
         isFilterEnabled: true,
+        category: TagCategory.SHOWTIME_CONTEXT,
+        featured: true,
+      },
+    ],
+  })
+
+  await prisma.movieTag.createMany({
+    data: [
+      {
+        name: 'Oscar',
+        regExp: 'oscar',
+        isFilterEnabled: true,
+        category: TagCategory.AWARD,
+        featured: true,
+      },
+      {
+        name: 'César',
+        regExp: 'c&eacute;sar',
+        isFilterEnabled: true,
+        category: TagCategory.AWARD,
+        featured: true,
       },
     ],
   })

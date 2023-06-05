@@ -1,7 +1,15 @@
-import { Language, Prisma, PrismaClient, Theater } from '@prisma/client'
+import {
+  Language,
+  MovieTag,
+  Prisma,
+  PrismaClient,
+  ShowtimeTag,
+  TagCategory,
+  Theater,
+} from '@prisma/client'
 import { getPixels } from '@unpic/pixels'
 import { encode } from 'blurhash'
-import { endOfDay, endOfWeek, endOfYesterday } from 'date-fns'
+import { add, endOfDay, endOfYesterday } from 'date-fns'
 import { DefaultState, Middleware } from 'koa'
 import { Context } from './core/context'
 import { log } from './core/logger'
@@ -15,6 +23,8 @@ const EXCLUSION_LIST = ['Rex Studios']
 const IMAGEKIT_FOLDER = process.env.ENV === 'development' ? 'posters-dev' : 'posters-prod'
 const IMAGEKIT_URL = `https://ik.imagekit.io/cinecal/${IMAGEKIT_FOLDER}`
 const POSTER_RATIO = 62 / 85
+const SHOWTIMES_EXPIRATION_DATE = endOfDay(new Date())
+const TICKETING_DETAILS_EXPIRATION_DATE = add(new Date(), { days: 3 })
 
 const prisma = new PrismaClient()
 
@@ -83,8 +93,8 @@ async function getAllocineTicketingDetails(url: string) {
 
   await prisma.scrapedUrl.upsert({
     where: { url },
-    create: { url, content, expiresAt: endOfWeek(new Date()) },
-    update: { content, expiresAt: endOfWeek(new Date()) },
+    create: { url, content, expiresAt: TICKETING_DETAILS_EXPIRATION_DATE },
+    update: { content, expiresAt: TICKETING_DETAILS_EXPIRATION_DATE },
   })
 
   return content
@@ -118,14 +128,14 @@ async function getAllocineShowtimes(url: string) {
 
   const json = JSON.parse(content) as AllocineResponse
 
-  if (json.error) {
-    throw new Error(`${url} - error`)
-  }
+  // if (json.error) {
+  //   throw new Error(`${url} - error`)
+  // }
 
   await prisma.scrapedUrl.upsert({
     where: { url },
-    create: { url, content, expiresAt: endOfDay(new Date()) },
-    update: { content, expiresAt: endOfDay(new Date()) },
+    create: { url, content, expiresAt: SHOWTIMES_EXPIRATION_DATE },
+    update: { content, expiresAt: SHOWTIMES_EXPIRATION_DATE },
   })
 
   return json
@@ -166,6 +176,41 @@ async function scrapAllocineShowtimes(
             allocineId: result.movie.internalId,
             posterAllocineUrl: result.movie.poster?.url,
             director: getDirector(result.movie.credits),
+            Tags: {
+              connectOrCreate: [
+                ...result.movie.relatedTags.reduce<
+                  Prisma.MovieTagCreateOrConnectWithoutMoviesInput[]
+                >((acc, { name, tags }) => {
+                  if (tags.list.find((type) => 'Tag.Type.SubGenre' === type)) {
+                    acc.push({
+                      where: { name },
+                      create: {
+                        name,
+                        category: TagCategory.SUB_GENRE,
+                      },
+                    })
+                  } else if (tags.list.find((type) => 'Tag.Type.Characteristic' === type)) {
+                    acc.push({
+                      where: { name },
+                      create: {
+                        name,
+                        category: TagCategory.CHARACTERISTIC,
+                      },
+                    })
+                  }
+                  return acc
+                }, [] as Prisma.MovieTagCreateOrConnectWithoutMoviesInput[]),
+                ...result.movie.genres.map<Prisma.MovieTagCreateOrConnectWithoutMoviesInput>(
+                  ({ translate }) => ({
+                    where: { name: translate },
+                    create: {
+                      name: translate,
+                      category: TagCategory.GENRE,
+                    },
+                  })
+                ),
+              ],
+            },
           },
         })
 
@@ -221,7 +266,12 @@ async function scrapAllocineShowtimes(
 }
 
 async function scrapAllocineTicketingUrl(): Promise<void> {
-  const tags = await prisma.tag.findMany()
+  const movieTags = (await prisma.movieTag.findMany({
+    where: { regExp: { not: null } },
+  })) as Array<Omit<MovieTag, 'regExp'> & { regExp: NonNullable<MovieTag['regExp']> }>
+  const showtimeTags = (await prisma.showtimeTag.findMany({
+    where: { regExp: { not: null } },
+  })) as Array<Omit<ShowtimeTag, 'regExp'> & { regExp: NonNullable<ShowtimeTag['regExp']> }>
 
   const showtimes = await prisma.showtime.findMany({
     where: {
@@ -260,7 +310,7 @@ async function scrapAllocineTicketingUrl(): Promise<void> {
         where: { id: movieId },
         data: {
           Tags: {
-            connect: tags
+            connect: movieTags
               .filter(({ regExp }) => new RegExp(regExp, 'i').test(details))
               .map(({ id }) => ({
                 id,
@@ -278,7 +328,7 @@ async function scrapAllocineTicketingUrl(): Promise<void> {
         where: { id },
         data: {
           Tags: {
-            connect: tags
+            connect: showtimeTags
               .filter(({ regExp }) => new RegExp(regExp, 'i').test(details))
               .map(({ id }) => ({
                 id,

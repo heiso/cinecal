@@ -14,8 +14,12 @@ export function getFilters(request: LoaderArgs['request']) {
     searchDateParam && searchDateParam in DATE_FILTER
       ? (searchDateParam as DATE_FILTER)
       : DATE_FILTER.DEFAULT
-  const tags = search
-    .getAll('tags')
+  const movieTags = search
+    .getAll('movieTags')
+    .map((value) => parseInt(value))
+    .filter((value) => !isNaN(value))
+  const showtimeTags = search
+    .getAll('showtimeTags')
     .map((value) => parseInt(value))
     .filter((value) => !isNaN(value))
   const theaters = search
@@ -29,14 +33,16 @@ export function getFilters(request: LoaderArgs['request']) {
   let count =
     Number(Boolean(title)) +
     Number(date !== DATE_FILTER.DEFAULT) +
-    tags.length +
+    movieTags.length +
+    showtimeTags.length +
     theaters.length +
     customTags.length
 
   return {
     title,
     date,
-    tags,
+    movieTags,
+    showtimeTags,
     theaters,
     customTags: (Object.keys(CUSTOM_TAG) as CUSTOM_TAG[]).reduce<Record<CUSTOM_TAG, Boolean>>(
       (acc, key) => {
@@ -82,9 +88,9 @@ export function getWhereInputs(filters: ReturnType<typeof getFilters>): {
     movieWhereInput: {
       ...(filters.title && { title: { contains: filters.title, mode: 'insensitive' } }),
       ...whereReleaseDate,
-      ...(filters.tags.length > 0 && {
+      ...(filters.movieTags.length > 0 && {
         Tags: {
-          some: { id: { in: filters.tags } },
+          some: { id: { in: filters.movieTags } },
         },
       }),
     },
@@ -94,9 +100,9 @@ export function getWhereInputs(filters: ReturnType<typeof getFilters>): {
       ...(filters.theaters.length > 0 && {
         theaterId: { in: filters.theaters },
       }),
-      ...(filters.tags.length > 0 && {
+      ...(filters.showtimeTags.length > 0 && {
         Tags: {
-          some: { id: { in: filters.tags } },
+          some: { id: { in: filters.showtimeTags } },
         },
       }),
     },

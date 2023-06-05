@@ -6,7 +6,7 @@ export enum DATE_FILTER {
 }
 
 export const DATE_FILTER_LABELS: Record<DATE_FILTER, string> = {
-  [DATE_FILTER.DEFAULT]: 'Peu importe',
+  [DATE_FILTER.DEFAULT]: 'Peu importe quand',
   [DATE_FILTER.TODAY]: "Aujourd'hui",
   [DATE_FILTER.THIS_WEEK]: 'Cette semaine',
   [DATE_FILTER.NEXT_WEEK]: 'Semaine prochaine',

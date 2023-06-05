@@ -1,4 +1,4 @@
-import { Tag } from '@prisma/client'
+import { MovieTag, ShowtimeTag } from '@prisma/client'
 import { LoaderArgs, json } from '@remix-run/node'
 import { Link, useLoaderData, useLocation } from '@remix-run/react'
 import { isBefore } from 'date-fns'
@@ -33,7 +33,7 @@ export const loader = async ({ context, params, request }: LoaderArgs) => {
           name: true,
         },
         where: {
-          isFilterEnabled: true,
+          featured: true,
         },
       },
       Showtimes: {
@@ -45,7 +45,7 @@ export const loader = async ({ context, params, request }: LoaderArgs) => {
               name: true,
             },
             where: {
-              isFilterEnabled: true,
+              featured: true,
             },
           },
           date: true,
@@ -69,24 +69,6 @@ export const loader = async ({ context, params, request }: LoaderArgs) => {
   return json({
     filterCount: filters.count,
 
-    tags: movies
-      .flatMap((movie) => [...movie.Tags, ...movie.Showtimes.flatMap(({ Tags }) => Tags)])
-      .reduce<Pick<Tag, 'id' | 'name'>[]>((acc, tag) => {
-        if (!acc.find(({ id }) => id === tag.id)) {
-          acc.push(tag)
-        }
-        return acc
-      }, []),
-
-    theaters: movies
-      .flatMap(({ Showtimes }) => Showtimes.flatMap(({ Theater }) => Theater))
-      .reduce<(typeof movies)[0]['Showtimes'][0]['Theater'][]>((acc, theater) => {
-        if (!acc.find(({ id }) => id === theater.id)) {
-          acc.push(theater)
-        }
-        return acc
-      }, []),
-
     movies: movies
       .sort((movieA, movieB) =>
         isBefore(movieA.Showtimes[0].date, movieB.Showtimes[0].date) ? -1 : 1
@@ -98,7 +80,7 @@ export const loader = async ({ context, params, request }: LoaderArgs) => {
           id: movie.id,
           showtimeCount: movie.Showtimes.length,
           tags: [...movie.Tags, ...movie.Showtimes.flatMap((showtime) => showtime.Tags)].reduce<
-            Pick<Tag, 'id' | 'name'>[]
+            Pick<MovieTag | ShowtimeTag, 'id' | 'name'>[]
           >((acc, tag) => {
             if (!acc.find(({ id }) => id === tag.id)) {
               acc.push(tag)
@@ -127,7 +109,7 @@ export default function Index() {
         <div className="flex w-full h-1/3">
           <div className="self-end grow text-center text-lg">
             Aucune séance <br />
-            :'(
+            😕
           </div>
         </div>
       )}

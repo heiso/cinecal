@@ -16,17 +16,40 @@ model ScrapedUrl {
   @@map("scraped_urls")
 }
 
-model Tag {
+enum TagCategory {
+  GENRE
+  SUB_GENRE
+  CHARACTERISTIC
+  AWARD
+  SHOWTIME_CONTEXT
+}
+
+model MovieTag {
   id Int @id @default(autoincrement())
 
   name            String  @unique @db.VarChar(255)
-  regExp          String  @db.VarChar(255)
+  regExp          String? @map("reg_exp") @db.VarChar(255)
   isFilterEnabled Boolean @default(false) @map("is_filter_enabled")
+  featured        Boolean @default(false)
 
-  Movies    Movie[]
+  category TagCategory
+  Movies   Movie[]
+
+  @@map("movie_tags")
+}
+
+model ShowtimeTag {
+  id Int @id @default(autoincrement())
+
+  name            String  @unique @db.VarChar(255)
+  regExp          String? @map("reg_exp") @db.VarChar(255)
+  isFilterEnabled Boolean @default(false) @map("is_filter_enabled")
+  featured        Boolean @default(false)
+
+  category  TagCategory
   Showtimes Showtime[]
 
-  @@map("tags")
+  @@map("showtime_tags")
 }
 
 model Movie {
@@ -47,7 +70,7 @@ model Movie {
   posterBlurHash    String?   @map("poster_blur_hash")
 
   Showtimes Showtime[]
-  Tags      Tag[]
+  Tags      MovieTag[]
 
   @@map("movies")
 }
@@ -81,7 +104,7 @@ model Showtime {
   ticketingUrl String?
 
   Prices Price[]
-  Tags   Tag[]
+  Tags   ShowtimeTag[]
 
   Theater   Theater @relation(fields: [theaterId], references: [id], onDelete: Cascade)
   theaterId Int     @map("theater_id")

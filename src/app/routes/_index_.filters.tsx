@@ -1,11 +1,13 @@
 import CheckIcon from '@heroicons/react/20/solid/CheckIcon'
 import BackIcon from '@heroicons/react/20/solid/XMarkIcon'
+import { Movie } from '@prisma/client'
 import { LoaderArgs, json } from '@remix-run/node'
 import {
   Form,
   Link,
   useLoaderData,
   useLocation,
+  useNavigate,
   useNavigation,
   useSearchParams,
   useSubmit,
@@ -49,10 +51,40 @@ export const loader = async ({ context, params, request }: LoaderArgs) => {
       })
     ),
 
-    tags: await ctx.prisma.tag.findMany({
-      where: { Showtimes: { some: { date: { gte: now } } } },
-      select: { id: true, name: true },
-    }),
+    movieTags: (
+      await ctx.prisma.movieTag.findMany({
+        where: {
+          isFilterEnabled: true,
+          Movies: { some: { Showtimes: { some: { date: { gte: now } } } } },
+        },
+        select: { id: true, name: true, Movies: { select: { id: true } } },
+      })
+    ).map((tag) => ({
+      ...tag,
+      count: tag.Movies.length,
+    })),
+
+    showtimeTags: (
+      await ctx.prisma.showtimeTag.findMany({
+        where: {
+          isFilterEnabled: true,
+          Showtimes: { some: { date: { gte: now } } },
+        },
+        select: {
+          id: true,
+          name: true,
+          Showtimes: { select: { movieId: true } },
+        },
+      })
+    ).map((tag) => ({
+      ...tag,
+      count: tag.Showtimes.reduce<Movie['id'][]>((acc, { movieId }) => {
+        if (!acc.includes(movieId)) {
+          acc.push(movieId)
+        }
+        return acc
+      }, []).length,
+    })),
 
     customTags: (Object.keys(CUSTOM_TAG_LABELS) as Array<keyof typeof CUSTOM_TAG_LABELS>).map(
       (id) => ({
@@ -130,12 +162,40 @@ function Checkbox({ id, name, value, label, defaultChecked, ...rest }: CheckboxP
 }
 
 export default function Index() {
-  const { resultCount, tags, customTags, theaters, randomMovie, dates, filterCount } =
-    useLoaderData<typeof loader>()
+  const {
+    resultCount,
+    movieTags,
+    showtimeTags,
+    customTags,
+    theaters,
+    randomMovie,
+    dates,
+    filterCount,
+  } = useLoaderData<typeof loader>()
   const submit = useSubmit()
   const [searchParams] = useSearchParams()
   const navigation = useNavigation()
+  const navigate = useNavigate()
   const location = useLocation()
+
+  useEffect(() => {
+    function handleKeyup(event: KeyboardEvent) {
+      if (
+        !event.defaultPrevented &&
+        !['input', 'textarea'].includes(
+          (event.target as HTMLElement).tagName.toLocaleLowerCase()
+        ) &&
+        event.key === 'Escape'
+      ) {
+        event.preventDefault()
+        navigate(-1)
+      }
+    }
+
+    document.addEventListener('keyup', handleKeyup)
+
+    return () => document.removeEventListener('keyup', handleKeyup)
+  }, [navigate])
 
   const optimisticSearchParams =
     navigation.state == 'loading' && navigation.location.pathname === location.pathname
@@ -144,13 +204,15 @@ export default function Index() {
 
   const searchParamTitle = optimisticSearchParams.get('title') ?? ''
   const searchParamDate = optimisticSearchParams.get('date') ?? DATE_FILTER.DEFAULT
-  const searchParamTags = optimisticSearchParams.getAll('tags') ?? ''
+  const searchParamMovieTags = optimisticSearchParams.getAll('movieTags') ?? ''
+  const searchParamShowtimeTags = optimisticSearchParams.getAll('showtimeTags') ?? ''
   const searchParamCustomTags = optimisticSearchParams.getAll('customTags') ?? ''
   const searchParamTheaters = optimisticSearchParams.getAll('theaters') ?? ''
 
   const [searchedTitle, setTitle] = useState(searchParamTitle)
   const [selectedDate, setDate] = useState(searchParamDate)
-  const [selectedTags, setTags] = useState(searchParamTags)
+  const [selectedMovieTags, setMovieTags] = useState(searchParamMovieTags)
+  const [selectedShowtimeTags, setShowtimeTags] = useState(searchParamShowtimeTags)
   const [selectedCustomTags, setCustomTags] = useState(searchParamCustomTags)
   const [selectedTheaters, setTheaters] = useState(searchParamTheaters)
 
@@ -163,8 +225,12 @@ export default function Index() {
   }, [searchParamDate])
 
   useEffect(() => {
-    setTags(selectedTags ?? [])
-  }, [selectedTags])
+    setMovieTags(selectedMovieTags ?? [])
+  }, [selectedMovieTags])
+
+  useEffect(() => {
+    setShowtimeTags(selectedShowtimeTags ?? [])
+  }, [selectedShowtimeTags])
 
   useEffect(() => {
     setCustomTags(selectedCustomTags ?? [])
@@ -197,6 +263,7 @@ export default function Index() {
           </Link>
         </div>
 
+        <p className="pt-4">Film</p>
         <input
           id="title"
           className="mt-4 mb-4 appearance-none block text-white bg-white bg-opacity-10 border border-white border-opacity-20 rounded-md w-full p-3 pl-4 pr-4 ring-0 focus:ring-0 focus-active:ring-0
@@ -208,15 +275,15 @@ export default function Index() {
           onChange={(event) => setTitle(event.target.value)}
         />
         <ul>
-          {tags.length > 0 &&
-            tags.map((tag) => (
+          {movieTags.length > 0 &&
+            movieTags.map((tag) => (
               <Checkbox
-                key={`tag-${tag.id.toString()}`}
-                id={`tag-${tag.id.toString()}`}
-                name="tags"
+                key={`movieTag-${tag.id.toString()}`}
+                id={`movieTag-${tag.id.toString()}`}
+                name="movieTags"
                 value={tag.id}
-                checked={searchParamTags.includes(tag.id.toString())}
-                onChange={(event) => setTags([...selectedTags, event.target.value])}
+                checked={searchParamMovieTags.includes(tag.id.toString())}
+                onChange={(event) => setMovieTags([...selectedMovieTags, event.target.value])}
                 label={tag.name}
               />
             ))}
@@ -230,13 +297,27 @@ export default function Index() {
                 name="customTags"
                 value={tag.id}
                 checked={searchParamCustomTags.includes(tag.id.toString())}
-                onChange={(event) => setTags([...selectedCustomTags, event.target.value])}
+                onChange={(event) => setCustomTags([...selectedCustomTags, event.target.value])}
                 label={tag.name}
               />
             ))}
         </ul>
 
-        <p className="pt-4">Date de séance</p>
+        <p className="pt-4">Séance</p>
+        <ul>
+          {showtimeTags.length > 0 &&
+            showtimeTags.map((tag) => (
+              <Checkbox
+                key={`showtimeTag-${tag.id.toString()}`}
+                id={`showtimeTag-${tag.id.toString()}`}
+                name="showtimeTags"
+                value={tag.id}
+                checked={searchParamShowtimeTags.includes(tag.id.toString())}
+                onChange={(event) => setShowtimeTags([...selectedShowtimeTags, event.target.value])}
+                label={tag.name}
+              />
+            ))}
+        </ul>
         <ul>
           {dates.length > 0 &&
             dates.map(({ label, value }) => (
