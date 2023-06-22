@@ -1,6 +1,6 @@
 import { Prisma } from '@prisma/client'
 import { LoaderArgs } from '@remix-run/node'
-import { add, endOfDay, endOfWeek, startOfWeek } from 'date-fns'
+import { add, endOfDay, endOfWeek, startOfDay, startOfWeek } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import { CUSTOM_TAG, DATE_FILTER } from './filters'
 
@@ -88,6 +88,7 @@ export function getWhereInputs(filters: ReturnType<typeof getFilters>): {
     movieWhereInput: {
       ...(filters.title && { title: { contains: filters.title, mode: 'insensitive' } }),
       ...whereReleaseDate,
+      ...(filters.customTags.SCRAPED_RECENTLY && { createdAt: { gte: startOfDay(now) } }),
       ...(filters.movieTags.length > 0 && {
         Tags: {
           some: { id: { in: filters.movieTags } },

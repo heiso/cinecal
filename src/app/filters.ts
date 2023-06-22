@@ -15,9 +15,11 @@ export const DATE_FILTER_LABELS: Record<DATE_FILTER, string> = {
 export enum CUSTOM_TAG {
   NEW_RELEASE = 'NEW_RELEASE',
   NEXT_RELEASE = 'NEXT_RELEASE',
+  SCRAPED_RECENTLY = 'SCRAPED_RECENTLY',
 }
 
 export const CUSTOM_TAG_LABELS: Record<CUSTOM_TAG, string> = {
   [CUSTOM_TAG.NEW_RELEASE]: 'Sorties récentes',
   [CUSTOM_TAG.NEXT_RELEASE]: 'Prochainement',
+  [CUSTOM_TAG.SCRAPED_RECENTLY]: 'Récemment ajouté',
 }
