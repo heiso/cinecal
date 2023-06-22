@@ -42,23 +42,20 @@ async function main() {
     data: [
       {
         name: 'Grand Large',
-        regExp: 'grand large',
+        regExp: 'grand large|grand-large|tag_grex_slarge',
         isFilterEnabled: true,
-        category: TagCategory.SHOWTIME_CONTEXT,
         featured: true,
       },
       {
         name: 'Marathon',
         regExp: 'marathon',
         isFilterEnabled: true,
-        category: TagCategory.SHOWTIME_CONTEXT,
         featured: true,
       },
       {
         name: 'Avant-première',
         regExp: 'avant-premi',
         isFilterEnabled: true,
-        category: TagCategory.SHOWTIME_CONTEXT,
         featured: true,
       },
     ],

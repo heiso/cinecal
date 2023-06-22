@@ -21,7 +21,6 @@ enum TagCategory {
   SUB_GENRE
   CHARACTERISTIC
   AWARD
-  SHOWTIME_CONTEXT
 }
 
 model MovieTag {
@@ -46,7 +45,6 @@ model ShowtimeTag {
   isFilterEnabled Boolean @default(false) @map("is_filter_enabled")
   featured        Boolean @default(false)
 
-  category  TagCategory
   Showtimes Showtime[]
 
   @@map("showtime_tags")
