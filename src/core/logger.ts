@@ -20,7 +20,7 @@ export const log = createLogger({
   level: process.env.LOG_LEVEL || 'info',
   handleExceptions: true,
   format:
-    process.env.NODE_ENV && ['development', 'test', 'ci'].includes(process.env.NODE_ENV)
+    (process.env.NODE_ENV && ['development', 'test', 'ci'].includes(process.env.NODE_ENV)) || true // As long as we do not have any monitoring/log manager, we can use the development format in production
       ? developmentFormat
       : format.combine(defaultFormat, format.json()),
   transports: [new transports.Console()],
