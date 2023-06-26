@@ -114,7 +114,7 @@ export default function Index() {
         </div>
       )}
       {movies.length > 0 && (
-        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-6 p-6 pb-28">
+        <div className="grid grid-cols-2 gap-6 p-6 pb-28">
           {movies.map((movie) => (
             <Link
               key={movie.id}
@@ -161,7 +161,7 @@ export default function Index() {
         </div>
       )}
 
-      <div className="fixed bottom-0 z-5 p-6 w-full xl:w-4/6">
+      <div className="fixed bottom-0 z-5 p-6 w-full max-w-screen-sm m-auto">
         <Link
           style={{ textShadow: '0 0 1px rgba(0,0,0,.5)' }}
           className="block items-center rounded-md bg-primary p-4 text-center"

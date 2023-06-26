@@ -350,7 +350,7 @@ export default function Index() {
         </ul>
       </div>
 
-      <div className="fixed bottom-0 z-5 p-6 w-full xl:w-4/6">
+      <div className="fixed bottom-0 z-5 p-6 w-full max-w-screen-sm m-auto">
         <Link
           style={{ textShadow: '0 0 1px rgba(0,0,0,.5)' }}
           to={{ pathname: '/', search: location.search }}

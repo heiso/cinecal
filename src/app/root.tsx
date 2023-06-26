@@ -11,14 +11,14 @@ export const links: LinksFunction = () => [{ rel: 'stylesheet', href: styles }]
 
 export default function App() {
   return (
-    <html lang="fr" className="dark bg-background w-full h-full text-white xl:w-4/6 m-auto">
+    <html lang="fr" className="dark bg-background w-full h-full text-white">
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width,initial-scale=1" />
         <Meta />
         <Links />
       </head>
-      <body className="w-full h-full">
+      <body className="w-full h-full max-w-screen-sm m-auto relative">
         <Outlet />
         <ScrollRestoration />
         <Scripts />
