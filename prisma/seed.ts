@@ -33,7 +33,13 @@ async function main() {
         name: "L'Archipel",
         allocineId: 'C0134',
         address: '17 bd de Strasbourg 75010 Paris',
-        website: 'https://larchipel.net',
+        website: 'https://www.larchipelcinema.com',
+      },
+      {
+        name: 'Le Louxor',
+        allocineId: 'W7510',
+        address: '170 boulevard de Magenta 75010 Paris',
+        website: 'https://www.cinemalouxor.fr',
       },
     ],
   })
