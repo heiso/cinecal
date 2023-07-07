@@ -95,7 +95,7 @@ model Showtime {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  allocineId   Int      @unique @map("allocine_id")
+  allocineId   BigInt   @unique @map("allocine_id")
   date         DateTime
   isPreview    Boolean  @default(false) @map("is_preview")
   language     Language
