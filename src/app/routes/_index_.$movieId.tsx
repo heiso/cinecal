@@ -1,6 +1,6 @@
 import BackIcon from '@heroicons/react/20/solid/XMarkIcon'
 import { TagCategory } from '@prisma/client'
-import { json, LoaderArgs, Response, V2_MetaFunction } from '@remix-run/node'
+import { LoaderArgs, Response, V2_MetaFunction, json } from '@remix-run/node'
 import { Link, useLoaderData, useLocation, useNavigate } from '@remix-run/react'
 import { add, format } from 'date-fns'
 import { fr } from 'date-fns/locale'
@@ -142,7 +142,7 @@ export const loader = async ({ context, params, request }: LoaderArgs) => {
       id: showtime.id,
       date: format(showtime.date, `HH'h'mm`, { locale: fr }),
       language: showtime.language,
-      tags: showtime.Tags,
+      tags: [{ id: showtime.language, name: showtime.language }, ...showtime.Tags],
       ticketingUrl: showtime.ticketingUrl,
       addToCalendarUrl,
     }
@@ -172,15 +172,47 @@ export const loader = async ({ context, params, request }: LoaderArgs) => {
           { day: string; showtimes: ReturnType<typeof mapShowtime>[] }[]
         >((acc, showtime) => {
           const day = format(showtime.date, `E dd LLL`, { locale: fr })
-          const item = acc.find((item) => item.day === day)
+          const showtimesByDay = acc.find((item) => item.day === day)
           const extendedShowtime = mapShowtime(showtime, theater)
-          if (item) {
-            item.showtimes.push(extendedShowtime)
+          if (showtimesByDay) {
+            showtimesByDay.showtimes.push(extendedShowtime)
           } else {
             acc.push({ day, showtimes: [extendedShowtime] })
           }
           return acc
         }, []),
+        daysByTags: theater.Showtimes.reduce<
+          {
+            key: string
+            tags: ReturnType<typeof mapShowtime>['tags']
+            days: { day: string; showtimes: ReturnType<typeof mapShowtime>[] }[]
+          }[]
+        >((acc, showtime) => {
+          const extendedShowtime = mapShowtime(showtime, theater)
+          const key = extendedShowtime.tags.map(({ id }) => id).join('-')
+          const showtimesByTags = acc.find((showtimeByTags) => showtimeByTags.key === key)
+          const day = format(showtime.date, `EEEE dd LLLL`, { locale: fr })
+
+          if (showtimesByTags) {
+            const showtimesByDay = showtimesByTags.days.find(
+              (showtimeByTags) => showtimeByTags.day === day
+            )
+
+            if (showtimesByDay) {
+              showtimesByDay.showtimes.push(extendedShowtime)
+            } else {
+              showtimesByTags.days.push({ day, showtimes: [extendedShowtime] })
+            }
+          } else {
+            acc.push({
+              key,
+              tags: extendedShowtime.tags,
+              days: [{ day, showtimes: [extendedShowtime] }],
+            })
+          }
+
+          return acc
+        }, []).sort((a, b) => (a.tags.length > b.tags.length ? -1 : 1)),
       }
     }),
   })
@@ -262,46 +294,29 @@ export default function Index() {
                 {theater.name}
               </Link>
             </h2>
-            {theater.days.map(({ day, showtimes }) => (
-              <div key={day} className="mb-8">
-                <div className="text-sm mb-4">{day}</div>
-                <div className="pl-4 w-full">
-                  <table className="table-auto w-full">
-                    <tbody>
-                      {showtimes.map((showtime) => (
-                        <tr key={showtime.id}>
-                          <td className="text-sm">{showtime.date}</td>
-                          <td className="space-x-2 pt-2 pb-2 ">
-                            <div className="inline-block text-xs border-gray rounded-md border text-gray p-1 w-fit">
-                              {showtime.language}
-                            </div>
-                            {showtime.tags.map((tag) => (
-                              <div
-                                key={tag.id}
-                                className="inline-block text-xs border-gray rounded-md border text-gray p-1 w-fit"
-                              >
-                                {tag.name}
-                              </div>
-                            ))}
-                          </td>
-                          {/* {showtime.Prices.map(({ label, price }) => `(${label}: ${price}€)`).join(' ')} */}
-                          <td className="text-right text-primary">
-                            {showtime.ticketingUrl && (
-                              <Link key={showtime.id} to={showtime.ticketingUrl} target="_blank">
-                                rez
-                              </Link>
-                            )}
-                          </td>
-                          <td className="text-right text-primary">
-                            <Link key={showtime.id} to={showtime.addToCalendarUrl} target="_blank">
-                              cal
-                            </Link>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+            {theater.daysByTags.map(({ tags, days }, index) => (
+              <div key={index}>
+                <hr />
+                <div>
+                  {tags.map(({ name }) => (
+                    <span key={name}>{name}</span>
+                  ))}
                 </div>
+                {days.map(({ day, showtimes }) => (
+                  <div key={day}>
+                    <div className="flex flex-wrap capitalize">{day}</div>
+                    {showtimes.map((showtime) => (
+                      <Link
+                        key={showtime.id}
+                        to={`./${showtime.id}`}
+                        style={{ textShadow: '0 0 1px rgba(0,0,0,.5)' }}
+                        className="mr-2 mb-2 inline-block rounded-md bg-primary p-4 text-center"
+                      >
+                        {showtime.date}
+                      </Link>
+                    ))}
+                  </div>
+                ))}
               </div>
             ))}
           </div>
