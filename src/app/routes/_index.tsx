@@ -117,6 +117,7 @@ export default function Index() {
         <div className="grid grid-cols-2 gap-6 p-6 pb-28">
           {movies.map((movie) => (
             <Link
+              prefetch="viewport"
               key={movie.id}
               to={{ pathname: movie.url, search: location.search }}
               className="relative block aspect-poster"
