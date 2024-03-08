@@ -66,35 +66,42 @@ export const loader = async ({ context, params, request }: LoaderArgs) => {
     },
   })
 
-  return json({
-    filterCount: filters.count,
+  return json(
+    {
+      filterCount: filters.count,
 
-    movies: movies
-      .sort((movieA, movieB) =>
-        isBefore(movieA.Showtimes[0].date, movieB.Showtimes[0].date) ? -1 : 1
-      )
-      .map((movie) => {
-        const { src, srcLowDef } = getPosterSrc(movie.posterUrl, movie.posterBlurHash)
+      movies: movies
+        .sort((movieA, movieB) =>
+          isBefore(movieA.Showtimes[0].date, movieB.Showtimes[0].date) ? -1 : 1
+        )
+        .map((movie) => {
+          const { src, srcLowDef } = getPosterSrc(movie.posterUrl, movie.posterBlurHash)
 
-        return {
-          id: movie.id,
-          showtimeCount: movie.Showtimes.length,
-          tags: [...movie.Tags, ...movie.Showtimes.flatMap((showtime) => showtime.Tags)].reduce<
-            Pick<MovieTag | ShowtimeTag, 'id' | 'name'>[]
-          >((acc, tag) => {
-            if (!acc.find(({ id }) => id === tag.id)) {
-              acc.push(tag)
-            }
-            return acc
-          }, []),
-          title: movie.title,
-          url: `${movie.id}`,
-          src,
-          srcLowDef,
-          srcBlur: srcLowDef,
-        }
-      }),
-  })
+          return {
+            id: movie.id,
+            showtimeCount: movie.Showtimes.length,
+            tags: [...movie.Tags, ...movie.Showtimes.flatMap((showtime) => showtime.Tags)].reduce<
+              Pick<MovieTag | ShowtimeTag, 'id' | 'name'>[]
+            >((acc, tag) => {
+              if (!acc.find(({ id }) => id === tag.id)) {
+                acc.push(tag)
+              }
+              return acc
+            }, []),
+            title: movie.title,
+            url: `${movie.id}`,
+            src,
+            srcLowDef,
+            srcBlur: srcLowDef,
+          }
+        }),
+    },
+    {
+      headers: {
+        'Cache-Control': 'max-age=3600, public',
+      },
+    }
+  )
 }
 
 export default function Index() {
