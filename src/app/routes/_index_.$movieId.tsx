@@ -148,74 +148,81 @@ export const loader = async ({ context, params, request }: LoaderArgs) => {
     }
   }
 
-  return json({
-    filterCount: filters.count,
+  return json(
+    {
+      filterCount: filters.count,
 
-    movie: {
-      tags: movie.Tags,
-      title: movie.title,
-      src,
-      srcLowDef,
-      duration: movie.duration,
-      releaseDate: movie.releaseDate ? format(movie.releaseDate, 'yyyy') : null,
-      director: movie.director,
-      synopsis: movie.synopsis,
-    },
+      movie: {
+        tags: movie.Tags,
+        title: movie.title,
+        src,
+        srcLowDef,
+        duration: movie.duration,
+        releaseDate: movie.releaseDate ? format(movie.releaseDate, 'yyyy') : null,
+        director: movie.director,
+        synopsis: movie.synopsis,
+      },
 
-    theaters: theaters.map((theater) => {
-      return {
-        id: theater.id,
-        name: theater.name,
-        website: theater.website,
-        address: theater.address,
-        days: theater.Showtimes.reduce<
-          { day: string; showtimes: ReturnType<typeof mapShowtime>[] }[]
-        >((acc, showtime) => {
-          const day = format(showtime.date, `E dd LLL`, { locale: fr })
-          const showtimesByDay = acc.find((item) => item.day === day)
-          const extendedShowtime = mapShowtime(showtime, theater)
-          if (showtimesByDay) {
-            showtimesByDay.showtimes.push(extendedShowtime)
-          } else {
-            acc.push({ day, showtimes: [extendedShowtime] })
-          }
-          return acc
-        }, []),
-        daysByTags: theater.Showtimes.reduce<
-          {
-            key: string
-            tags: ReturnType<typeof mapShowtime>['tags']
-            days: { day: string; showtimes: ReturnType<typeof mapShowtime>[] }[]
-          }[]
-        >((acc, showtime) => {
-          const extendedShowtime = mapShowtime(showtime, theater)
-          const key = extendedShowtime.tags.map(({ id }) => id).join('-')
-          const showtimesByTags = acc.find((showtimeByTags) => showtimeByTags.key === key)
-          const day = format(showtime.date, `EEEE dd LLLL`, { locale: fr })
-
-          if (showtimesByTags) {
-            const showtimesByDay = showtimesByTags.days.find(
-              (showtimeByTags) => showtimeByTags.day === day
-            )
-
+      theaters: theaters.map((theater) => {
+        return {
+          id: theater.id,
+          name: theater.name,
+          website: theater.website,
+          address: theater.address,
+          days: theater.Showtimes.reduce<
+            { day: string; showtimes: ReturnType<typeof mapShowtime>[] }[]
+          >((acc, showtime) => {
+            const day = format(showtime.date, `E dd LLL`, { locale: fr })
+            const showtimesByDay = acc.find((item) => item.day === day)
+            const extendedShowtime = mapShowtime(showtime, theater)
             if (showtimesByDay) {
               showtimesByDay.showtimes.push(extendedShowtime)
             } else {
-              showtimesByTags.days.push({ day, showtimes: [extendedShowtime] })
+              acc.push({ day, showtimes: [extendedShowtime] })
             }
-          } else {
-            acc.push({
-              key,
-              tags: extendedShowtime.tags,
-              days: [{ day, showtimes: [extendedShowtime] }],
-            })
-          }
+            return acc
+          }, []),
+          daysByTags: theater.Showtimes.reduce<
+            {
+              key: string
+              tags: ReturnType<typeof mapShowtime>['tags']
+              days: { day: string; showtimes: ReturnType<typeof mapShowtime>[] }[]
+            }[]
+          >((acc, showtime) => {
+            const extendedShowtime = mapShowtime(showtime, theater)
+            const key = extendedShowtime.tags.map(({ id }) => id).join('-')
+            const showtimesByTags = acc.find((showtimeByTags) => showtimeByTags.key === key)
+            const day = format(showtime.date, `EEEE dd LLLL`, { locale: fr })
 
-          return acc
-        }, []).sort((a, b) => (a.tags.length > b.tags.length ? -1 : 1)),
-      }
-    }),
-  })
+            if (showtimesByTags) {
+              const showtimesByDay = showtimesByTags.days.find(
+                (showtimeByTags) => showtimeByTags.day === day
+              )
+
+              if (showtimesByDay) {
+                showtimesByDay.showtimes.push(extendedShowtime)
+              } else {
+                showtimesByTags.days.push({ day, showtimes: [extendedShowtime] })
+              }
+            } else {
+              acc.push({
+                key,
+                tags: extendedShowtime.tags,
+                days: [{ day, showtimes: [extendedShowtime] }],
+              })
+            }
+
+            return acc
+          }, []).sort((a, b) => (a.tags.length > b.tags.length ? -1 : 1)),
+        }
+      }),
+    },
+    {
+      headers: {
+        'Cache-Control': 'max-age=3600, public',
+      },
+    }
+  )
 }
 
 export default function Index() {

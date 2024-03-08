@@ -100,23 +100,30 @@ export const loader = async ({ context, params, request }: LoaderArgs) => {
 
   const addToCalendarUrl = url.toString()
 
-  return json({
-    movie: {
-      ...showtime.Movie,
-      src,
-    },
+  return json(
+    {
+      movie: {
+        ...showtime.Movie,
+        src,
+      },
 
-    showtime: {
-      id: showtime.id,
-      day: format(showtime.date, `EEEE dd LLLL`, { locale: fr }),
-      date: format(showtime.date, `HH'h'mm`, { locale: fr }),
-      language: showtime.language,
-      tags: [{ id: showtime.language, name: showtime.language }, ...showtime.Tags],
-      ticketingUrl: showtime.ticketingUrl,
-      addToCalendarUrl,
-      prices: showtime.Prices,
+      showtime: {
+        id: showtime.id,
+        day: format(showtime.date, `EEEE dd LLLL`, { locale: fr }),
+        date: format(showtime.date, `HH'h'mm`, { locale: fr }),
+        language: showtime.language,
+        tags: [{ id: showtime.language, name: showtime.language }, ...showtime.Tags],
+        ticketingUrl: showtime.ticketingUrl,
+        addToCalendarUrl,
+        prices: showtime.Prices,
+      },
     },
-  })
+    {
+      headers: {
+        'Cache-Control': 'max-age=3600, public',
+      },
+    }
+  )
 }
 
 export default function Index() {
