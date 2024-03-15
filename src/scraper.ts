@@ -171,7 +171,7 @@ async function scrapAllocineShowtimes(
             originalTitle: result.movie.originalTitle,
             title: result.movie.title,
             duration: getDuration(result.movie.runtime),
-            synopsis: result.movie.synopsisFull,
+            synopsis: result.movie.synopsis,
             releaseDate: getReleaseDate(result.movie.releases),
             allocineId: result.movie.internalId,
             posterAllocineUrl: result.movie.poster?.url,

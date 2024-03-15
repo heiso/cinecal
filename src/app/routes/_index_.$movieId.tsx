@@ -269,8 +269,9 @@ export default function Index() {
           />
         </div>
 
-        <div className="relative z-1 space-y-4">
+        <div className="relative z-1 space-y-4 pb-4">
           <h1 className="text-white text-3xl inline-block">{movie.title}</h1>
+
           <div className="space-x-2">
             <span className="inline-block text-xs border-gray rounded-md border text-gray p-1">
               {movie.duration} min
@@ -279,6 +280,7 @@ export default function Index() {
               {movie.releaseDate}, {movie.director}
             </span>
           </div>
+
           <div className="flex flex-wrap">
             {movie.tags.length &&
               movie.tags.map((tag) => (
@@ -291,37 +293,49 @@ export default function Index() {
               ))}
           </div>
 
-          <p className="text-white text-sm">{movie.synopsis}</p>
+          <p className="text-white">{movie.synopsis}</p>
         </div>
 
         {theaters?.map((theater) => (
-          <div key={theater.id}>
-            <h2 className="text-center m-4 font-medium text-lg">
-              <Link to={theater.website} target="_blank">
-                {theater.name}
-              </Link>
-            </h2>
+          <div className="flex flex-col gap-8 py-4" key={theater.id}>
             {theater.daysByTags.map(({ tags, days }, index) => (
-              <div key={index}>
-                <hr />
-                <div>
+              <div key={index} className="flex flex-col">
+                <div className="flex gap-2 items-center mb-4">
+                  <h2 className="font-medium text-lg mr-2">
+                    <Link to={theater.website} target="_blank">
+                      {theater.name}
+                    </Link>
+                  </h2>
+
                   {tags.map(({ name }) => (
-                    <span key={name}>{name}</span>
+                    <div
+                      className="inline-block text-xs font-bold bg-gray rounded-md border text-black px-2 py-1"
+                      key={name}
+                    >
+                      {name}
+                    </div>
                   ))}
                 </div>
+
                 {days.map(({ day, showtimes }) => (
                   <div key={day}>
-                    <div className="flex flex-wrap capitalize">{day}</div>
-                    {showtimes.map((showtime) => (
-                      <Link
-                        key={showtime.id}
-                        to={`./${showtime.id}`}
-                        style={{ textShadow: '0 0 1px rgba(0,0,0,.5)' }}
-                        className="mr-2 mb-2 inline-block rounded-md bg-primary p-4 text-center"
-                      >
-                        {showtime.date}
-                      </Link>
-                    ))}
+                    {day.startsWith('lundi') && <div className="p-2"></div>}
+                    <div className="flex flex-col gap-4 pb-6 pl-4 border-l-8 border-gray border-opacity-20">
+                      <div className="flex flex-wrap capitalize">{day}</div>
+                      <div className="flex gap-4 flex-wrap">
+                        {showtimes.map((showtime) => (
+                          <Link
+                            key={showtime.id}
+                            target="_blank"
+                            to={showtime.addToCalendarUrl}
+                            style={{ textShadow: '0 0 1px rgba(0,0,0,.5)' }}
+                            className="inline-block rounded-md bg-primary px-4 py-2 text-center"
+                          >
+                            {showtime.date}
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
                   </div>
                 ))}
               </div>
