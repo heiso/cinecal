@@ -1,0 +1,110 @@
+import { json, type LinksFunction, type MetaFunction } from '@remix-run/node'
+import {
+  Link,
+  Links,
+  Meta,
+  Outlet,
+  Scripts,
+  ScrollRestoration,
+  isRouteErrorResponse,
+  useLoaderData,
+  useRouteError,
+} from '@remix-run/react'
+import type { PropsWithChildren } from 'react'
+import { routerPaths } from '../routes.ts'
+import './font.css'
+import './tailwind.css'
+
+type ENV = {
+  ENV: string
+  BUILD_VERSION: string
+}
+
+declare global {
+  var ENV: ENV
+  interface Window {
+    ENV: ENV
+  }
+}
+
+export function loader() {
+  return json({
+    ENV: {
+      ENV: process.env.ENV,
+      BUILD_VERSION: process.env.BUILD_VERSION,
+    },
+  })
+}
+
+export const meta: MetaFunction = () => {
+  return [
+    { title: 'Cinecal' },
+    { property: 'description', content: 'Explorez le cinéma à votre rythme' },
+  ]
+}
+
+export const links: LinksFunction = () => {
+  return [
+    {
+      rel: 'alternate icon',
+      type: 'image/png',
+      href: '/favicon-32x32.png',
+    },
+    { rel: 'apple-touch-icon', href: '/apple-touch-icon.png' },
+    {
+      rel: 'manifest',
+      href: '/site.webmanifest',
+      crossOrigin: 'use-credentials',
+    } as const, // necessary to make typescript happy
+  ]
+}
+
+type DocumentProps = PropsWithChildren
+function Document({ children }: DocumentProps) {
+  return (
+    <html lang="fr" className="dark bg-background w-full h-full text-white">
+      <head>
+        <meta charSet="utf-8" />
+        <meta name="viewport" content="width=device-width,initial-scale=1" />
+        <Meta />
+        <Links />
+      </head>
+      <body className="w-full h-full max-w-screen-sm m-auto relative">
+        {children}
+        <ScrollRestoration />
+        <Scripts />
+      </body>
+    </html>
+  )
+}
+
+export function ErrorBoundary() {
+  const error = useRouteError()
+
+  return (
+    <Document>
+      <h1 className="text-center">Oops! I did it again</h1>
+
+      {isRouteErrorResponse(error) && <div>Status: {error.status}</div>}
+
+      <Link className="hover:underline" to={routerPaths['/']}>
+        Go back
+      </Link>
+    </Document>
+  )
+}
+
+export default function App() {
+  const { ENV } = useLoaderData<typeof loader>()
+
+  return (
+    <Document>
+      <Outlet />
+      <script
+        dangerouslySetInnerHTML={{
+          __html: `window.ENV = ${JSON.stringify(ENV)}`,
+        }}
+      />
+    </Document>
+  )
+}

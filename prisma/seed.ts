@@ -41,6 +41,18 @@ async function main() {
         address: '170 boulevard de Magenta 75010 Paris',
         website: 'https://www.cinemalouxor.fr',
       },
+      {
+        name: 'mk2 Quai de Seine',
+        allocineId: 'C0003',
+        address: '14 quai de la seine 75019 Paris 19e arrondissement',
+        website: 'https://www.mk2.com/salle/mk2-quai-seine-quai-loire',
+      },
+      {
+        name: 'mk2 Quai de Loire',
+        allocineId: 'C1621',
+        address: '7 quai de Loire 75019 Paris',
+        website: 'https://www.mk2.com/salle/mk2-quai-seine-quai-loire',
+      },
     ],
   })
 

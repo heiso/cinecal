@@ -1,8 +1,12 @@
 {
   "extends": "./tsconfig.json",
-  "exclude": ["dist"],
-  "include": ["src/**/*.ts"],
+  "include": ["server/**/*.ts"],
   "compilerOptions": {
+    "outDir": "build",
+    "baseUrl": ".",
+    "rootDir": ".",
+    "checkJs": false,
+    "allowImportingTsExtensions": false,
     "noEmit": false
   }
 }

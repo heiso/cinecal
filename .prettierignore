@@ -1,6 +1,2 @@
-dist
 node_modules
-generated
-coverage
 package-lock.json
-lerna.json

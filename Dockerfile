@@ -1,33 +1,21 @@
+# syntax=docker/dockerfile:1
+ARG NODE_VERSION=20.6.1
+
+
+
 # ===
 # base node image
 # ===
-FROM node:19-bullseye-slim as base
+FROM node:${NODE_VERSION}-slim as base
 
-# Install openssl for Prisma
-RUN apt-get update && apt-get install -y openssl cron curl
+RUN apt-get update -qq && \
+    apt-get install -y openssl cron curl
 
-# Install all node_modules, including dev dependencies
-FROM base as deps
+LABEL fly_launch_runtime="Remix/Prisma"
 
-RUN mkdir /app
 WORKDIR /app
 
-ADD package.json package-lock.json ./
-RUN npm install --production=false
-
-
-
-# ===
-# Setup production node_modules
-# ===
-FROM base as production-deps
-
-RUN mkdir /app
-WORKDIR /app
-
-COPY --from=deps /app/node_modules /app/node_modules
-ADD package.json package-lock.json ./
-RUN npm prune --production
+ENV NODE_ENV=production
 
 
 
@@ -36,41 +24,46 @@ RUN npm prune --production
 # ===
 FROM base as build
 
-ENV NODE_ENV=production
+# Install packages needed to build node modules
+RUN apt-get update -qq && \
+    apt-get install -y python-is-python3 pkg-config build-essential 
 
-RUN mkdir /app
-WORKDIR /app
+# Install node modules
+COPY --link package.json package-lock.json ./
+RUN npm install --production=false
 
-COPY --from=deps /app/node_modules /app/node_modules
-
-ADD prisma .
+# Generate Prisma Client
+COPY --link prisma .
 RUN npx prisma generate
 
-ADD . .
+# Copy application code
+COPY --link . .
+
+# Generate Routes
+RUN npx tsx generate-remix-routes.ts
+
+# Generate SVGs
+RUN npx tsx generate-svg-icons-sprite.ts
+
+# Build application
 RUN npm run build
+
+# Remove development dependencies
+RUN npm prune --production
 
 
 
 # ===
-# Finally, build the production image with minimal footprint
+# Final stage for app image
 # ===
 FROM base
 
-ENV NODE_ENV=production
-
-RUN mkdir /app
-WORKDIR /app
-
-COPY --from=production-deps /app/node_modules /app/node_modules
-COPY --from=build /app/node_modules/.prisma /app/node_modules/.prisma
-COPY --from=build /app/dist /app/dist
-COPY --from=build /app/build /app/build
-COPY --from=build /app/public /app/public
-ADD . .
+# Copy built application
+COPY --from=build /app /app
 
 CMD npx prisma migrate deploy && \
   printenv | awk -F= '{ print $1"="$2 }' > /tmp/crontab && \
   cat ./crontab >> /tmp/crontab && \
   crontab -u root /tmp/crontab && \
   cron && \
-  node ./dist/src/index.js
+  node --max-old-space-size=256 build/server
