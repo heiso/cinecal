@@ -5,7 +5,7 @@ import { resolve } from 'path'
 import { scrap } from '../scraper'
 
 function getPaths(basePath: string, paths: string[] = []) {
-  readdirSync(basePath, { withFileTypes: true }).map((dirent) => {
+  readdirSync(basePath, { withFileTypes: true }).forEach((dirent) => {
     const path = resolve(`${basePath}/${dirent.name}`)
     if (dirent.isDirectory()) {
       getPaths(path, paths)
@@ -23,8 +23,8 @@ const server = setupServer(
     const url = `https://www.allocine.fr/_/${path
       .replace(`${__dirname}/fixtures/`, '')
       .replace('.json', '')}`
-    return http.post(url, ({request}) => new Response(json))
-  })
+    return http.post(url, ({ request }) => new Response(json))
+  }),
 )
 
 beforeAll(() => server.listen())

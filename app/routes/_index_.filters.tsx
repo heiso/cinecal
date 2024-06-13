@@ -15,6 +15,7 @@ import { CUSTOM_TAG_LABELS, DATE_FILTER, DATE_FILTER_LABELS } from '../filters'
 import { getFilters, getWhereInputs } from '../filters.server'
 import { prisma } from '../prisma.server'
 import { Icon } from '../ui/icon'
+import { Input } from '../ui/input'
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const now = new Date()
@@ -261,15 +262,14 @@ export default function Index() {
         </div>
 
         <p className="pt-4">Film</p>
-        <input
+        <Input
           id="title"
-          className="mt-4 mb-4 appearance-none block text-white bg-white bg-opacity-10 border border-white border-opacity-20 rounded-md w-full p-3 pl-4 pr-4 ring-0 focus:ring-0 focus-active:ring-0
-          outline-none"
           type="text"
           placeholder={`Essayez ${randomMovie.title}`}
           name="title"
           value={searchedTitle}
           onChange={(event) => setTitle(event.target.value)}
+          icon={<Icon id="magnifying-glass" />}
         />
         <ul>
           {movieTags.length > 0 &&

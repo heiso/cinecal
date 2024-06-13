@@ -3,10 +3,10 @@ import { hoursToMilliseconds } from 'date-fns'
 import Koa, { type Context } from 'koa'
 import connect from 'koa-connect'
 import serve from 'koa-static'
-import { createRequestHandler } from './adapter.js'
-import './process.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
+import { createRequestHandler } from './adapter.js'
+import './process.js'
 
 installGlobals()
 
@@ -63,7 +63,9 @@ declare module '@remix-run/server-runtime' {
   const build = (
     viteDevServer
       ? () => viteDevServer.ssrLoadModule('virtual:remix/server-build')
-      : await import(`${path.dirname(fileURLToPath(import.meta.url))}/../vite-server/server/index.js`)
+      : await import(
+          `${path.dirname(fileURLToPath(import.meta.url))}/../vite-server/server/index.js`
+        )
   ) as ServerBuild | (() => Promise<ServerBuild>)
 
   app.use(createRequestHandler({ build, mode: process.env.NODE_ENV, getLoadContext: (ctx) => ctx }))

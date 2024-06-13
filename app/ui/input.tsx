@@ -15,7 +15,7 @@ export type InputProps = InputHTMLAttributes<HTMLInputElement> & {
 }
 
 export const defaultStyles =
-  'text-pink-500 placeholder:text-pink-300 hover:border-pink-500 focus:border-pink-500'
+  'text-white placeholder:text-white placeholder:text-opacity-50 hover:border-opacity-30 focus:border-opacity-30 border-opacity-20 border-white bg-opacity-10'
 export const errorStyles =
   'text-red-500 placeholder:text-red-300 hover:border-red-500 focus:border-red-500 bg-red-100 selection:bg-red-500 selection:text-red-50'
 
@@ -32,10 +32,10 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
     return (
       <div className={`relative  ${className ?? ''}`}>
         <input
-          className={`w-full h-full px-4 py-3 ${
+          className={`block w-full h-full p-3 px-4 ${
             icon ? 'pr-11' : ''
-          } appearance-none outline-none disabled:pointer-events-none border rounded-lg ${
-            hasError ? 'bg-red-100' : isFilled ? 'bg-pink-100' : 'bg-white'
+          } appearance-none outline-none disabled:pointer-events-none border rounded-md ring-0 focus:ring-0 focus-active:ring-0 ${
+            hasError ? 'bg-red-100' : isFilled ? 'bg-white' : 'bg-white'
           } ${hasError ? errorStyles : defaultStyles}`}
           ref={innerRef}
           {...props}
@@ -43,7 +43,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
         {icon && (
           <div
             className={`absolute top-0 right-0 bottom-0 z-10 px-4 py-3 select-none ${
-              hasError ? 'text-red-500 fill-red-500' : 'text-pink-500 fill-pink-500'
+              hasError ? 'text-red-500 fill-red-500' : 'text-white fill-white'
             } flex justify-center items-center`}
           >
             {icon}
