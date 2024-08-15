@@ -9,7 +9,7 @@ import {
 } from '@prisma/client'
 import { getPixels } from '@unpic/pixels'
 import { encode } from 'blurhash'
-import { add, endOfDay, endOfYesterday } from 'date-fns'
+import { add, addDays, endOfDay, endOfYesterday, format } from 'date-fns'
 import type { Middleware } from 'koa'
 import type { AllocineResponse, Credit, Release } from './allocine-types'
 
@@ -154,7 +154,7 @@ async function scrapAllocineShowtimes(
 ): Promise<Prisma.ShowtimeCreateInput[]> {
   const theater = theaters[theaterIndex]
   const pageParam = page > 1 ? `p-${page}/` : ''
-  const dayParam = day > 0 ? `d-${day}/` : ''
+  const dayParam = day > 0 ? `d-${format(addDays(new Date(), day), 'yyyy-MM-dd')}/` : ''
   const url = `${URL_ALLOCINE_SHOWTIMES}/theater-${theater.allocineId}/${dayParam}${pageParam}`
 
   try {
