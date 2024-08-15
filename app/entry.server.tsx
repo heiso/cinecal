@@ -1,4 +1,4 @@
-import { PassThrough } from 'node:stream'
+import { PassThrough, Transform } from 'node:stream'
 
 import type { AppLoadContext, DataFunctionArgs, EntryContext } from '@remix-run/node'
 import { createReadableStreamFromReadable } from '@remix-run/node'
@@ -38,14 +38,28 @@ function handleBotRequest(
 
           responseHeaders.set('Content-Type', 'text/html')
 
+          /**
+           * @url https://github.com/kentcdodds/kentcdodds.com/blob/438a18209a060c9f42ff7bd5b416044c69e0b237/app/entry.server.tsx#L109
+           * find/replace all instances of the string "data-evt-" with ""
+           * this is a bit of a hack because React won't render the "onload"
+           * prop, which we use for blurrable image
+           */
+					const dataEvtTransform = new Transform({
+						transform(chunk, encoding, callback) {
+							const string = chunk.toString()
+							const replaced = string.replace(/data-evt-/g, ``)
+							callback(null, replaced)
+						},
+					})
+
+          pipe(dataEvtTransform).pipe(body)
+
           resolve(
             new Response(stream, {
               headers: responseHeaders,
               status: responseStatusCode,
             }),
           )
-
-          pipe(body)
         },
         onShellError(error: unknown) {
           reject(error)
@@ -84,14 +98,28 @@ function handleBrowserRequest(
 
           responseHeaders.set('Content-Type', 'text/html')
 
+          /**
+           * @url https://github.com/kentcdodds/kentcdodds.com/blob/438a18209a060c9f42ff7bd5b416044c69e0b237/app/entry.server.tsx#L109
+           * find/replace all instances of the string "data-evt-" with ""
+           * this is a bit of a hack because React won't render the "onload"
+           * prop, which we use for blurrable image
+           */
+					const dataEvtTransform = new Transform({
+						transform(chunk, encoding, callback) {
+							const string = chunk.toString()
+							const replaced = string.replace(/data-evt-/g, ``)
+							callback(null, replaced)
+						},
+					})
+
+          pipe(dataEvtTransform).pipe(body)
+
           resolve(
             new Response(stream, {
               headers: responseHeaders,
               status: responseStatusCode,
             }),
           )
-
-          pipe(body)
         },
         onShellError(error: unknown) {
           reject(error)

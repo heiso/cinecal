@@ -56,7 +56,7 @@ export function ProgressiveImg({ srcLowDef, className, ...rest }: ProgressiveImg
         // this funny data-evt-prefixed attribute which our server renderer will
         // remove for us (check entry.server).
         suppressHydrationWarning={true}
-        data-evt-onload="this.classList.remove('opacity-0')"
+        data-evt-onload="this.classList.remove('transition-opacity', 'opacity-0')"
         onLoad={() => setVisible(true)}
         id={id}
         className={`absolute left-0 top-0 transition-opacity ${isVisible ? '' : 'opacity-0'} `}
