@@ -10,7 +10,6 @@ import {
 import { getPixels } from '@unpic/pixels'
 import { encode } from 'blurhash'
 import { add, addDays, endOfDay, format } from 'date-fns'
-import { POSTER_WIDTH } from '../app/poster.server'
 import type { AllocineResponse, Credit, Release } from './allocine-types'
 
 const API_ENDPOINT = 'https://api.imagekit.io/v1/files'
@@ -528,7 +527,7 @@ export async function savePosterBlurHashes() {
 
   for (const movie of movies) {
     try {
-      const url = `${IMAGEKIT_URL}/${movie.posterUrl}/tr:w-${POSTER_WIDTH},q-50,ar-62-85`
+      const url = `${IMAGEKIT_URL}/${movie.posterUrl}/tr:w-310,q-50,ar-62-85`
       const pixels = await getPixels(url)
       const data = Uint8ClampedArray.from(pixels.data)
       const blurHash = encode(data, pixels.width, pixels.height, Math.round(9 * POSTER_RATIO), 9)
