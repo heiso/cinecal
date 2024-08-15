@@ -6,20 +6,16 @@ export interface Poster {
   path: string
 }
 
-export interface Genre {
-  id: number
-  translate: string
-  tag: string
-}
-
 export interface Seo {
   __typename: string
   browsable: boolean
+  title: string | null
 }
 
 export interface Data {
   __typename: string
   seo: Seo
+  productionYear: number
 }
 
 export interface UserRating {
@@ -304,20 +300,24 @@ export interface CustomFlags {
 
 export interface Movie {
   synopsis: string
-  synopsisFull: string
   __typename: string
   internalId: number
   poster: Poster
   title: string
   originalTitle: string
   type: string
-  runtime: string
-  genres: Genre[]
+  runtime: number
+  genres: string[]
   languages: string[]
   data: Data
   stats: Stats
   editorialReviews: any[]
   releases: Release[]
+  /**
+   * @todo
+   * @fixme
+   * This is not anymore a valid type according to the allocine api response
+   */
   credits: Credit[]
   cast: Cast
   countries: Country[]

@@ -9,6 +9,7 @@ import { getPosterSrc } from '../poster.server'
 import { prisma } from '../prisma.server'
 import { ProgressiveImg } from '../progressiveImg'
 import { Icon } from '../ui/icon'
+import { routerPaths } from '../../routes'
 
 const GOOGLE_CALENDAR_DATE_FORMAT = "yyyyMMdd'T'HHmmss"
 
@@ -124,13 +125,14 @@ export const loader = async ({ context, params, request }: LoaderFunctionArgs) =
       )}`,
     )
     url.searchParams.append('text', `${theater.name} - ${movie.title}`)
-    url.searchParams.append('location', theater.address)
+    url.searchParams.append('location', `${theater.name} ${theater.address}`)
     if (showtime.Tags.length) {
+      const cinecalUrl = new URL(routerPaths['/:movieId']({movieId: movie.id}), process.env.PUBLIC_URL).toString()
       url.searchParams.append(
         'details',
-        `Ticket: <a href="${showtime.ticketingUrl}">${
+        `Page du film <a href=${cinecalUrl} target="_blank">${cinecalUrl}</a>\nRéserver une place <a href="${showtime.ticketingUrl}" target="_blank">${
           showtime.ticketingUrl
-        }</a>\nTags: ${showtime.Tags.map(({ name }) => name).join(', ')}`,
+        }</a>`,
       )
     }
 

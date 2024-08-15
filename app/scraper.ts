@@ -39,10 +39,8 @@ function getUniqueAllocineShowtimes(showtimes: AllocineResponse['results'][0]['s
   }, [])
 }
 
-function getDuration(runtime: string) {
-  const split = runtime.split('h')
-  if (!split) return 0
-  return parseInt(split[0]) * 60 + parseInt(split[1])
+function getDuration(runtime: number) {
+  return runtime / 60 || 0
 }
 
 function getReleaseDate(releases: Release[]) {
@@ -54,6 +52,10 @@ function getReleaseDate(releases: Release[]) {
 }
 
 function getDirector(credits: Credit[]) {
+  /**
+   * @todo allocine changed its api, credits is now edges and nodes
+   */
+  return null
   const persons = credits
     .filter((credit) => credit.position?.name === 'DIRECTOR')
     .map((credit) => credit.person)
@@ -148,7 +150,7 @@ async function scrapAllocineShowtimes(
   showtimeCreateInputs: Record<
     ReturnType<typeof getUniqueAllocineShowtimes>[0]['internalId'],
     Prisma.ShowtimeCreateInput
-  > = {},
+  > = {}
 ): Promise<Prisma.ShowtimeCreateInput[]> {
   const theater = theaters[theaterIndex]
   const pageParam = page > 1 ? `p-${page}/` : ''
@@ -159,7 +161,7 @@ async function scrapAllocineShowtimes(
     const body = await getAllocineShowtimes(url)
 
     for (const result of body.results.filter(
-      ({ movie }) => !EXCLUSION_LIST.includes(movie.title),
+      ({ movie }) => !EXCLUSION_LIST.includes(movie.title)
     )) {
       try {
         const movie = await prisma.movie.upsert({
@@ -199,13 +201,13 @@ async function scrapAllocineShowtimes(
                   return acc
                 }, [] as Prisma.MovieTagCreateOrConnectWithoutMoviesInput[]),
                 ...result.movie.genres.map<Prisma.MovieTagCreateOrConnectWithoutMoviesInput>(
-                  ({ translate }) => ({
-                    where: { name: translate },
+                  (name) => ({
+                    where: { name },
                     create: {
-                      name: translate,
+                      name,
                       category: TagCategory.GENRE,
                     },
-                  }),
+                  })
                 ),
               ],
             },
@@ -245,7 +247,7 @@ async function scrapAllocineShowtimes(
         maxDay,
         day,
         page + 1,
-        showtimeCreateInputs,
+        showtimeCreateInputs
       )
     }
   } catch (err) {
@@ -283,14 +285,14 @@ async function scrapAllocineTicketingUrl(): Promise<void> {
   })
 
   for (const { id, movieId, ticketingUrl } of showtimes.filter(
-    ({ ticketingUrl }) => ticketingUrl,
+    ({ ticketingUrl }) => ticketingUrl
   )) {
     try {
       const details = await getAllocineTicketingDetails(ticketingUrl!)
       let prices: { label: string; description?: string | null; price: number }[] = []
 
       const regx = new RegExp(
-        /<p>([^<]*)(?:<a[^<]*title\=\"([^<]*)"[^<]*>i<\/a>)?<span[^<]*[^>]*>(\d*.\d*)\ &euro;/g,
+        /<p>([^<]*)(?:<a[^<]*title\=\"([^<]*)"[^<]*>i<\/a>)?<span[^<]*[^>]*>(\d*.\d*)\ &euro;/g
       )
       const matches = [...details.matchAll(regx)]
 
@@ -360,7 +362,7 @@ async function getUploadedPosterList(): Promise<
   const body = await response.json()
 
   return body.filter((file: Record<string, unknown>) =>
-    (file.filePath as string).includes(IMAGEKIT_FOLDER),
+    (file.filePath as string).includes(IMAGEKIT_FOLDER)
   )
 }
 
@@ -378,7 +380,7 @@ async function scrapAllocinePosters() {
       let posterUrl: string
 
       const poster = posters.find(
-        (poster) => poster.customMetadata.allocineUrl === movie.posterAllocineUrl,
+        (poster) => poster.customMetadata.allocineUrl === movie.posterAllocineUrl
       )
 
       if (poster) {
@@ -395,14 +397,14 @@ async function scrapAllocinePosters() {
             id: movie.id,
             title: movie.originalTitle,
             allocineUrl: movie.posterAllocineUrl,
-          }),
+          })
         )
 
         const response = await fetch(`${API_ENDPOINT}/upload`, {
           method: 'POST',
           headers: {
             Authorization: `Basic ${Buffer.from(process.env.IMAGEKIT_API_KEY + ':').toString(
-              'base64',
+              'base64'
             )}`,
           },
           body,
