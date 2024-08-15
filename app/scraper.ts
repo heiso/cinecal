@@ -181,19 +181,20 @@ async function scrapAllocineShowtimes(
                 ...result.movie.relatedTags.reduce<
                   Prisma.MovieTagCreateOrConnectWithoutMoviesInput[]
                 >((acc, { name, tags }) => {
+                  const resolvedName = typeof name === 'string' ? name : name.translate
                   if (tags.list.find((type) => 'Tag.Type.SubGenre' === type)) {
                     acc.push({
-                      where: { name },
+                      where: { name: resolvedName },
                       create: {
-                        name,
+                        name: resolvedName,
                         category: TagCategory.SUB_GENRE,
                       },
                     })
                   } else if (tags.list.find((type) => 'Tag.Type.Characteristic' === type)) {
                     acc.push({
-                      where: { name },
+                      where: { name: resolvedName },
                       create: {
-                        name,
+                        name: resolvedName,
                         category: TagCategory.CHARACTERISTIC,
                       },
                     })
@@ -201,13 +202,16 @@ async function scrapAllocineShowtimes(
                   return acc
                 }, [] as Prisma.MovieTagCreateOrConnectWithoutMoviesInput[]),
                 ...result.movie.genres.map<Prisma.MovieTagCreateOrConnectWithoutMoviesInput>(
-                  (name) => ({
-                    where: { name },
-                    create: {
-                      name,
-                      category: TagCategory.GENRE,
-                    },
-                  })
+                  (name) => {
+                    const resolvedName = typeof name === 'string' ? name : name.translate
+                    return {
+                      where: { name: resolvedName },
+                      create: {
+                        name: resolvedName,
+                        category: TagCategory.GENRE,
+                      },
+                    }
+                  }
                 ),
               ],
             },

@@ -270,7 +270,7 @@ export interface Tags {
 export interface RelatedTag {
   __typename: string
   internalId: number
-  name: string
+  name: string | { id: string; tag: string; translate: string }
   scope: string
   data: Data2
   tags: Tags
@@ -307,7 +307,7 @@ export interface Movie {
   originalTitle: string
   type: string
   runtime: number
-  genres: string[]
+  genres: string[] | { id: number; translate: string; tag: string }[]
   languages: string[]
   data: Data
   stats: Stats
