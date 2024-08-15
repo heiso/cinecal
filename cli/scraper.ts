@@ -9,7 +9,7 @@ import {
 } from '@prisma/client'
 import { getPixels } from '@unpic/pixels'
 import { encode } from 'blurhash'
-import { add, addDays, endOfDay, endOfYesterday, format } from 'date-fns'
+import { add, addDays, endOfDay, format } from 'date-fns'
 import type { AllocineResponse, Credit, Release } from './allocine-types'
 
 const API_ENDPOINT = 'https://api.imagekit.io/v1/files'
@@ -36,7 +36,12 @@ function getUniqueAllocineShowtimes(showtimes: AllocineResponse['results'][0]['s
   }, [])
 }
 
-function getDuration(runtime: number) {
+function getDuration(runtime: number | string) {
+  if (typeof runtime === 'string') {
+    const split = runtime.split('h')
+    if (!split) return 0
+    return parseInt(split[0]) * 60 + parseInt(split[1])
+  }
   return runtime / 60 || 0
 }
 
@@ -456,7 +461,7 @@ export async function scrapShowtimes(maxDay: number) {
 
   await prisma.$transaction([
     prisma.showtime.deleteMany({
-      where: { date: { lt: endOfYesterday() } },
+      where: { date: { lt: new Date() } },
     }),
     prisma.movie.deleteMany({
       where: { Showtimes: { none: {} } },
