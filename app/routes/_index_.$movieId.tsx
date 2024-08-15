@@ -152,6 +152,7 @@ export const loader = async ({ context, params, request }: LoaderFunctionArgs) =
     filterCount: filters.count,
 
     movie: {
+      id: movie.id,
       tags: movie.Tags,
       title: movie.title,
       src,
@@ -245,7 +246,7 @@ export default function Index() {
   return (
     <>
       <div className="p-6 pb-28">
-        <Link to={{ pathname: '/' }} className="fill-white w-fit absolute z-10">
+        <Link to={{ pathname: '/', hash: movie.id.toString() }} className="fill-white w-fit absolute z-10">
           <Icon id="cross-2" width="32px" height="32px" />
         </Link>
 

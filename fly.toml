@@ -8,7 +8,7 @@ primary_region = "cdg"
   ENV = "production"
   PORT = "8080"
   TZ = "Europe/Paris"
-  PUBLIC_URL = "cinecal.fly.dev"
+  PUBLIC_URL = "https://cinecal.fly.dev"
   SHOULD_REFRESH_BROWSER_IF_VERSION_MISMATCH = 'true'
 
 [[service]]
