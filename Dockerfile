@@ -9,7 +9,7 @@ ARG NODE_VERSION=20.6.1
 FROM node:${NODE_VERSION}-slim as base
 
 RUN apt-get update -qq && \
-    apt-get install -y openssl cron curl
+    apt-get install -y openssl curl
 
 LABEL fly_launch_runtime="Remix/Prisma"
 
@@ -61,9 +61,4 @@ FROM base
 # Copy built application
 COPY --from=build /app /app
 
-CMD npx prisma migrate deploy && \
-  printenv | awk -F= '{ print $1"="$2 }' > /tmp/crontab && \
-  cat ./crontab >> /tmp/crontab && \
-  crontab -u root /tmp/crontab && \
-  cron && \
-  node --max-old-space-size=256 build/server
+CMD npx prisma migrate deploy && node --max-old-space-size=256 build/server

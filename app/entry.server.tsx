@@ -145,5 +145,7 @@ export async function handleDataRequest(response: Response, { request }: DataFun
 }
 
 export function handleError(error: unknown, { request }: DataFunctionArgs): void {
+  if (request.signal.aborted) return;
+  
   console.error(error)
 }

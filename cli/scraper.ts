@@ -10,8 +10,8 @@ import {
 import { getPixels } from '@unpic/pixels'
 import { encode } from 'blurhash'
 import { add, addDays, endOfDay, endOfYesterday, format } from 'date-fns'
-import type { Middleware } from 'koa'
 import type { AllocineResponse, Credit, Release } from './allocine-types'
+
 
 const API_ENDPOINT = 'https://api.imagekit.io/v1/files'
 const URL_ALLOCINE_SHOWTIMES = 'https://www.allocine.fr/_/showtimes'
@@ -455,6 +455,14 @@ async function savePosterBlurHashes() {
 }
 
 export async function scrap(maxDay: number = 10, reset = false) {
+  const start = Date.now()
+
+  const [countCacheItemsBefore, countShowtimesBefore, countMoviesBefore] = await Promise.all([
+    prisma.scrapedUrl.count(),
+    prisma.showtime.count(),
+    prisma.movie.count(),
+  ])
+
   if (reset) {
     await prisma.$transaction([prisma.showtime.deleteMany(), prisma.movie.deleteMany()])
   }
@@ -483,44 +491,17 @@ export async function scrap(maxDay: number = 10, reset = false) {
   await prisma.showtime.deleteMany({
     where: { allocineId: { notIn: foundShowtimeAllocineIds } },
   })
-}
 
-export function scraperMiddleware(): Middleware {
-  return async function scraperMiddleware(ctx, next) {
-    if (
-      ctx.path.startsWith('/scrap') &&
-      ['127.0.0.1', '::ffff:127.0.0.1', '::1'].includes(ctx.ip)
-    ) {
-      const start = Date.now()
+  const [countCacheItemsAfter, countShowtimesAfter, countMoviesAfter] = await Promise.all([
+    prisma.scrapedUrl.count(),
+    prisma.showtime.count(),
+    prisma.movie.count(),
+  ])
 
-      const [countCacheItemsBefore, countShowtimesBefore, countMoviesBefore] = await Promise.all([
-        ctx.prisma.scrapedUrl.count(),
-        ctx.prisma.showtime.count(),
-        ctx.prisma.movie.count(),
-      ])
+  const duration = Date.now() - start
 
-      ctx.res.statusCode = 200
-      ctx.res.end()
-
-      const match = ctx.path.match(/([0-9]+)/)
-      const days = match ? parseInt(match[0]) : 90
-
-      await scrap(days)
-
-      const [countCacheItemsAfter, countShowtimesAfter, countMoviesAfter] = await Promise.all([
-        ctx.prisma.scrapedUrl.count(),
-        ctx.prisma.showtime.count(),
-        ctx.prisma.movie.count(),
-      ])
-
-      const duration = Date.now() - start
-
-      console.log(`CachedUrls: ${countCacheItemsBefore} -> ${countCacheItemsAfter}`)
-      console.log(`Movies: ${countMoviesBefore} -> ${countMoviesAfter}`)
-      console.log(`Showtimes: ${countShowtimesBefore} -> ${countShowtimesAfter}`)
-      console.log(`Done in ${duration}ms`)
-    } else {
-      return next()
-    }
-  }
+  console.log(`CachedUrls: ${countCacheItemsBefore} -> ${countCacheItemsAfter}`)
+  console.log(`Movies: ${countMoviesBefore} -> ${countMoviesAfter}`)
+  console.log(`Showtimes: ${countShowtimesBefore} -> ${countShowtimesAfter}`)
+  console.log(`Done in ${duration}ms`)
 }

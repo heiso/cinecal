@@ -1,6 +1,6 @@
 {
   "extends": "./tsconfig.json",
-  "include": ["server/**/*.ts"],
+  "include": ["server/**/*.ts", "cli/**/*.ts"],
   "compilerOptions": {
     "outDir": "build",
     "baseUrl": ".",
