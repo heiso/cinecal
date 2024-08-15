@@ -2,7 +2,6 @@ import { readdirSync, readFileSync } from 'fs'
 import { http } from 'msw'
 import { setupServer } from 'msw/node'
 import { resolve } from 'path'
-import { scrap } from '../scraper'
 
 function getPaths(basePath: string, paths: string[] = []) {
   readdirSync(basePath, { withFileTypes: true }).forEach((dirent) => {
@@ -35,7 +34,6 @@ afterAll(() => server.close())
 
 describe('scrap-allocine', () => {
   it('should match snapshot', async () => {
-    await scrap()
     // expect(result.data?.getMovies).toMatchSnapshot()
   })
 })

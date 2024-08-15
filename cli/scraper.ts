@@ -12,7 +12,6 @@ import { encode } from 'blurhash'
 import { add, addDays, endOfDay, endOfYesterday, format } from 'date-fns'
 import type { AllocineResponse, Credit, Release } from './allocine-types'
 
-
 const API_ENDPOINT = 'https://api.imagekit.io/v1/files'
 const URL_ALLOCINE_SHOWTIMES = 'https://www.allocine.fr/_/showtimes'
 // const URL_THEMOVIEDBID = `https://api.themoviedb.org/3/search/movie?api_key=${process.env.THEMOVIEDBID_API_KEY}&language=fr-FR&query=`
@@ -25,8 +24,6 @@ const SHOWTIMES_EXPIRATION_DATE = endOfDay(new Date())
 const TICKETING_DETAILS_EXPIRATION_DATE = add(new Date(), { days: 3 })
 
 const prisma = new PrismaClient()
-
-let foundShowtimeAllocineIds: number[] = []
 
 function getUniqueAllocineShowtimes(showtimes: AllocineResponse['results'][0]['showtimes']) {
   const showtimesArray = [...showtimes.local, ...showtimes.multiple, ...showtimes.original]
@@ -93,7 +90,7 @@ async function getAllocineTicketingDetails(url: string) {
 
   await prisma.scrapedUrl.upsert({
     where: { url },
-    create: { url, content, expiresAt: TICKETING_DETAILS_EXPIRATION_DATE },
+    create: { url, content, expiresAt: TICKETING_DETAILS_EXPIRATION_DATE, type: 'TICKETING' },
     update: { content, expiresAt: TICKETING_DETAILS_EXPIRATION_DATE },
   })
 
@@ -134,7 +131,7 @@ async function getAllocineShowtimes(url: string) {
 
   await prisma.scrapedUrl.upsert({
     where: { url },
-    create: { url, content, expiresAt: SHOWTIMES_EXPIRATION_DATE },
+    create: { url, content, expiresAt: SHOWTIMES_EXPIRATION_DATE, type: 'SHOWTIMES' },
     update: { content, expiresAt: SHOWTIMES_EXPIRATION_DATE },
   })
 
@@ -144,13 +141,14 @@ async function getAllocineShowtimes(url: string) {
 async function scrapAllocineShowtimes(
   theaters: Theater[],
   maxDay: number,
+  foundShowtimeAllocineIds: Set<number>,
   theaterIndex: number = 0,
   day: number = 0,
   page: number = 1,
   showtimeCreateInputs: Record<
     ReturnType<typeof getUniqueAllocineShowtimes>[0]['internalId'],
     Prisma.ShowtimeCreateInput
-  > = {}
+  > = {},
 ): Promise<Prisma.ShowtimeCreateInput[]> {
   const theater = theaters[theaterIndex]
   const pageParam = page > 1 ? `p-${page}/` : ''
@@ -161,7 +159,7 @@ async function scrapAllocineShowtimes(
     const body = await getAllocineShowtimes(url)
 
     for (const result of body.results.filter(
-      ({ movie }) => !EXCLUSION_LIST.includes(movie.title)
+      ({ movie }) => !EXCLUSION_LIST.includes(movie.title),
     )) {
       try {
         const movie = await prisma.movie.upsert({
@@ -211,7 +209,7 @@ async function scrapAllocineShowtimes(
                         category: TagCategory.GENRE,
                       },
                     }
-                  }
+                  },
                 ),
               ],
             },
@@ -235,10 +233,7 @@ async function scrapAllocineShowtimes(
           skipDuplicates: true,
         })
 
-        foundShowtimeAllocineIds = [
-          ...foundShowtimeAllocineIds,
-          ...data.map(({ allocineId }) => allocineId),
-        ]
+        data.forEach(({ allocineId }) => foundShowtimeAllocineIds.add(allocineId))
       } catch (err) {
         console.error(err)
       }
@@ -248,10 +243,11 @@ async function scrapAllocineShowtimes(
       return scrapAllocineShowtimes(
         theaters,
         theaterIndex,
+        foundShowtimeAllocineIds,
         maxDay,
         day,
         page + 1,
-        showtimeCreateInputs
+        showtimeCreateInputs,
       )
     }
   } catch (err) {
@@ -259,11 +255,27 @@ async function scrapAllocineShowtimes(
   }
 
   if (day < maxDay) {
-    return scrapAllocineShowtimes(theaters, maxDay, theaterIndex, day + 1, 1, showtimeCreateInputs)
+    return scrapAllocineShowtimes(
+      theaters,
+      maxDay,
+      foundShowtimeAllocineIds,
+      theaterIndex,
+      day + 1,
+      1,
+      showtimeCreateInputs,
+    )
   }
 
   if (theaters[theaterIndex + 1]) {
-    return scrapAllocineShowtimes(theaters, maxDay, theaterIndex + 1, 0, 1, showtimeCreateInputs)
+    return scrapAllocineShowtimes(
+      theaters,
+      maxDay,
+      foundShowtimeAllocineIds,
+      theaterIndex + 1,
+      0,
+      1,
+      showtimeCreateInputs,
+    )
   }
 
   return Object.values(showtimeCreateInputs)
@@ -289,14 +301,14 @@ async function scrapAllocineTicketingUrl(): Promise<void> {
   })
 
   for (const { id, movieId, ticketingUrl } of showtimes.filter(
-    ({ ticketingUrl }) => ticketingUrl
+    ({ ticketingUrl }) => ticketingUrl,
   )) {
     try {
       const details = await getAllocineTicketingDetails(ticketingUrl!)
       let prices: { label: string; description?: string | null; price: number }[] = []
 
       const regx = new RegExp(
-        /<p>([^<]*)(?:<a[^<]*title\=\"([^<]*)"[^<]*>i<\/a>)?<span[^<]*[^>]*>(\d*.\d*)\ &euro;/g
+        /<p>([^<]*)(?:<a[^<]*title\=\"([^<]*)"[^<]*>i<\/a>)?<span[^<]*[^>]*>(\d*.\d*)\ &euro;/g,
       )
       const matches = [...details.matchAll(regx)]
 
@@ -366,7 +378,7 @@ async function getUploadedPosterList(): Promise<
   const body = await response.json()
 
   return body.filter((file: Record<string, unknown>) =>
-    (file.filePath as string).includes(IMAGEKIT_FOLDER)
+    (file.filePath as string).includes(IMAGEKIT_FOLDER),
   )
 }
 
@@ -384,7 +396,7 @@ async function scrapAllocinePosters() {
       let posterUrl: string
 
       const poster = posters.find(
-        (poster) => poster.customMetadata.allocineUrl === movie.posterAllocineUrl
+        (poster) => poster.customMetadata.allocineUrl === movie.posterAllocineUrl,
       )
 
       if (poster) {
@@ -401,14 +413,14 @@ async function scrapAllocinePosters() {
             id: movie.id,
             title: movie.originalTitle,
             allocineUrl: movie.posterAllocineUrl,
-          })
+          }),
         )
 
         const response = await fetch(`${API_ENDPOINT}/upload`, {
           method: 'POST',
           headers: {
             Authorization: `Basic ${Buffer.from(process.env.IMAGEKIT_API_KEY + ':').toString(
-              'base64'
+              'base64',
             )}`,
           },
           body,
@@ -431,7 +443,63 @@ async function scrapAllocinePosters() {
   }
 }
 
-async function savePosterBlurHashes() {
+export async function scrapShowtimes(maxDay: number) {
+  const foundShowtimeAllocineIds = new Set<number>()
+
+  const [countCacheItemsBefore, countShowtimesBefore, countMoviesBefore, theaters] =
+    await Promise.all([
+      prisma.scrapedUrl.count({ where: { type: 'SHOWTIMES' } }),
+      prisma.showtime.count(),
+      prisma.movie.count(),
+      prisma.theater.findMany(),
+    ])
+
+  await prisma.$transaction([
+    prisma.showtime.deleteMany({
+      where: { date: { lt: endOfYesterday() } },
+    }),
+    prisma.movie.deleteMany({
+      where: { Showtimes: { none: {} } },
+    }),
+    prisma.scrapedUrl.deleteMany({
+      where: { expiresAt: { lt: new Date() }, type: 'SHOWTIMES' },
+    }),
+  ])
+
+  await scrapAllocineShowtimes(theaters, maxDay, foundShowtimeAllocineIds)
+
+  const [countCacheItemsAfter, countShowtimesAfter, countMoviesAfter] = await Promise.all([
+    prisma.scrapedUrl.count({ where: { type: 'SHOWTIMES' } }),
+    prisma.showtime.count(),
+    prisma.movie.count(),
+    prisma.showtime.deleteMany({
+      where: { allocineId: { notIn: [...foundShowtimeAllocineIds] } },
+    }),
+  ])
+
+  console.log(`CachedUrls: ${countCacheItemsBefore} -> ${countCacheItemsAfter}`)
+  console.log(`Movies: ${countMoviesBefore} -> ${countMoviesAfter}`)
+  console.log(`Showtimes: ${countShowtimesBefore} -> ${countShowtimesAfter}`)
+}
+
+export async function scrapTicketing() {
+  const countCacheItemsBefore = await prisma.scrapedUrl.count({ where: { type: 'TICKETING' } })
+  await prisma.scrapedUrl.deleteMany({
+    where: { expiresAt: { lt: new Date() }, type: 'TICKETING' },
+  })
+
+  await scrapAllocineTicketingUrl()
+
+  const countCacheItemsAfter = await prisma.scrapedUrl.count({ where: { type: 'TICKETING' } })
+
+  console.log(`CachedUrls: ${countCacheItemsBefore} -> ${countCacheItemsAfter}`)
+}
+
+export async function scrapPosters() {
+  await scrapAllocinePosters()
+}
+
+export async function savePosterBlurHashes() {
   const movies = await prisma.movie.findMany({
     where: { posterUrl: { not: null }, posterBlurHash: null },
     select: { id: true, posterUrl: true },
@@ -452,56 +520,4 @@ async function savePosterBlurHashes() {
       console.error(err)
     }
   }
-}
-
-export async function scrap(maxDay: number = 10, reset = false) {
-  const start = Date.now()
-
-  const [countCacheItemsBefore, countShowtimesBefore, countMoviesBefore] = await Promise.all([
-    prisma.scrapedUrl.count(),
-    prisma.showtime.count(),
-    prisma.movie.count(),
-  ])
-
-  if (reset) {
-    await prisma.$transaction([prisma.showtime.deleteMany(), prisma.movie.deleteMany()])
-  }
-
-  const [theaters] = await prisma.$transaction([
-    prisma.theater.findMany(),
-    prisma.scrapedUrl.deleteMany({
-      where: { expiresAt: { lt: new Date() } },
-    }),
-    prisma.showtime.deleteMany({
-      where: { date: { lt: endOfYesterday() } },
-    }),
-    prisma.movie.deleteMany({
-      where: { Showtimes: { none: {} } },
-    }),
-  ])
-
-  await scrapAllocineShowtimes(theaters, maxDay)
-
-  await scrapAllocineTicketingUrl()
-
-  await scrapAllocinePosters()
-
-  await savePosterBlurHashes()
-
-  await prisma.showtime.deleteMany({
-    where: { allocineId: { notIn: foundShowtimeAllocineIds } },
-  })
-
-  const [countCacheItemsAfter, countShowtimesAfter, countMoviesAfter] = await Promise.all([
-    prisma.scrapedUrl.count(),
-    prisma.showtime.count(),
-    prisma.movie.count(),
-  ])
-
-  const duration = Date.now() - start
-
-  console.log(`CachedUrls: ${countCacheItemsBefore} -> ${countCacheItemsAfter}`)
-  console.log(`Movies: ${countMoviesBefore} -> ${countMoviesAfter}`)
-  console.log(`Showtimes: ${countShowtimesBefore} -> ${countShowtimesAfter}`)
-  console.log(`Done in ${duration}ms`)
 }

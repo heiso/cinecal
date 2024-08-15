@@ -7,11 +7,17 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum ScrapedUrlType {
+  SHOWTIMES
+  TICKETING
+}
+
 model ScrapedUrl {
-  url       String   @id
-  createdAt DateTime @default(now()) @map("created_at")
-  expiresAt DateTime @map("expires_at")
+  url       String          @id
+  createdAt DateTime        @default(now()) @map("created_at")
+  expiresAt DateTime        @map("expires_at")
   content   String
+  type      ScrapedUrlType
 
   @@map("scraped_urls")
 }
