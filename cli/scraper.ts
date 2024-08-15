@@ -10,6 +10,7 @@ import {
 import { getPixels } from '@unpic/pixels'
 import { encode } from 'blurhash'
 import { add, addDays, endOfDay, format } from 'date-fns'
+import { POSTER_WIDTH } from '../app/poster.server'
 import type { AllocineResponse, Credit, Release } from './allocine-types'
 
 const API_ENDPOINT = 'https://api.imagekit.io/v1/files'
@@ -370,10 +371,22 @@ async function scrapAllocineTicketingUrl(): Promise<void> {
   }
 }
 
-async function getUploadedPosterList(): Promise<
-  { filePath: string; name: string; url: string; customMetadata: Record<string, unknown> }[]
-> {
-  const response = await fetch(API_ENDPOINT, {
+type CustomMetadata = {
+  id: number
+  title: string
+  allocineUrl: string | null
+}
+
+async function getUploadedPosterList(
+  movieIds: number[],
+): Promise<{ filePath: string; name: string; url: string; customMetadata: CustomMetadata }[]> {
+  const url = new URL(API_ENDPOINT)
+  url.searchParams.append('path', IMAGEKIT_FOLDER)
+  url.searchParams.append('type', 'file')
+  url.searchParams.append('fileType', 'image')
+  url.searchParams.append('searchQuery', `"customMetadata.id" in [${movieIds.join(',')}]`)
+
+  const response = await fetch(url, {
     method: 'GET',
     headers: {
       Authorization: `Basic ${Buffer.from(process.env.IMAGEKIT_API_KEY + ':').toString('base64')}`,
@@ -394,14 +407,16 @@ async function scrapAllocinePosters() {
     orderBy: { id: 'asc' },
   })
 
-  const posters = await getUploadedPosterList()
+  const posters = await getUploadedPosterList(movies.map(({ id }) => id))
 
   for (const movie of movies) {
     try {
       let posterUrl: string
 
       const poster = posters.find(
-        (poster) => poster.customMetadata.allocineUrl === movie.posterAllocineUrl,
+        (poster) =>
+          poster.customMetadata.allocineUrl?.split('/').reverse()[0] ===
+          movie.posterAllocineUrl?.split('/').reverse()[0],
       )
 
       if (poster) {
@@ -418,7 +433,7 @@ async function scrapAllocinePosters() {
             id: movie.id,
             title: movie.originalTitle,
             allocineUrl: movie.posterAllocineUrl,
-          }),
+          } satisfies CustomMetadata),
         )
 
         const response = await fetch(`${API_ENDPOINT}/upload`, {
@@ -513,7 +528,7 @@ export async function savePosterBlurHashes() {
 
   for (const movie of movies) {
     try {
-      const url = `${IMAGEKIT_URL}/${movie.posterUrl}/tr:w-400,q-50,ar-62-85`
+      const url = `${IMAGEKIT_URL}/${movie.posterUrl}/tr:w-${POSTER_WIDTH},q-50,ar-62-85`
       const pixels = await getPixels(url)
       const data = Uint8ClampedArray.from(pixels.data)
       const blurHash = encode(data, pixels.width, pixels.height, Math.round(9 * POSTER_RATIO), 9)
