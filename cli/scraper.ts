@@ -392,6 +392,10 @@ async function getUploadedPosterList(
     },
   })
 
+  if (!response.ok) {
+    console.error(response)
+  }
+
   const body = await response.json()
 
   return body.filter((file: Record<string, unknown>) =>
