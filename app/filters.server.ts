@@ -86,6 +86,7 @@ export function getWhereInputs(filters: ReturnType<typeof getFilters>): {
 
   return {
     movieWhereInput: {
+      Showtimes: { some: { id: { not: undefined } } },
       ...(filters.title && { title: { contains: filters.title, mode: 'insensitive' } }),
       ...whereReleaseDate,
       ...(filters.customTags.SCRAPED_RECENTLY && { createdAt: { gte: startOfDay(now) } }),

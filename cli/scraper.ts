@@ -481,9 +481,6 @@ export async function scrapShowtimes(maxDay: number) {
     prisma.showtime.deleteMany({
       where: { date: { lt: new Date() } },
     }),
-    prisma.movie.deleteMany({
-      where: { Showtimes: { none: {} } },
-    }),
     prisma.scrapedUrl.deleteMany({
       where: { expiresAt: { lt: new Date() }, type: 'SHOWTIMES' },
     }),
