@@ -16,7 +16,7 @@ const API_ENDPOINT = 'https://api.imagekit.io/v1/files'
 const URL_ALLOCINE_SHOWTIMES = 'https://www.allocine.fr/_/showtimes'
 // const URL_THEMOVIEDBID = `https://api.themoviedb.org/3/search/movie?api_key=${process.env.THEMOVIEDBID_API_KEY}&language=fr-FR&query=`
 // const URL_THEMOVIEDBID_PICTURES = `https://image.tmdb.org/t/p/original`
-const EXCLUSION_LIST = ['Rex Studios']
+const EXCLUSION_LIST = ['Rex Studios', 'Sauvez le cinéma !']
 const IMAGEKIT_FOLDER = process.env.ENV === 'development' ? 'posters-dev' : 'posters-prod'
 const IMAGEKIT_URL = `https://ik.imagekit.io/cinecal/${IMAGEKIT_FOLDER}`
 const POSTER_RATIO = 62 / 85
