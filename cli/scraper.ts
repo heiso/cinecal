@@ -250,8 +250,8 @@ async function scrapAllocineShowtimes(
         maxDay,
         foundShowtimeAllocineIds,
         theaterIndex,
-        day + 1,
-        1,
+        day,
+        Number(body.pagination.page) + 1,
         showtimeCreateInputs,
       )
     }
