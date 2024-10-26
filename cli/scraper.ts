@@ -247,11 +247,11 @@ async function scrapAllocineShowtimes(
     if (Number(body.pagination.page) < body.pagination.totalPages) {
       return scrapAllocineShowtimes(
         theaters,
-        theaterIndex,
-        foundShowtimeAllocineIds,
         maxDay,
-        day,
-        page + 1,
+        foundShowtimeAllocineIds,
+        theaterIndex,
+        day + 1,
+        1,
         showtimeCreateInputs,
       )
     }
