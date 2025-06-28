@@ -394,8 +394,18 @@ async function getUploadedPosterList(
 
   if (!response.ok) {
     console.error(response)
-    console.log(url.toString())
-    throw new Error(response.statusText)
+    /**
+     * If a 503 is fired, it might be because the url is too long.
+     * Therefore, we can recursively try until it works :shrug:
+     */
+    if ((response.status === 503 || response.status === 431) && movieIds.length > 100) {
+      console.log(
+        `imagekit api failed with ${movieIds.length} movies, trying with ${movieIds.length - 25}`,
+      )
+      return getUploadedPosterList(movieIds.slice(-(movieIds.length - 25)))
+    } else {
+      throw new Error(response.statusText)
+    }
   }
 
   const body = await response.json()
@@ -414,7 +424,7 @@ async function scrapAllocinePosters() {
   const movies = await prisma.movie.findMany({
     where: { posterAllocineUrl: { not: null } },
     select: { id: true, originalTitle: true, posterAllocineUrl: true },
-    orderBy: { id: 'asc' },
+    orderBy: { id: 'desc' },
   })
 
   const posters = await getUploadedPosterList(movies.map(({ id }) => id))
