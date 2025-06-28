@@ -11,6 +11,14 @@
       "skipFiles": ["<node_internals>/**"],
       "type": "pwa-node",
       "restart": true
+    },
+    {
+      "name": "Attach cli",
+      "port": 9230,
+      "request": "attach",
+      "skipFiles": ["<node_internals>/**"],
+      "type": "pwa-node",
+      "restart": true
     }
   ]
 }

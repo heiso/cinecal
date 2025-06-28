@@ -394,9 +394,16 @@ async function getUploadedPosterList(
 
   if (!response.ok) {
     console.error(response)
+    console.log(url.toString())
+    throw new Error(response.statusText)
   }
 
   const body = await response.json()
+
+  if (!Array.isArray(body)) {
+    console.error(body)
+    throw new Error('body should be an array')
+  }
 
   return body.filter((file: Record<string, unknown>) =>
     (file.filePath as string).includes(IMAGEKIT_FOLDER),
