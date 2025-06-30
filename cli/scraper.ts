@@ -379,45 +379,95 @@ type CustomMetadata = {
 async function getUploadedPosterList(
   movieIds: number[],
 ): Promise<{ filePath: string; name: string; url: string; customMetadata: CustomMetadata }[]> {
-  const url = new URL(API_ENDPOINT)
-  url.searchParams.append('path', IMAGEKIT_FOLDER)
-  url.searchParams.append('type', 'file')
-  url.searchParams.append('fileType', 'image')
-  url.searchParams.append('searchQuery', `"customMetadata.id" in [${movieIds.join(',')}]`)
+  const movieIdsByPacks = movieIds.reduce<number[][]>((acc, id, index) => {
+    if (index % 500 === 0) {
+      acc.push([])
+    }
+    acc[acc.length - 1].push(id)
+    return acc
+  }, [])
 
-  const response = await fetch(url, {
-    method: 'GET',
+  const moviePosters: {
+    filePath: string
+    name: string
+    url: string
+    customMetadata: CustomMetadata
+  }[] = []
+
+  for (const ids of movieIdsByPacks) {
+    const url = new URL(API_ENDPOINT)
+    url.searchParams.append('path', IMAGEKIT_FOLDER)
+    url.searchParams.append('type', 'file')
+    url.searchParams.append('fileType', 'image')
+    url.searchParams.append('searchQuery', `"customMetadata.id" in [${ids.join(',')}]`)
+
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        Authorization: `Basic ${Buffer.from(process.env.IMAGEKIT_API_KEY + ':').toString('base64')}`,
+      },
+    })
+
+    console.log(`getUploadedPosterList for ${ids.length} posters`, url.toString())
+
+    if (!response.ok) {
+      throw new Error(response.statusText)
+    }
+
+    const body = await response.json()
+
+    if (!Array.isArray(body)) {
+      console.error(body)
+      throw new Error('body should be an array')
+    }
+
+    moviePosters.push(
+      ...(body.filter((file: Record<string, unknown>) =>
+        (file.filePath as string).includes(IMAGEKIT_FOLDER),
+      ) as { filePath: string; name: string; url: string; customMetadata: CustomMetadata }[]),
+    )
+
+    await new Promise((resolve) => setTimeout(resolve, 500))
+  }
+
+  return moviePosters
+}
+
+async function uploadAllocinePosterToImageKit(movie: {
+  posterAllocineUrl: string | null
+  id: number
+  originalTitle: string
+}) {
+  const body = new FormData()
+  body.append('file', movie.posterAllocineUrl!)
+  body.append('fileName', movie.id.toString())
+  body.append('folder', IMAGEKIT_FOLDER)
+  body.append(
+    'customMetadata',
+    JSON.stringify({
+      id: movie.id,
+      title: movie.originalTitle,
+      allocineUrl: movie.posterAllocineUrl,
+    } satisfies CustomMetadata),
+  )
+
+  const response = await fetch(`${API_ENDPOINT}/upload`, {
+    method: 'POST',
     headers: {
       Authorization: `Basic ${Buffer.from(process.env.IMAGEKIT_API_KEY + ':').toString('base64')}`,
     },
+    body,
   })
 
-  if (!response.ok) {
-    console.error(response)
-    /**
-     * If a 503 is fired, it might be because the url is too long.
-     * Therefore, we can recursively try until it works :shrug:
-     */
-    if ((response.status === 503 || response.status === 431) && movieIds.length > 100) {
-      console.log(
-        `imagekit api failed with ${movieIds.length} movies, trying with ${movieIds.length - 25}`,
-      )
-      return getUploadedPosterList(movieIds.slice(-(movieIds.length - 25)))
-    } else {
-      throw new Error(response.statusText)
-    }
+  if (!response.ok || response.status !== 200) {
+    console.error(response.status, response.statusText)
+    console.error(await response.text())
+    throw new Error(response.statusText)
+  } else {
+    const json = await response.json()
+
+    return json.name
   }
-
-  const body = await response.json()
-
-  if (!Array.isArray(body)) {
-    console.error(body)
-    throw new Error('body should be an array')
-  }
-
-  return body.filter((file: Record<string, unknown>) =>
-    (file.filePath as string).includes(IMAGEKIT_FOLDER),
-  )
 }
 
 async function scrapAllocinePosters() {
@@ -431,7 +481,7 @@ async function scrapAllocinePosters() {
 
   for (const movie of movies) {
     try {
-      let posterUrl: string
+      let posterUrl: string | null = null
 
       const poster = posters.find(
         (poster) =>
@@ -439,44 +489,29 @@ async function scrapAllocinePosters() {
           movie.posterAllocineUrl?.split('/').reverse()[0],
       )
 
+      console.log(`${movie.id} - ${movie.originalTitle}, ${movie.posterAllocineUrl}`)
       if (poster) {
-        console.log(`${poster.url} - existing`)
+        console.log(` - existing - ${poster.url}`)
         posterUrl = poster.name
       } else {
-        const body = new FormData()
-        body.append('file', movie.posterAllocineUrl!)
-        body.append('fileName', movie.id.toString())
-        body.append('folder', IMAGEKIT_FOLDER)
-        body.append(
-          'customMetadata',
-          JSON.stringify({
-            id: movie.id,
-            title: movie.originalTitle,
-            allocineUrl: movie.posterAllocineUrl,
-          } satisfies CustomMetadata),
-        )
-
-        const response = await fetch(`${API_ENDPOINT}/upload`, {
-          method: 'POST',
-          headers: {
-            Authorization: `Basic ${Buffer.from(process.env.IMAGEKIT_API_KEY + ':').toString(
-              'base64',
-            )}`,
-          },
-          body,
-        })
-
-        if (response.status !== 200) {
-          console.error(await response.text())
+        await new Promise((resolve) => setTimeout(resolve, 500))
+        console.log(` - uploading...`)
+        try {
+          posterUrl = await uploadAllocinePosterToImageKit(movie)
+        } catch (err) {
+          await new Promise((resolve) => setTimeout(resolve, 1000))
+          console.log(` - trying again...`)
+          try {
+            posterUrl = await uploadAllocinePosterToImageKit(movie)
+          } catch (err) {}
         }
 
-        const json = await response.json()
-        posterUrl = json.name
+        if (posterUrl) {
+          await prisma.movie.update({ where: { id: movie.id }, data: { posterUrl } })
 
-        console.log(json.url)
+          console.log(` - uploaded - ${posterUrl}`)
+        }
       }
-
-      await prisma.movie.update({ where: { id: movie.id }, data: { posterUrl } })
     } catch (err) {
       console.error(err)
     }
