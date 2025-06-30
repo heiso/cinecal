@@ -4,12 +4,12 @@ import { Link, useLoaderData, useLocation, useNavigate } from '@remix-run/react'
 import { add, format } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import { useEffect } from 'react'
+import { routerPaths } from '../../routes'
+import { ProgressiveImg } from '../components/progressiveImg'
 import { getFilters, getWhereInputs } from '../filters.server'
 import { getPosterSrc } from '../poster.server'
 import { prisma } from '../prisma.server'
-import { ProgressiveImg } from '../progressiveImg'
 import { Icon } from '../ui/icon'
-import { routerPaths } from '../../routes'
 
 const GOOGLE_CALENDAR_DATE_FORMAT = "yyyyMMdd'T'HHmmss"
 
@@ -127,7 +127,10 @@ export const loader = async ({ context, params, request }: LoaderFunctionArgs) =
     url.searchParams.append('text', `${theater.name} - ${movie.title}`)
     url.searchParams.append('location', `${theater.name} ${theater.address}`)
     if (showtime.Tags.length) {
-      const cinecalUrl = new URL(routerPaths['/:movieId']({movieId: movie.id}), process.env.PUBLIC_URL).toString()
+      const cinecalUrl = new URL(
+        routerPaths['/:movieId']({ movieId: movie.id }),
+        process.env.PUBLIC_URL,
+      ).toString()
       url.searchParams.append(
         'details',
         `Page du film <a href=${cinecalUrl} target="_blank">${cinecalUrl}</a>\nRéserver une place <a href="${showtime.ticketingUrl}" target="_blank">${
@@ -246,7 +249,10 @@ export default function Index() {
   return (
     <>
       <div className="p-6 pb-28">
-        <Link to={{ pathname: '/', hash: movie.id.toString() }} className="fill-white w-fit absolute z-10">
+        <Link
+          to={{ pathname: '/', hash: movie.id.toString() }}
+          className="fill-white w-fit absolute z-10"
+        >
           <Icon id="cross-2" width="32px" height="32px" />
         </Link>
 
@@ -255,12 +261,16 @@ export default function Index() {
             className="absolute z-0 top-0 left-0 w-full h-full bg-no-repeat bg-cover bg-center blur-3xl"
             style={{ backgroundImage: `url('${movie.srcLowDef}')` }}
           ></div>
-          <ProgressiveImg
-            className="w-1/2 m-auto aspect-poster overflow-hidden rounded-xl"
-            src={movie.src}
-            srcLowDef={movie.srcLowDef}
-            alt={movie.title}
-          />
+          {movie.src ? (
+            <ProgressiveImg
+              className="w-1/2 m-auto aspect-poster overflow-hidden rounded-xl"
+              src={movie.src}
+              srcLowDef={movie.srcLowDef}
+              alt={movie.title}
+            />
+          ) : (
+            <div className="pt-8 w-full"></div>
+          )}
         </div>
 
         <div className="relative z-1 space-y-4 pb-4">
