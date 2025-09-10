@@ -421,7 +421,7 @@ export interface Showtimes {
 }
 
 export interface Result {
-  movie: Movie
+  movie: Movie | null
   showtimes: Showtimes
 }
 

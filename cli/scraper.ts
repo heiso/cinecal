@@ -123,16 +123,19 @@ async function getAllocineShowtimes(url: string) {
   })
 
   if (!res.ok) {
-    throw new Error(`${url} - error`)
+    throw new Error(`HTTP ${res.status}`)
   }
 
   const content = await res.text()
-
   const json = JSON.parse(content) as AllocineResponse
 
-  // if (json.error) {
-  //   throw new Error(`${url} - error`)
-  // }
+  if (json.error) {
+    if (json.message === 'no.showtime.error') {
+      console.log(`${url} - no showtimes found`)
+      return json
+    }
+    console.error(`${url} - error ${json.message || 'Unknown error'}`)
+  }
 
   await prisma.scrapedUrl.upsert({
     where: { url },
@@ -147,6 +150,7 @@ async function scrapAllocineShowtimes(
   theaters: Theater[],
   maxDay: number,
   foundShowtimeAllocineIds: Set<number>,
+  successfulTheaterIds: Set<number> = new Set(),
   theaterIndex: number = 0,
   day: number = 0,
   page: number = 1,
@@ -154,7 +158,7 @@ async function scrapAllocineShowtimes(
     ReturnType<typeof getUniqueAllocineShowtimes>[0]['internalId'],
     Prisma.ShowtimeCreateInput
   > = {},
-): Promise<Prisma.ShowtimeCreateInput[]> {
+): Promise<{ showtimeInputs: Prisma.ShowtimeCreateInput[]; successfulTheaterIds: Set<number> }> {
   const theater = theaters[theaterIndex]
   const pageParam = page > 1 ? `p-${page}/` : ''
   const dayParam = day > 0 ? `d-${format(addDays(new Date(), day), 'yyyy-MM-dd')}/` : ''
@@ -163,100 +167,128 @@ async function scrapAllocineShowtimes(
   try {
     const body = await getAllocineShowtimes(url)
 
-    for (const result of body.results.filter(
-      ({ movie }) => !EXCLUSION_LIST.includes(movie.title),
-    )) {
-      try {
-        const movie = await prisma.movie.upsert({
-          where: { allocineId: result.movie.internalId },
-          update: {},
-          create: {
-            originalTitle: result.movie.originalTitle,
-            title: result.movie.title,
-            duration: getDuration(result.movie.runtime),
-            synopsis: result.movie.synopsis,
-            releaseDate: getReleaseDate(result.movie.releases),
-            allocineId: result.movie.internalId,
-            posterAllocineUrl: result.movie.poster?.url,
-            director: getDirector(result.movie.credits),
-            Tags: {
-              connectOrCreate: [
-                ...result.movie.relatedTags.reduce<
-                  Prisma.MovieTagCreateOrConnectWithoutMoviesInput[]
-                >((acc, { name, tags }) => {
-                  const resolvedName = typeof name === 'string' ? name : name.translate
-                  if (tags.list.find((type) => 'Tag.Type.SubGenre' === type)) {
-                    acc.push({
-                      where: { name: resolvedName },
-                      create: {
-                        name: resolvedName,
-                        category: TagCategory.SUB_GENRE,
-                      },
-                    })
-                  } else if (tags.list.find((type) => 'Tag.Type.Characteristic' === type)) {
-                    acc.push({
-                      where: { name: resolvedName },
-                      create: {
-                        name: resolvedName,
-                        category: TagCategory.CHARACTERISTIC,
-                      },
-                    })
-                  }
-                  return acc
-                }, [] as Prisma.MovieTagCreateOrConnectWithoutMoviesInput[]),
-                ...result.movie.genres.map<Prisma.MovieTagCreateOrConnectWithoutMoviesInput>(
-                  (name) => {
+    if (!body) {
+      console.error(
+        `${theater.name} (${theater.allocineId}) - day ${day} page ${page} - API call failed, skipping`,
+      )
+      // Continue to next iteration without processing this failed call
+    } else {
+      // Mark theater as having at least one successful API call
+      successfulTheaterIds.add(theater.id)
+
+      console.log(
+        `${theater.name} (${theater.allocineId}) - day ${day} page ${page} - found ${body.results.length} movies`,
+      )
+
+      for (const result of body.results) {
+        try {
+          if (result.movie === null) {
+            console.log(
+              `${theater.name} (${theater.allocineId}) - day ${day} page ${page} - skipping showtime with no movie object`,
+            )
+            continue
+          } else if (EXCLUSION_LIST.includes(result.movie.title)) {
+            console.log(
+              `${theater.name} (${theater.allocineId}) - day ${day} page ${page} - skipping showtime for excluded movie "${result.movie.title}"`,
+            )
+            continue
+          }
+
+          const movie = await prisma.movie.upsert({
+            where: { allocineId: result.movie.internalId },
+            update: {},
+            create: {
+              originalTitle: result.movie.originalTitle,
+              title: result.movie.title,
+              duration: getDuration(result.movie.runtime),
+              synopsis: result.movie.synopsis,
+              releaseDate: getReleaseDate(result.movie.releases),
+              allocineId: result.movie.internalId,
+              posterAllocineUrl: result.movie.poster?.url,
+              director: getDirector(result.movie.credits),
+              Tags: {
+                connectOrCreate: [
+                  ...result.movie.relatedTags.reduce<
+                    Prisma.MovieTagCreateOrConnectWithoutMoviesInput[]
+                  >((acc, { name, tags }) => {
                     const resolvedName = typeof name === 'string' ? name : name.translate
-                    return {
-                      where: { name: resolvedName },
-                      create: {
-                        name: resolvedName,
-                        category: TagCategory.GENRE,
-                      },
+                    if (tags.list.find((type) => 'Tag.Type.SubGenre' === type)) {
+                      acc.push({
+                        where: { name: resolvedName },
+                        create: {
+                          name: resolvedName,
+                          category: TagCategory.SUB_GENRE,
+                        },
+                      })
+                    } else if (tags.list.find((type) => 'Tag.Type.Characteristic' === type)) {
+                      acc.push({
+                        where: { name: resolvedName },
+                        create: {
+                          name: resolvedName,
+                          category: TagCategory.CHARACTERISTIC,
+                        },
+                      })
                     }
-                  },
-                ),
-              ],
+                    return acc
+                  }, [] as Prisma.MovieTagCreateOrConnectWithoutMoviesInput[]),
+                  ...result.movie.genres.map<Prisma.MovieTagCreateOrConnectWithoutMoviesInput>(
+                    (name) => {
+                      const resolvedName = typeof name === 'string' ? name : name.translate
+                      return {
+                        where: { name: resolvedName },
+                        create: {
+                          name: resolvedName,
+                          category: TagCategory.GENRE,
+                        },
+                      }
+                    },
+                  ),
+                ],
+              },
             },
-          },
-        })
+          })
 
-        const data = getUniqueAllocineShowtimes(result.showtimes).map((showtime) => ({
-          allocineId: showtime.internalId,
-          date: new Date(showtime.startsAt),
-          isPreview: showtime.isPreview,
-          language: showtime.tags.includes('Localization.Language.French')
-            ? Language.VF
-            : Language.VO,
-          ticketingUrl: showtime.data.ticketing?.[0]?.urls[0],
-          theaterId: theater.id,
-          movieId: movie.id,
-        }))
+          const data = getUniqueAllocineShowtimes(result.showtimes).map((showtime) => ({
+            allocineId: showtime.internalId,
+            date: new Date(showtime.startsAt),
+            isPreview: showtime.isPreview,
+            language: showtime.tags.includes('Localization.Language.French')
+              ? Language.VF
+              : Language.VO,
+            ticketingUrl: showtime.data.ticketing?.[0]?.urls[0],
+            theaterId: theater.id,
+            movieId: movie.id,
+          }))
 
-        await prisma.showtime.createMany({
-          data,
-          skipDuplicates: true,
-        })
+          await prisma.showtime.createMany({
+            data,
+            skipDuplicates: true,
+          })
 
-        data.forEach(({ allocineId }) => foundShowtimeAllocineIds.add(allocineId))
-      } catch (err) {
-        console.error(err)
+          data.forEach(({ allocineId }) => foundShowtimeAllocineIds.add(allocineId))
+        } catch (err) {
+          console.error(err)
+        }
+      }
+
+      if (Number(body.pagination.page) < body.pagination.totalPages) {
+        return scrapAllocineShowtimes(
+          theaters,
+          maxDay,
+          foundShowtimeAllocineIds,
+          successfulTheaterIds,
+          theaterIndex,
+          day,
+          Number(body.pagination.page) + 1,
+          showtimeCreateInputs,
+        )
       }
     }
-
-    if (Number(body.pagination.page) < body.pagination.totalPages) {
-      return scrapAllocineShowtimes(
-        theaters,
-        maxDay,
-        foundShowtimeAllocineIds,
-        theaterIndex,
-        day,
-        Number(body.pagination.page) + 1,
-        showtimeCreateInputs,
-      )
-    }
   } catch (err) {
-    console.error(err)
+    console.error(
+      `${theater.name} (${theater.allocineId}) ${url} - day ${day} page ${page} - unexpected error:`,
+      err,
+    )
   }
 
   if (day < maxDay) {
@@ -264,6 +296,7 @@ async function scrapAllocineShowtimes(
       theaters,
       maxDay,
       foundShowtimeAllocineIds,
+      successfulTheaterIds,
       theaterIndex,
       day + 1,
       1,
@@ -276,6 +309,7 @@ async function scrapAllocineShowtimes(
       theaters,
       maxDay,
       foundShowtimeAllocineIds,
+      successfulTheaterIds,
       theaterIndex + 1,
       0,
       1,
@@ -283,7 +317,7 @@ async function scrapAllocineShowtimes(
     )
   }
 
-  return Object.values(showtimeCreateInputs)
+  return { showtimeInputs: Object.values(showtimeCreateInputs), successfulTheaterIds }
 }
 
 async function scrapAllocineTicketingUrl(): Promise<void> {
@@ -538,20 +572,33 @@ export async function scrapShowtimes(maxDay: number) {
     }),
   ])
 
-  await scrapAllocineShowtimes(theaters, maxDay, foundShowtimeAllocineIds)
+  const { successfulTheaterIds } = await scrapAllocineShowtimes(
+    theaters,
+    maxDay,
+    foundShowtimeAllocineIds,
+  )
+
+  console.log(`Successfully scraped ${successfulTheaterIds.size}/${theaters.length} theaters`)
+
+  // Only delete showtimes from theaters that were successfully scraped
+  // This prevents data loss when some theaters fail to scrape
+  const deletedShowtimes = await prisma.showtime.deleteMany({
+    where: {
+      allocineId: { notIn: [...foundShowtimeAllocineIds] },
+      theaterId: { in: [...successfulTheaterIds] }, // Only delete from successfully scraped theaters
+    },
+  })
 
   const [countCacheItemsAfter, countShowtimesAfter, countMoviesAfter] = await Promise.all([
     prisma.scrapedUrl.count({ where: { type: 'SHOWTIMES' } }),
     prisma.showtime.count(),
     prisma.movie.count(),
-    prisma.showtime.deleteMany({
-      where: { allocineId: { notIn: [...foundShowtimeAllocineIds] } },
-    }),
   ])
 
   console.log(`CachedUrls: ${countCacheItemsBefore} -> ${countCacheItemsAfter}`)
   console.log(`Movies: ${countMoviesBefore} -> ${countMoviesAfter}`)
   console.log(`Showtimes: ${countShowtimesBefore} -> ${countShowtimesAfter}`)
+  console.log(`Deleted ${deletedShowtimes.count} old showtimes from successfully scraped theaters`)
 }
 
 export async function scrapTicketing() {
