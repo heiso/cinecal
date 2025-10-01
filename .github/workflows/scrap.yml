@@ -10,6 +10,7 @@ on:
         required: true
   schedule:
     - cron: '0 2 * * *'
+    - cron: '0 10 * * *'
 
 jobs:
   scrap-showtimes:
