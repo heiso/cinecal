@@ -26,7 +26,7 @@ const TICKETING_DETAILS_EXPIRATION_DATE = add(new Date(), { days: 3 })
 const prisma = new PrismaClient()
 
 function getUniqueAllocineShowtimes(showtimes: AllocineResponse['results'][0]['showtimes']) {
-  const showtimesArray = [...showtimes.local, ...showtimes.multiple, ...showtimes.original]
+  const showtimesArray = Object.values(showtimes).flat()
 
   return showtimesArray.reduce<typeof showtimesArray>((acc, showtime) => {
     if (!acc.find(({ internalId }) => internalId === showtime.internalId)) {
