@@ -26,6 +26,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
       title: true,
       posterUrl: true,
       posterBlurHash: true,
+      posterAllocineUrl: true,
       Tags: {
         select: {
           id: true,
@@ -73,7 +74,11 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
         isBefore(movieA.Showtimes[0].date, movieB.Showtimes[0].date) ? -1 : 1,
       )
       .map((movie) => {
-        const { src, srcLowDef } = getPosterSrc(movie.posterUrl, movie.posterBlurHash)
+        const { src, srcLowDef } = getPosterSrc(
+          movie.posterUrl,
+          movie.posterBlurHash,
+          movie.posterAllocineUrl,
+        )
 
         return {
           id: movie.id,

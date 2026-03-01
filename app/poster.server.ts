@@ -8,10 +8,16 @@ const imagekitUrl = `https://ik.imagekit.io/cinecal/${
   process.env.ENV === 'development' ? 'posters-dev' : 'posters-prod'
 }`
 
-export function getPosterSrc(posterUrl: string | null, posterBlurHash: string | null) {
+export function getPosterSrc(
+  posterUrl: string | null,
+  posterBlurHash: string | null,
+  posterAllocineUrl: string | null,
+) {
   return {
     // TODO: default src
-    src: posterUrl ? `${imagekitUrl}/${posterUrl}/tr:w-${POSTER_WIDTH},ar-62-85` : '',
+    src: posterUrl
+      ? `${imagekitUrl}/${posterUrl}/tr:w-${POSTER_WIDTH},ar-62-85`
+      : posterAllocineUrl,
     srcLowDef: posterBlurHash
       ? blurhashToDataUri(
           posterBlurHash,

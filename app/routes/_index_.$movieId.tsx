@@ -45,6 +45,7 @@ export const loader = async ({ context, params, request }: LoaderFunctionArgs) =
       releaseDate: true,
       posterUrl: true,
       posterBlurHash: true,
+      posterAllocineUrl: true,
       Tags: {
         where: {
           category: TagCategory.GENRE,
@@ -109,7 +110,11 @@ export const loader = async ({ context, params, request }: LoaderFunctionArgs) =
     },
   })
 
-  const { src, srcLowDef } = getPosterSrc(movie.posterUrl, movie.posterBlurHash)
+  const { src, srcLowDef } = getPosterSrc(
+    movie.posterUrl,
+    movie.posterBlurHash,
+    movie.posterAllocineUrl,
+  )
 
   const mapShowtime = (
     showtime: (typeof theaters)[0]['Showtimes'][0],
