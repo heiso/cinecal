@@ -620,14 +620,19 @@ export async function scrapPosters() {
 
 export async function savePosterBlurHashes() {
   const movies = await prisma.movie.findMany({
-    where: { posterUrl: { not: null }, posterBlurHash: null },
-    select: { id: true, posterUrl: true },
+    where: {
+      OR: [{ posterUrl: { not: null } }, { posterAllocineUrl: { not: null } }],
+      posterBlurHash: null,
+    },
+    select: { id: true, posterUrl: true, posterAllocineUrl: true },
     orderBy: { id: 'asc' },
   })
 
   for (const movie of movies) {
     try {
-      const url = `${IMAGEKIT_URL}/${movie.posterUrl}/tr:w-310,q-50,ar-62-85`
+      const url = movie.posterUrl
+        ? `${IMAGEKIT_URL}/${movie.posterUrl}/tr:w-310,q-50,ar-62-85`
+        : movie.posterAllocineUrl ?? ''
       const pixels = await getPixels(url)
       const data = Uint8ClampedArray.from(pixels.data)
       const blurHash = encode(data, pixels.width, pixels.height, Math.round(9 * POSTER_RATIO), 9)
