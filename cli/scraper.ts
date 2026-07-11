@@ -410,9 +410,15 @@ type CustomMetadata = {
   allocineUrl: string | null
 }
 
-async function getUploadedPosterList(
-  movieIds: number[],
-): Promise<{ filePath: string; name: string; url: string; customMetadata: CustomMetadata }[]> {
+type UploadedPoster = {
+  fileId: string
+  filePath: string
+  name: string
+  url: string
+  customMetadata: CustomMetadata
+}
+
+async function getUploadedPosterList(movieIds: number[]): Promise<UploadedPoster[]> {
   const movieIdsByPacks = movieIds.reduce<number[][]>((acc, id, index) => {
     if (index % 500 === 0) {
       acc.push([])
@@ -421,12 +427,7 @@ async function getUploadedPosterList(
     return acc
   }, [])
 
-  const moviePosters: {
-    filePath: string
-    name: string
-    url: string
-    customMetadata: CustomMetadata
-  }[] = []
+  const moviePosters: UploadedPoster[] = []
 
   for (const ids of movieIdsByPacks) {
     const url = new URL(API_ENDPOINT)
@@ -458,7 +459,7 @@ async function getUploadedPosterList(
     moviePosters.push(
       ...(body.filter((file: Record<string, unknown>) =>
         (file.filePath as string).includes(IMAGEKIT_FOLDER),
-      ) as { filePath: string; name: string; url: string; customMetadata: CustomMetadata }[]),
+      ) as UploadedPoster[]),
     )
 
     await new Promise((resolve) => setTimeout(resolve, 500))
@@ -504,7 +505,106 @@ async function uploadAllocinePosterToImageKit(movie: {
   }
 }
 
+async function getAllUploadedPosters(): Promise<UploadedPoster[]> {
+  const LIMIT = 1000 // ImageKit max page size
+  const posters: UploadedPoster[] = []
+
+  for (let skip = 0; ; skip += LIMIT) {
+    const url = new URL(API_ENDPOINT)
+    url.searchParams.append('path', IMAGEKIT_FOLDER)
+    url.searchParams.append('type', 'file')
+    url.searchParams.append('fileType', 'image')
+    url.searchParams.append('limit', LIMIT.toString())
+    url.searchParams.append('skip', skip.toString())
+
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        Authorization: `Basic ${Buffer.from(process.env.IMAGEKIT_API_KEY + ':').toString('base64')}`,
+      },
+    })
+
+    if (!response.ok) {
+      throw new Error(response.statusText)
+    }
+
+    const body = await response.json()
+
+    if (!Array.isArray(body)) {
+      console.error(body)
+      throw new Error('body should be an array')
+    }
+
+    posters.push(...(body as UploadedPoster[]))
+
+    if (body.length < LIMIT) {
+      break
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, 500))
+  }
+
+  return posters
+}
+
+async function deletePostersFromImageKit(fileIds: string[]) {
+  // ImageKit bulk delete is capped at 100 fileIds per call
+  const fileIdsByPacks = fileIds.reduce<string[][]>((acc, fileId, index) => {
+    if (index % 100 === 0) {
+      acc.push([])
+    }
+    acc[acc.length - 1].push(fileId)
+    return acc
+  }, [])
+
+  for (const ids of fileIdsByPacks) {
+    const response = await fetch(`${API_ENDPOINT}/batch/deleteByFileIds`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Basic ${Buffer.from(process.env.IMAGEKIT_API_KEY + ':').toString('base64')}`,
+      },
+      body: JSON.stringify({ fileIds: ids }),
+    })
+
+    if (!response.ok) {
+      console.error(response.status, response.statusText)
+      console.error(await response.text())
+      throw new Error(response.statusText)
+    }
+
+    console.log(`Deleted ${ids.length} unused posters from ImageKit`)
+
+    await new Promise((resolve) => setTimeout(resolve, 500))
+  }
+}
+
+async function deleteUnusedPosters() {
+  const moviesWithPoster = await prisma.movie.findMany({
+    where: { posterUrl: { not: null } },
+    select: { posterUrl: true },
+  })
+  const usedPosterNames = new Set(moviesWithPoster.map((movie) => movie.posterUrl))
+
+  const uploadedPosters = await getAllUploadedPosters()
+  const unusedPosterFileIds = uploadedPosters
+    .filter((poster) => !usedPosterNames.has(poster.name))
+    .map((poster) => poster.fileId)
+
+  console.log(
+    `ImageKit posters: ${uploadedPosters.length} total, ${unusedPosterFileIds.length} unused`,
+  )
+
+  if (unusedPosterFileIds.length > 0) {
+    await deletePostersFromImageKit(unusedPosterFileIds)
+  }
+}
+
 async function scrapAllocinePosters() {
+  // Remove posters no longer referenced by any movie first, so ImageKit has
+  // room for the uploads below even when storage is close to full.
+  await deleteUnusedPosters()
+
   const movies = await prisma.movie.findMany({
     where: { posterAllocineUrl: { not: null } },
     select: { id: true, originalTitle: true, posterAllocineUrl: true },
