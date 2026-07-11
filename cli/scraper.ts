@@ -22,6 +22,11 @@ const IMAGEKIT_URL = `https://ik.imagekit.io/cinecal/${IMAGEKIT_FOLDER}`
 const POSTER_RATIO = 62 / 85
 const SHOWTIMES_EXPIRATION_DATE = endOfDay(new Date())
 const TICKETING_DETAILS_EXPIRATION_DATE = add(new Date(), { days: 3 })
+// Poster cleanup only trusts the showtime state if the last complete scrape is
+// within this window. Showtimes run every 30min, so a healthy pipeline produces
+// a complete run well within a day; if none has succeeded for this long, skip
+// cleanup rather than risk deleting posters based on stale/partial data.
+const POSTER_CLEANUP_MAX_AGE_HOURS = 24
 
 const prisma = new PrismaClient()
 
@@ -47,6 +52,17 @@ const ALLOCINE_USER_AGENT =
   'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36'
 const ALLOCINE_MAX_RETRIES = 1
 const ALLOCINE_RETRY_DELAY_MS = 2000
+
+// Thrown when Allocine returns 429 after retries, i.e. the per-IP request budget
+// is spent. It aborts the current run: there is no point hammering the remaining
+// ~1000 URLs (they will all 429 for ~5min), and it also marks the run as
+// incomplete so the poster cleanup knows not to trust the showtime state.
+class RateLimitError extends Error {
+  constructor(url: string) {
+    super(`Rate limited (429): ${url}`)
+    this.name = 'RateLimitError'
+  }
+}
 
 async function allocineFetch(url: string, init: RequestInit = {}): Promise<Response> {
   for (let attempt = 0; ; attempt++) {
@@ -166,6 +182,10 @@ async function getAllocineShowtimes(url: string) {
   const res = await allocineFetch(url, {
     method: 'post',
   })
+
+  if (res.status === 429) {
+    throw new RateLimitError(url)
+  }
 
   if (!res.ok) {
     throw new Error(`HTTP ${res.status}`)
@@ -350,6 +370,11 @@ async function scrapAllocineShowtimes(
       }
     }
   } catch (err) {
+    // A 429 means the per-IP budget is spent: abort the whole run rather than
+    // hammering the remaining URLs. The next scheduled run resumes from cache.
+    if (err instanceof RateLimitError) {
+      throw err
+    }
     console.error(
       `${theater.name} (${theater.allocineId}) ${url} - day ${day} page ${page} - unexpected error:`,
       err,
@@ -678,11 +703,16 @@ async function deletePostersFromImageKit(fileIds: string[]) {
 }
 
 async function deleteUnusedPosters() {
-  const moviesWithPoster = await prisma.movie.findMany({
-    where: { posterUrl: { not: null } },
+  // A poster is "in use" only if it belongs to a movie that still has at least
+  // one showtime. Movies are never deleted and posterUrl is never cleared, so
+  // keying on `posterUrl != null` would keep every poster forever and the
+  // ImageKit folder would grow without bound. Past showtimes are pruned earlier
+  // in the run, so "has a showtime" effectively means "has an upcoming showtime".
+  const moviesWithShowtime = await prisma.movie.findMany({
+    where: { posterUrl: { not: null }, Showtimes: { some: {} } },
     select: { posterUrl: true },
   })
-  const usedPosterNames = new Set(moviesWithPoster.map((movie) => movie.posterUrl))
+  const usedPosterNames = new Set(moviesWithShowtime.map((movie) => movie.posterUrl))
 
   const uploadedPosters = await getAllUploadedPosters()
   const unusedPosterFileIds = uploadedPosters
@@ -699,18 +729,36 @@ async function deleteUnusedPosters() {
 }
 
 async function scrapAllocinePosters() {
-  // Remove posters no longer referenced by any movie first, so ImageKit has
-  // room for the uploads below even when storage is close to full. Best-effort:
-  // if it fails (e.g. transient network error) we still proceed to uploads, and
-  // the next scheduled run retries the cleanup.
-  try {
-    await deleteUnusedPosters()
-  } catch (err) {
-    console.error('deleteUnusedPosters failed, continuing to uploads', err)
+  // Remove posters of movies that no longer have showtimes - but ONLY if the
+  // last showtimes scrape completed without being cut short by rate limiting.
+  // On a partial run a movie's showtimes can be temporarily missing, and
+  // deleting its poster then would just force a re-upload next run (churn, and
+  // risk when storage is full). Cleanup runs first so ImageKit has room for the
+  // uploads below. Best-effort: a transient failure still lets uploads proceed.
+  const appState = await prisma.appState.findUnique({ where: { id: 1 } })
+  const lastComplete = appState?.lastCompleteScrapeAt
+  const scrapeIsFresh =
+    lastComplete != null && lastComplete >= add(new Date(), { hours: -POSTER_CLEANUP_MAX_AGE_HOURS })
+
+  if (scrapeIsFresh) {
+    try {
+      await deleteUnusedPosters()
+    } catch (err) {
+      console.error('deleteUnusedPosters failed, continuing to uploads', err)
+    }
+  } else {
+    console.log(
+      `Skipping poster cleanup: last complete scrape is ${
+        lastComplete ? 'too old' : 'unknown'
+      } (${lastComplete?.toISOString() ?? 'never'})`,
+    )
   }
 
+  // Only upload posters for movies that currently have a showtime: those are
+  // the only ones displayed, and it keeps the ImageKit folder from filling up
+  // with posters for movies no longer playing.
   const movies = await prisma.movie.findMany({
-    where: { posterAllocineUrl: { not: null } },
+    where: { posterAllocineUrl: { not: null }, Showtimes: { some: {} } },
     select: { id: true, originalTitle: true, posterAllocineUrl: true },
     orderBy: { id: 'desc' },
   })
@@ -776,22 +824,54 @@ export async function scrapShowtimes(maxDay: number) {
     }),
   ])
 
-  const { successfulTheaterIds } = await scrapAllocineShowtimes(
-    theaters,
-    maxDay,
-    foundShowtimeAllocineIds,
+  let complete = true
+  let successfulTheaterIds = new Set<number>()
+  try {
+    ;({ successfulTheaterIds } = await scrapAllocineShowtimes(
+      theaters,
+      maxDay,
+      foundShowtimeAllocineIds,
+    ))
+  } catch (err) {
+    // A 429 aborts the run partway: we have valid data for the theaters/days
+    // scraped so far (persisted as we went), but the run is incomplete.
+    if (err instanceof RateLimitError) {
+      complete = false
+      console.warn(`Rate limited - stopping run early. ${err.message}`)
+    } else {
+      throw err
+    }
+  }
+
+  console.log(
+    `Scraped ${successfulTheaterIds.size}/${theaters.length} theaters (${
+      complete ? 'complete' : 'incomplete - rate limited'
+    })`,
   )
 
-  console.log(`Successfully scraped ${successfulTheaterIds.size}/${theaters.length} theaters`)
+  // Prune showtimes that were not found again ONLY on a complete run. On a
+  // partial (rate-limited) run, a theater's later days may simply not have been
+  // reached, so their showtimes are missing from foundShowtimeAllocineIds -
+  // pruning then would delete valid future showtimes. Skipping the prune on
+  // incomplete runs prevents that data loss.
+  let deletedShowtimes = { count: 0 }
+  if (complete) {
+    deletedShowtimes = await prisma.showtime.deleteMany({
+      where: {
+        allocineId: { notIn: [...foundShowtimeAllocineIds] },
+        theaterId: { in: [...successfulTheaterIds] },
+      },
+    })
 
-  // Only delete showtimes from theaters that were successfully scraped
-  // This prevents data loss when some theaters fail to scrape
-  const deletedShowtimes = await prisma.showtime.deleteMany({
-    where: {
-      allocineId: { notIn: [...foundShowtimeAllocineIds] },
-      theaterId: { in: [...successfulTheaterIds] }, // Only delete from successfully scraped theaters
-    },
-  })
+    // Record that showtime state is trustworthy right now, so the poster
+    // cleanup (a separate job) knows it can safely delete posters for movies
+    // that have no showtimes.
+    await prisma.appState.upsert({
+      where: { id: 1 },
+      create: { id: 1, lastCompleteScrapeAt: new Date() },
+      update: { lastCompleteScrapeAt: new Date() },
+    })
+  }
 
   const [countCacheItemsAfter, countShowtimesAfter, countMoviesAfter] = await Promise.all([
     prisma.scrapedUrl.count({ where: { type: 'SHOWTIMES' } }),
@@ -802,7 +882,9 @@ export async function scrapShowtimes(maxDay: number) {
   console.log(`CachedUrls: ${countCacheItemsBefore} -> ${countCacheItemsAfter}`)
   console.log(`Movies: ${countMoviesBefore} -> ${countMoviesAfter}`)
   console.log(`Showtimes: ${countShowtimesBefore} -> ${countShowtimesAfter}`)
-  console.log(`Deleted ${deletedShowtimes.count} old showtimes from successfully scraped theaters`)
+  console.log(
+    `Deleted ${deletedShowtimes.count} old showtimes${complete ? '' : ' (skipped - incomplete run)'}`,
+  )
 }
 
 export async function scrapTicketing() {

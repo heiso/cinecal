@@ -22,6 +22,19 @@ model ScrapedUrl {
   @@map("scraped_urls")
 }
 
+// Singleton row (id is always 1) holding cross-run scraper state.
+model AppState {
+  id Int @id @default(1)
+
+  // Set when a showtimes scrape completes without being cut short by rate
+  // limiting. The poster cleanup only deletes posters when this is recent,
+  // so a partial (429-truncated) run never wrongly deletes a poster for a
+  // movie whose showtimes are just temporarily missing.
+  lastCompleteScrapeAt DateTime? @map("last_complete_scrape_at")
+
+  @@map("app_state")
+}
+
 enum TagCategory {
   GENRE
   SUB_GENRE
