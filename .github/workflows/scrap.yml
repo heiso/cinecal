@@ -9,8 +9,13 @@ on:
         description: Days
         required: true
   schedule:
-    - cron: '0 2 * * *'
-    - cron: '0 10 * * *'
+    # Runs every 30 minutes. Allocine (Cloudflare) enforces a per-IP rolling
+    # request budget (~5min window), so a single 90-day run cannot fetch
+    # everything. Instead, each run fetches what it can before hitting the
+    # budget; the showtimes cache lasts until end-of-day, so the next run only
+    # fetches the gaps (cached URLs are free) and the range converges over a few
+    # runs. See the note in cli/scraper.ts.
+    - cron: '*/30 * * * *'
 
 jobs:
   scrap-showtimes:

@@ -25,6 +25,51 @@ const TICKETING_DETAILS_EXPIRATION_DATE = add(new Date(), { days: 3 })
 
 const prisma = new PrismaClient()
 
+const ALLOCINE_ORIGIN = 'https://www.allocine.fr'
+// Allocine sits behind Cloudflare, which enforces a per-IP rolling request
+// budget (~200-500 requests) and then serves 429 (`cf-mitigated: challenge`)
+// for the rest of a ~5min window. This was verified empirically:
+//  - the budget is per IP, not per session: a fresh __cf_bm/UA does NOT reset it
+//  - request pacing does not change the budget, only how fast it is spent
+//  - the window reliably resets after ~300s; requests during cooldown do not
+//    extend it
+// A full 90-day scrape (~1260 requests) blows through the budget, so instead of
+// fighting it we lean on two things the pipeline already gives us:
+//  1. The scrap job runs every 30min (see .github/workflows/scrap.yml), and the
+//     showtimes cache lasts until end-of-day, so a run only fetches the URLs the
+//     previous runs' budgets could not reach - cached URLs cost zero requests.
+//  2. 429s are non-fatal per URL (the caller logs and moves on), so a run that
+//     spends its budget simply skips the rest; the next run 30min later (a fresh
+//     budget window) fills the gaps. Over a few runs the whole range converges.
+// Given that, on a 429 we retry once quickly (for transient blips) and then give
+// up on that URL fast rather than burning minutes in backoff.
+const ALLOCINE_USER_AGENT =
+  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36'
+const ALLOCINE_MAX_RETRIES = 1
+const ALLOCINE_RETRY_DELAY_MS = 2000
+
+async function allocineFetch(url: string, init: RequestInit = {}): Promise<Response> {
+  for (let attempt = 0; ; attempt++) {
+    const res = await fetch(url, {
+      ...init,
+      headers: {
+        'User-Agent': ALLOCINE_USER_AGENT,
+        Accept: 'application/json, text/plain, */*',
+        'Accept-Language': 'fr-FR,fr;q=0.9,en;q=0.8',
+        Referer: `${ALLOCINE_ORIGIN}/`,
+        ...init.headers,
+      },
+    })
+
+    if ((res.status === 429 || res.status === 503) && attempt < ALLOCINE_MAX_RETRIES) {
+      await new Promise((resolve) => setTimeout(resolve, ALLOCINE_RETRY_DELAY_MS))
+      continue
+    }
+
+    return res
+  }
+}
+
 function getUniqueAllocineShowtimes(showtimes: AllocineResponse['results'][0]['showtimes']) {
   const showtimesArray = Object.values(showtimes).flat()
 
@@ -85,10 +130,10 @@ async function getAllocineTicketingDetails(url: string) {
 
   console.log(url)
 
-  const res = await fetch(url)
+  const res = await allocineFetch(url)
 
   if (!res.ok) {
-    throw new Error(`${url} - error`)
+    throw new Error(`${url} - error HTTP ${res.status}`)
   }
 
   const content = await res.text()
@@ -113,12 +158,12 @@ async function getAllocineShowtimes(url: string) {
 
   if (cached) {
     console.log(`${url} - cached`)
-    return JSON.parse(cached.content) as unknown as AllocineResponse
+    return { json: JSON.parse(cached.content) as unknown as AllocineResponse, fromCache: true }
   }
 
   console.log(url)
 
-  const res = await fetch(url, {
+  const res = await allocineFetch(url, {
     method: 'post',
   })
 
@@ -131,10 +176,17 @@ async function getAllocineShowtimes(url: string) {
 
   if (json.error) {
     if (json.message === 'no.showtime.error') {
+      // Cache the empty result too: a day with no showtimes should not be
+      // re-fetched on every run. Not caching it wasted ~280 of the ~1260
+      // requests in a 90-day run (far-future empty days), eating into the
+      // per-IP request budget for nothing.
       console.log(`${url} - no showtimes found`)
-      return json
+    } else {
+      // Other errors are transient/unexpected: do not cache, so the next run
+      // retries them.
+      console.error(`${url} - error ${json.message || 'Unknown error'}`)
+      return { json, fromCache: false }
     }
-    console.error(`${url} - error ${json.message || 'Unknown error'}`)
   }
 
   await prisma.scrapedUrl.upsert({
@@ -143,7 +195,7 @@ async function getAllocineShowtimes(url: string) {
     update: { content, expiresAt: SHOWTIMES_EXPIRATION_DATE },
   })
 
-  return json
+  return { json, fromCache: false }
 }
 
 async function scrapAllocineShowtimes(
@@ -165,19 +217,21 @@ async function scrapAllocineShowtimes(
   const url = `${URL_ALLOCINE_SHOWTIMES}/theater-${theater.allocineId}/${dayParam}${pageParam}`
 
   try {
-    const body = await getAllocineShowtimes(url)
+    const result = await getAllocineShowtimes(url)
 
-    if (!body) {
+    if (!result) {
       console.error(
         `${theater.name} (${theater.allocineId}) - day ${day} page ${page} - API call failed, skipping`,
       )
       // Continue to next iteration without processing this failed call
     } else {
+      const { json: body, fromCache } = result
+
       // Mark theater as having at least one successful API call
       successfulTheaterIds.add(theater.id)
 
       console.log(
-        `${theater.name} (${theater.allocineId}) - day ${day} page ${page} - found ${body.results.length} movies`,
+        `${theater.name} (${theater.allocineId}) - day ${day} page ${page} - found ${body.results.length} movies${fromCache ? ' (cached)' : ''}`,
       )
 
       for (const result of body.results) {
@@ -190,6 +244,17 @@ async function scrapAllocineShowtimes(
           } else if (EXCLUSION_LIST.includes(result.movie.title)) {
             console.log(
               `${theater.name} (${theater.allocineId}) - day ${day} page ${page} - skipping showtime for excluded movie "${result.movie.title}"`,
+            )
+            continue
+          }
+
+          // On a cache hit the movies/showtimes were already persisted when the
+          // URL was first fetched, so skip the (expensive) DB writes. We still
+          // record the showtime ids so the prune step below does not delete
+          // showtimes that are simply being served from cache this run.
+          if (fromCache) {
+            getUniqueAllocineShowtimes(result.showtimes).forEach((showtime) =>
+              foundShowtimeAllocineIds.add(showtime.internalId),
             )
             continue
           }
@@ -418,6 +483,53 @@ type UploadedPoster = {
   customMetadata: CustomMetadata
 }
 
+const IMAGEKIT_MAX_RETRIES = 3
+const IMAGEKIT_RETRY_DELAY_MS = 2000
+
+function imagekitAuthHeader() {
+  return `Basic ${Buffer.from(process.env.IMAGEKIT_API_KEY + ':').toString('base64')}`
+}
+
+// Wraps fetch for the ImageKit API with retries. The self-hosted runner
+// occasionally hits transient network failures (e.g. DNS ENOTFOUND on
+// api.imagekit.io) which throw from fetch and would otherwise crash the whole
+// scrap step; retryable HTTP statuses (429 / 5xx) are retried too.
+async function imagekitFetch(url: string | URL, init: RequestInit = {}): Promise<Response> {
+  let lastErr: unknown
+
+  for (let attempt = 0; attempt <= IMAGEKIT_MAX_RETRIES; attempt++) {
+    if (attempt > 0) {
+      await new Promise((resolve) => setTimeout(resolve, IMAGEKIT_RETRY_DELAY_MS * attempt))
+    }
+
+    try {
+      const response = await fetch(url, {
+        ...init,
+        headers: { Authorization: imagekitAuthHeader(), ...init.headers },
+      })
+
+      if (response.status === 429 || response.status >= 500) {
+        lastErr = new Error(`ImageKit HTTP ${response.status}`)
+        console.warn(
+          `${url} - ${response.status}, retrying (attempt ${attempt + 1}/${IMAGEKIT_MAX_RETRIES})`,
+        )
+        continue
+      }
+
+      return response
+    } catch (err) {
+      // Network-level failure (DNS, connection reset, ...) - fetch throws.
+      lastErr = err
+      console.warn(
+        `${url} - network error, retrying (attempt ${attempt + 1}/${IMAGEKIT_MAX_RETRIES})`,
+        err instanceof Error ? err.message : err,
+      )
+    }
+  }
+
+  throw lastErr
+}
+
 async function getUploadedPosterList(movieIds: number[]): Promise<UploadedPoster[]> {
   const movieIdsByPacks = movieIds.reduce<number[][]>((acc, id, index) => {
     if (index % 500 === 0) {
@@ -436,12 +548,7 @@ async function getUploadedPosterList(movieIds: number[]): Promise<UploadedPoster
     url.searchParams.append('fileType', 'image')
     url.searchParams.append('searchQuery', `"customMetadata.id" in [${ids.join(',')}]`)
 
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: {
-        Authorization: `Basic ${Buffer.from(process.env.IMAGEKIT_API_KEY + ':').toString('base64')}`,
-      },
-    })
+    const response = await imagekitFetch(url, { method: 'GET' })
 
     console.log(`getUploadedPosterList for ${ids.length} posters`, url.toString())
 
@@ -486,11 +593,8 @@ async function uploadAllocinePosterToImageKit(movie: {
     } satisfies CustomMetadata),
   )
 
-  const response = await fetch(`${API_ENDPOINT}/upload`, {
+  const response = await imagekitFetch(`${API_ENDPOINT}/upload`, {
     method: 'POST',
-    headers: {
-      Authorization: `Basic ${Buffer.from(process.env.IMAGEKIT_API_KEY + ':').toString('base64')}`,
-    },
     body,
   })
 
@@ -517,12 +621,7 @@ async function getAllUploadedPosters(): Promise<UploadedPoster[]> {
     url.searchParams.append('limit', LIMIT.toString())
     url.searchParams.append('skip', skip.toString())
 
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: {
-        Authorization: `Basic ${Buffer.from(process.env.IMAGEKIT_API_KEY + ':').toString('base64')}`,
-      },
-    })
+    const response = await imagekitFetch(url, { method: 'GET' })
 
     if (!response.ok) {
       throw new Error(response.statusText)
@@ -558,11 +657,10 @@ async function deletePostersFromImageKit(fileIds: string[]) {
   }, [])
 
   for (const ids of fileIdsByPacks) {
-    const response = await fetch(`${API_ENDPOINT}/batch/deleteByFileIds`, {
+    const response = await imagekitFetch(`${API_ENDPOINT}/batch/deleteByFileIds`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Basic ${Buffer.from(process.env.IMAGEKIT_API_KEY + ':').toString('base64')}`,
       },
       body: JSON.stringify({ fileIds: ids }),
     })
@@ -602,8 +700,14 @@ async function deleteUnusedPosters() {
 
 async function scrapAllocinePosters() {
   // Remove posters no longer referenced by any movie first, so ImageKit has
-  // room for the uploads below even when storage is close to full.
-  await deleteUnusedPosters()
+  // room for the uploads below even when storage is close to full. Best-effort:
+  // if it fails (e.g. transient network error) we still proceed to uploads, and
+  // the next scheduled run retries the cleanup.
+  try {
+    await deleteUnusedPosters()
+  } catch (err) {
+    console.error('deleteUnusedPosters failed, continuing to uploads', err)
+  }
 
   const movies = await prisma.movie.findMany({
     where: { posterAllocineUrl: { not: null } },
