@@ -37,7 +37,12 @@ jobs:
       - run: npx prisma generate
 
       - uses: superfly/flyctl-actions/setup-flyctl@master
-      - run: flyctl proxy 5432:5432 -a cinecal-db &
+      - run: |
+          flyctl proxy 5432:5432 -a cinecal-db &
+          for i in $(seq 1 30); do
+            (echo > /dev/tcp/127.0.0.1/5432) >/dev/null 2>&1 && echo "proxy up" && break
+            echo "waiting for proxy..."; sleep 1
+          done
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
       - run: npx tsx ./cli scrapShowtimes ${{ inputs.days || 90 }}
@@ -91,7 +96,12 @@ jobs:
       - run: npx prisma generate
 
       - uses: superfly/flyctl-actions/setup-flyctl@master
-      - run: flyctl proxy 5432:5432 -a cinecal-db &
+      - run: |
+          flyctl proxy 5432:5432 -a cinecal-db &
+          for i in $(seq 1 30); do
+            (echo > /dev/tcp/127.0.0.1/5432) >/dev/null 2>&1 && echo "proxy up" && break
+            echo "waiting for proxy..."; sleep 1
+          done
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
       - run: npx tsx ./cli scrapPosters
@@ -119,7 +129,12 @@ jobs:
       - run: npx prisma generate
 
       - uses: superfly/flyctl-actions/setup-flyctl@master
-      - run: flyctl proxy 5432:5432 -a cinecal-db &
+      - run: |
+          flyctl proxy 5432:5432 -a cinecal-db &
+          for i in $(seq 1 30); do
+            (echo > /dev/tcp/127.0.0.1/5432) >/dev/null 2>&1 && echo "proxy up" && break
+            echo "waiting for proxy..."; sleep 1
+          done
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
       - run: npx tsx ./cli savePosterBlurHashes
