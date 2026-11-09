@@ -93,14 +93,13 @@ export async function loader({ params, request }: Route.LoaderArgs) {
     calendarUrl.searchParams.append('ctz', 'Europe/Paris')
     calendarUrl.searchParams.append('text', `${theater.name} - ${movie.title}`)
     calendarUrl.searchParams.append('location', `${theater.name} ${theater.address}`)
-    if (showtime.Tags.length) {
-      calendarUrl.searchParams.append(
-        'details',
-        `Page du film <a href=${url} target="_blank">${url}</a>\nRéserver une place <a href="${showtime.ticketingUrl}" target="_blank">${
-          showtime.ticketingUrl
-        }</a>`,
+    const details = [`Page du film <a href="${url}" target="_blank">${url}</a>`]
+    if (showtime.ticketingUrl) {
+      details.push(
+        `Réserver une place <a href="${showtime.ticketingUrl}" target="_blank">${showtime.ticketingUrl}</a>`,
       )
     }
+    calendarUrl.searchParams.append('details', details.join('\n'))
 
     const addToCalendarUrl = calendarUrl.toString()
 
