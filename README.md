@@ -103,6 +103,9 @@ publishes two images to GitHub Container Registry, tagged `latest` and with the 
 
 ## Hosting
 
+Until the homelab replaces it, the old Fly.io site keeps running the code before this rebuild, fed by
+`.github/workflows/scrap-fly.yml` (the old scrape workflow, pinned to that code). Delete it with the Fly.io site.
+
 The app runs with docker compose: Postgres, a one-shot `migrate` service (pending migrations, then the theaters from
 the seed, which skips existing rows), the app, and the scraper (showtimes, posters and blurhashes every 30 minutes).
 Only [`deploy/compose.yml`](deploy/compose.yml) and a `.env` are needed on the server.

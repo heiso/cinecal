@@ -1,0 +1,152 @@
+# Keeps the old Fly.io site (cinecal.fly.dev) fed until the homelab replaces it.
+# That site runs the code of dc4361b (the last commit before the React Router 8 / Prisma 8
+# rebuild) against its own database, so this workflow checks out and runs that same code.
+# Delete this file once the Fly.io site is shut down.
+name: Scrap showtimes (Fly.io site)
+
+on:
+  workflow_dispatch:
+    inputs:
+      days:
+        default: 90
+        type: number
+        description: Days
+        required: true
+  schedule:
+    # Runs every 30 minutes. Allocine (Cloudflare) enforces a per-IP rolling
+    # request budget (~5min window), so a single 90-day run cannot fetch
+    # everything. Instead, each run fetches what it can before hitting the
+    # budget; the showtimes cache lasts until end-of-day, so the next run only
+    # fetches the gaps (cached URLs are free) and the range converges over a few
+    # runs. See the note in cli/scraper.ts.
+    - cron: '*/30 * * * *'
+
+jobs:
+  scrap-showtimes:
+    name: Scrap showtimes
+    runs-on: self-hosted
+    # runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: dc4361b3b7c5b621a5d9ceb87bdb7f51b8cfda61
+      # - uses: superfly/flyctl-actions/setup-flyctl@master
+      # - run: flyctl ssh console -a cinecal -C "node ./build/cli scrapShowtimes ${{ inputs.days || 90 }}"
+      #   env:
+      #     FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+
+      - uses: actions/setup-node@v2
+        with:
+          node-version-file: '.nvmrc'
+          # cache: 'npm'
+      - run: npm ci
+      - run: npx prisma generate
+
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+      - run: |
+          flyctl proxy 5432:5432 -a cinecal-db &
+          for i in $(seq 1 30); do
+            (echo > /dev/tcp/127.0.0.1/5432) >/dev/null 2>&1 && echo "proxy up" && break
+            echo "waiting for proxy..."; sleep 1
+          done
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+      - run: npx tsx ./cli scrapShowtimes ${{ inputs.days || 90 }}
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+  # scrap-ticketing:
+  #   name: Scrap Ticketing
+  #   needs: [scrap-showtimes]
+  #   # runs-on: self-hosted
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #     - uses: superfly/flyctl-actions/setup-flyctl@master
+  #     - run: flyctl ssh console -a cinecal -C "node ./build/cli scrapTicketing"
+  #       env:
+  #         FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+
+  #     # - uses: actions/setup-node@v2
+  #     #   with:
+  #     #     node-version-file: '.nvmrc'
+  #     #     cache: 'npm'
+  #     # - run: npm ci
+  #     # - run: npx prisma generate
+
+  #     # - uses: superfly/flyctl-actions/setup-flyctl@master
+  #     # - run: flyctl proxy 5432:5432 -a cinecal-db &
+  #     #   env:
+  #     #     FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+  #     # - run: npx tsx ./cli scrapTicketing
+  #     #   env:
+  #     #     DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+  scrap-posters:
+    name: Scrap Posters
+    needs: [scrap-showtimes]
+    runs-on: self-hosted
+    # runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: dc4361b3b7c5b621a5d9ceb87bdb7f51b8cfda61
+      # - uses: superfly/flyctl-actions/setup-flyctl@master
+      # - run: flyctl ssh console -a cinecal -C "node ./build/cli scrapPosters"
+      #   env:
+      #     FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+
+      - uses: actions/setup-node@v2
+        with:
+          node-version-file: '.nvmrc'
+          # cache: 'npm'
+      - run: npm ci
+      - run: npx prisma generate
+
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+      - run: |
+          flyctl proxy 5432:5432 -a cinecal-db &
+          for i in $(seq 1 30); do
+            (echo > /dev/tcp/127.0.0.1/5432) >/dev/null 2>&1 && echo "proxy up" && break
+            echo "waiting for proxy..."; sleep 1
+          done
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+      - run: npx tsx ./cli scrapPosters
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          IMAGEKIT_API_KEY: ${{ secrets.IMAGEKIT_API_KEY }}
+
+  save-poster-blur-hashes:
+    name: Save BlurHashes
+    needs: [scrap-posters]
+    runs-on: self-hosted
+    # runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: dc4361b3b7c5b621a5d9ceb87bdb7f51b8cfda61
+      # - uses: superfly/flyctl-actions/setup-flyctl@master
+      # - run: flyctl ssh console -a cinecal -C "node ./build/cli savePosterBlurHashes"
+      #   env:
+      #     FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+
+      - uses: actions/setup-node@v2
+        with:
+          node-version-file: '.nvmrc'
+          # cache: 'npm'
+      - run: npm ci
+      - run: npx prisma generate
+
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+      - run: |
+          flyctl proxy 5432:5432 -a cinecal-db &
+          for i in $(seq 1 30); do
+            (echo > /dev/tcp/127.0.0.1/5432) >/dev/null 2>&1 && echo "proxy up" && break
+            echo "waiting for proxy..."; sleep 1
+          done
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+      - run: npx tsx ./cli savePosterBlurHashes
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
