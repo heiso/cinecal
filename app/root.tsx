@@ -1,9 +1,9 @@
-import type { PropsWithChildren } from 'react'
+import { useEffect, type PropsWithChildren } from 'react'
 import {
+  href,
   isRouteErrorResponse,
   Link,
   Links,
-  Meta,
   Outlet,
   redirect,
   Scripts,
@@ -13,18 +13,6 @@ import {
 import type { Route } from './+types/root'
 import './app.css'
 import { env } from './env.server'
-import './font.css'
-
-type ENV = {
-  ENV: string
-  BUILD_VERSION: string
-}
-
-declare global {
-  interface Window {
-    ENV: ENV
-  }
-}
 
 // No ending slashes for SEO reasons
 // https://github.com/epicweb-dev/epic-stack/discussions/108
@@ -38,21 +26,23 @@ const removeTrailingSlash: Route.MiddlewareFunction = ({ request }) => {
 export const middleware: Route.MiddlewareFunction[] = [removeTrailingSlash]
 
 export function loader() {
-  return {
-    ENV: {
-      ENV: env.ENV,
-      BUILD_VERSION: env.BUILD_VERSION,
-    } satisfies ENV,
-  }
+  return { buildVersion: env.BUILD_VERSION }
 }
 
-export const meta: Route.MetaFunction = () => [
-  { title: 'Cinecal' },
-  { property: 'description', content: 'Explorez le cinéma à votre rythme' },
-]
+// The build version is the one this page was rendered with: keep it across navigations
+export function shouldRevalidate() {
+  return false
+}
 
 export const links: Route.LinksFunction = () => [
-  { rel: 'alternate icon', type: 'image/png', href: '/favicon-32x32.png' },
+  {
+    rel: 'preload',
+    href: '/fonts/Atkinson-Hyperlegible-Regular.woff2',
+    as: 'font',
+    type: 'font/woff2',
+    crossOrigin: 'anonymous',
+  },
+  { rel: 'icon', type: 'image/png', href: '/favicon-32x32.png' },
   { rel: 'apple-touch-icon', href: '/apple-touch-icon.png' },
   { rel: 'manifest', href: '/site.webmanifest', crossOrigin: 'use-credentials' },
 ]
@@ -63,7 +53,7 @@ export function Layout({ children }: PropsWithChildren) {
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width,initial-scale=1" />
-        <Meta />
+        <meta name="description" content="Explorez le cinéma à votre rythme" />
         <Links />
       </head>
       <body className="w-full h-full max-w-(--breakpoint-sm) m-auto relative">
@@ -80,6 +70,7 @@ export function ErrorBoundary() {
 
   return (
     <>
+      <title>Cinecal</title>
       <h1 className="text-center">Oops! I did it again</h1>
 
       {isRouteErrorResponse(error) && <div>Status: {error.status}</div>}
@@ -92,14 +83,23 @@ export function ErrorBoundary() {
 }
 
 export default function App({ loaderData }: Route.ComponentProps) {
-  return (
-    <>
-      <Outlet />
-      <script
-        dangerouslySetInnerHTML={{
-          __html: `window.ENV = ${JSON.stringify(loaderData.ENV)}`,
-        }}
-      />
-    </>
-  )
+  const { buildVersion } = loaderData
+
+  // Reload the page when a new version was deployed while the tab was in the background
+  useEffect(() => {
+    async function reloadIfOutdated() {
+      const response = await fetch(href('/health'))
+      if (!response.ok) return
+      const health: { build: string; shouldRefreshIfVersionMismatch: boolean } =
+        await response.json()
+      if (health.shouldRefreshIfVersionMismatch && health.build !== buildVersion) {
+        window.location.reload()
+      }
+    }
+
+    window.addEventListener('focus', reloadIfOutdated)
+    return () => window.removeEventListener('focus', reloadIfOutdated)
+  }, [buildVersion])
+
+  return <Outlet />
 }

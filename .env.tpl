@@ -1,9 +1,7 @@
 # Config
 ENV=development
 NODE_ENV=development
-PORT=3000
 PUBLIC_URL=http://localhost:3000
-# SESSION_COOKIE_DOMAIN=
 # IMAGEKIT_API_KEY=
 
 # Secrets

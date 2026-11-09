@@ -1,4 +1,3 @@
-import { isBefore } from 'date-fns'
 import { Link, useLocation } from 'react-router'
 import { PosterFalback } from '../components/poster-fallback'
 import { ProgressiveImg } from '../components/progressive-img'
@@ -39,8 +38,11 @@ export async function loader({ request }: Route.LoaderArgs) {
     filterCount: filters.count,
 
     movies: movies
-      .sort((movieA, movieB) =>
-        isBefore(movieA.Showtimes[0].date, movieB.Showtimes[0].date) ? -1 : 1,
+      // Every listed movie has a showtime (see getWhereInputs); the sort is stable, so ties keep the id order
+      .sort(
+        (movieA, movieB) =>
+          (movieA.Showtimes[0]?.date.getTime() ?? Infinity) -
+          (movieB.Showtimes[0]?.date.getTime() ?? Infinity),
       )
       .map((movie) => {
         const { src, srcLowDef } = getPosterSrc(
@@ -75,6 +77,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
 
   return (
     <>
+      <title>Cinecal</title>
       <h1 className="text-4xl p-6 pb-0">Séances</h1>
       <p className="p-6 pt-0 pb-0 text-gray">Explorez le cinéma à votre rythme</p>
       {movies.length === 0 && (
@@ -97,7 +100,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
             >
               {movie.src ? (
                 <ProgressiveImg
-                  className="w-full overflow-hidden aspect-poster rounded-xl"
+                  className="block w-full aspect-poster object-cover rounded-xl"
                   key={movie.id}
                   src={movie.src}
                   srcLowDef={movie.srcLowDef}

@@ -1,14 +1,14 @@
-volumes:
-  pgdata:
-
 services:
   postgres:
+    image: postgres:18-alpine
     restart: unless-stopped
-    image: postgres:12-alpine
-    volumes:
-      - pgdata:/data:delegated
     environment:
-      PGDATA: /data
       POSTGRES_HOST_AUTH_METHOD: trust
     ports:
       - 5432:5432
+    volumes:
+      # Postgres 18+ images keep their data under /var/lib/postgresql/<major>
+      - postgres:/var/lib/postgresql
+
+volumes:
+  postgres:

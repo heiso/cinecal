@@ -23,7 +23,7 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'38b10d7396cb5f9ba280ec3e75e5bfbd8d0572ecb266cfb5a30a5255375988a6'>;
+  StorageHashBase<'939fa03b0cdc044cbcc0048a749044cf18963b1682faaa71b52c1f14cf88796f'>;
 export type ExecutionHash =
   ExecutionHashBase<'e225ef7deb0bb81fc2d27513aedfcedefc7c6ec5161397f331a00a620430dc2d'>;
 export type ProfileHash =
@@ -364,7 +364,6 @@ export namespace Models {
     posterUrl: FieldOutputTypes['public']['Movie']['posterUrl'];
     releaseDate: FieldOutputTypes['public']['Movie']['releaseDate'];
     synopsis: FieldOutputTypes['public']['Movie']['synopsis'];
-    themoviedbId: FieldOutputTypes['public']['Movie']['themoviedbId'];
     title: FieldOutputTypes['public']['Movie']['title'];
     updatedAt: FieldOutputTypes['public']['Movie']['updatedAt'];
     Showtimes: public_Showtime[];
@@ -759,12 +758,6 @@ type ContractBase = Omit<
                 readonly synopsis: {
                   readonly dataType: 'pg/text';
                   readonly codecId: 'pg/text@1';
-                  readonly nullable: true;
-                  readonly many: false;
-                };
-                readonly themoviedb_id: {
-                  readonly dataType: 'pg/int4';
-                  readonly codecId: 'pg/int4@1';
                   readonly nullable: true;
                   readonly many: false;
                 };
@@ -1267,10 +1260,6 @@ type ContractBase = Omit<
                 readonly nullable: true;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
               };
-              readonly themoviedbId: {
-                readonly nullable: true;
-                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
-              };
               readonly title: {
                 readonly nullable: false;
                 readonly type: {
@@ -1334,7 +1323,6 @@ type ContractBase = Omit<
                 readonly posterUrl: { readonly column: 'poster_url' };
                 readonly releaseDate: { readonly column: 'release_date' };
                 readonly synopsis: { readonly column: 'synopsis' };
-                readonly themoviedbId: { readonly column: 'themoviedb_id' };
                 readonly title: { readonly column: 'title' };
                 readonly updatedAt: { readonly column: 'updated_at' };
               };

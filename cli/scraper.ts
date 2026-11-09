@@ -94,11 +94,16 @@ function getUniqueAllocineShowtimes(showtimes: AllocineResponse['results'][0]['s
   }, [])
 }
 
+function chunk<T>(items: T[], size: number): T[][] {
+  return Array.from({ length: Math.ceil(items.length / size) }, (_, index) =>
+    items.slice(index * size, (index + 1) * size),
+  )
+}
+
 function getDuration(runtime: number | string) {
   if (typeof runtime === 'string') {
-    const split = runtime.split('h')
-    if (!split) return 0
-    return parseInt(split[0]) * 60 + parseInt(split[1])
+    const [hours = '', minutes = ''] = runtime.split('h')
+    return parseInt(hours) * 60 + parseInt(minutes) || 0
   }
   return runtime / 60 || 0
 }
@@ -111,13 +116,13 @@ function getReleaseDate(releases: Release[]) {
   return new Date(date)
 }
 
-/**
- * @todo allocine changed its api, credits is now edges and nodes. Directors
- * used to be the credits whose position name is DIRECTOR, joined as
- * "firstName lastName".
- */
-function getDirector(_credits: Credit[]): string | null {
-  return null
+function getDirector(credits: Credit[]): string | null {
+  const directors = credits
+    .filter((credit) => credit.position?.name === 'DIRECTOR')
+    .map(({ person }) => [person?.firstName, person?.lastName].filter(Boolean).join(' '))
+    .filter(Boolean)
+
+  return directors.length > 0 ? directors.join(', ') : null
 }
 
 function getCachedUrl(url: string) {
@@ -227,12 +232,17 @@ function getMovieTags(movie: AllocineMovie) {
  * movie is left untouched.
  */
 async function findOrCreateMovie(movie: AllocineMovie) {
+  const director = getDirector(movie.credits)
   const existing = await db.orm.public.Movie.where({ allocineId: movie.internalId })
-    .select('id')
+    .select('id', 'director')
     .first()
 
   if (existing) {
-    return existing
+    // Movies scraped while the director was not parsed get it on their next scrape
+    if (existing.director === null && director !== null) {
+      await db.orm.public.Movie.where({ id: existing.id }).updateAndCount({ director })
+    }
+    return { id: existing.id }
   }
 
   const tagIds = new Set<number>()
@@ -251,7 +261,7 @@ async function findOrCreateMovie(movie: AllocineMovie) {
     releaseDate: getReleaseDate(movie.releases),
     allocineId: movie.internalId,
     posterAllocineUrl: movie.poster?.url,
-    director: getDirector(movie.credits),
+    director,
     ...(tagIds.size > 0 && {
       Tags: (tags) => tags.connect([...tagIds].map((id) => ({ id }))),
     }),
@@ -268,6 +278,7 @@ async function scrapAllocineShowtimes(
   page: number = 1,
 ): Promise<{ successfulTheaterIds: Set<number> }> {
   const theater = theaters[theaterIndex]
+  if (!theater) return { successfulTheaterIds }
   const pageParam = page > 1 ? `p-${page}/` : ''
   const dayParam = day > 0 ? `d-${format(addDays(new Date(), day), 'yyyy-MM-dd')}/` : ''
   const url = `${URL_ALLOCINE_SHOWTIMES}/theater-${theater.allocineId}/${dayParam}${pageParam}`
@@ -407,25 +418,22 @@ async function scrapAllocineTicketingUrl(): Promise<void> {
   const matchingTags = (tags: { id: number; regExp: string | null }[], details: string) =>
     tags.filter(({ regExp }) => regExp && new RegExp(regExp, 'i').test(details))
 
-  for (const { id, movieId, ticketingUrl } of showtimes.filter(
-    ({ ticketingUrl }) => ticketingUrl,
-  )) {
+  const decodeEntities = (text: string) =>
+    text
+      .replace(/&#128;/g, '€')
+      .replace(/&#(\d+);/g, (_entity, charCode: string) => String.fromCharCode(Number(charCode)))
+
+  for (const { id, movieId, ticketingUrl } of showtimes) {
+    if (!ticketingUrl) continue
     try {
-      const details = await getAllocineTicketingDetails(ticketingUrl!)
-      let prices: { label: string; description?: string | null; price: number }[] = []
+      const details = await getAllocineTicketingDetails(ticketingUrl)
 
       const regx =
         /<p>([^<]*)(?:<a[^<]*title="([^<]*)"[^<]*>i<\/a>)?<span[^<]*[^>]*>(\d*.\d*) &euro;/g
-      const matches = [...details.matchAll(regx)]
-
-      prices = matches.map((match) => ({
-        label: match[1]
-          ?.replace(/&#128;/g, '€')
-          .replace(/(&#(\d+);)/g, (match, capture, charCode) => String.fromCharCode(charCode)),
-        description: match[2]
-          ?.replace(/&#128;/g, '€')
-          .replace(/(&#(\d+);)/g, (match, capture, charCode) => String.fromCharCode(charCode)),
-        price: parseInt(match[3]),
+      const prices = [...details.matchAll(regx)].map(([, label = '', description, price = '']) => ({
+        label: decodeEntities(label),
+        description: description === undefined ? null : decodeEntities(description),
+        price: parseInt(price),
       }))
 
       const movieTagLinks = matchingTags(movieTags, details).map((tag) => ({
@@ -527,13 +535,7 @@ async function imagekitFetch(url: string | URL, init: RequestInit = {}): Promise
 }
 
 async function getUploadedPosterList(movieIds: number[]): Promise<UploadedPoster[]> {
-  const movieIdsByPacks = movieIds.reduce<number[][]>((acc, id, index) => {
-    if (index % 500 === 0) {
-      acc.push([])
-    }
-    acc[acc.length - 1].push(id)
-    return acc
-  }, [])
+  const movieIdsByPacks = chunk(movieIds, 500)
 
   const moviePosters: UploadedPoster[] = []
 
@@ -644,13 +646,7 @@ async function getAllUploadedPosters(): Promise<UploadedPoster[]> {
 
 async function deletePostersFromImageKit(fileIds: string[]) {
   // ImageKit bulk delete is capped at 100 fileIds per call
-  const fileIdsByPacks = fileIds.reduce<string[][]>((acc, fileId, index) => {
-    if (index % 100 === 0) {
-      acc.push([])
-    }
-    acc[acc.length - 1].push(fileId)
-    return acc
-  }, [])
+  const fileIdsByPacks = chunk(fileIds, 100)
 
   for (const ids of fileIdsByPacks) {
     const response = await imagekitFetch(`${API_ENDPOINT}/batch/deleteByFileIds`, {

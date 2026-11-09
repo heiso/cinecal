@@ -1,16 +1,91 @@
 @import 'tailwindcss';
 
 @theme {
-  /* The system font stack the app has always rendered with (Tailwind 3's fallback) */
   --font-sans:
-    ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
-    'Noto Color Emoji';
-  --font-default: open-sans, sans-serif;
-  --font-AtkinsonHyperlegible: 'Atkinson Hyperlegible', 'Atkinson Hyperlegible Fallback';
+    'Atkinson Hyperlegible', 'Atkinson Hyperlegible Fallback', ui-sans-serif, system-ui, sans-serif,
+    'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
 
   --color-gray: #ccc;
   --color-background: #0d1116;
   --color-primary: #009ddc;
 
   --aspect-poster: 62 / 85;
+}
+
+/* https://www.brailleinstitute.org/freefont/ */
+@font-face {
+  font-family: 'Atkinson Hyperlegible';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/Atkinson-Hyperlegible-Regular.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Atkinson Hyperlegible';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/Atkinson-Hyperlegible-Italic.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Atkinson Hyperlegible';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/Atkinson-Hyperlegible-Bold.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Atkinson Hyperlegible';
+  font-style: italic;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/Atkinson-Hyperlegible-BoldItalic.woff2') format('woff2');
+}
+
+/* Arial adjusted to the metrics of Atkinson Hyperlegible, to avoid a layout shift when it loads */
+@font-face {
+  font-family: 'Atkinson Hyperlegible Fallback';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Arial');
+  ascent-override: 80.38%;
+  descent-override: 25.35%;
+  line-gap-override: 15.15%;
+  size-adjust: 99.03%;
+}
+
+@font-face {
+  font-family: 'Atkinson Hyperlegible Fallback';
+  font-style: italic;
+  font-weight: 400;
+  src: local('Arial Italic');
+  ascent-override: 80.32%;
+  descent-override: 25.33%;
+  line-gap-override: 15.14%;
+  size-adjust: 99.11%;
+}
+
+@font-face {
+  font-family: 'Atkinson Hyperlegible Fallback';
+  font-style: normal;
+  font-weight: 700;
+  src: local('Arial Bold');
+  ascent-override: 79.8%;
+  descent-override: 25.16%;
+  line-gap-override: 15.04%;
+  size-adjust: 99.75%;
+}
+
+@font-face {
+  font-family: 'Atkinson Hyperlegible Fallback';
+  font-style: italic;
+  font-weight: 700;
+  src: local('Arial Bold Italic');
+  ascent-override: 79.32%;
+  descent-override: 25.01%;
+  line-gap-override: 14.95%;
+  size-adjust: 100.35%;
 }

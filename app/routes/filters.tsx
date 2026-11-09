@@ -1,15 +1,5 @@
-// The effects below keep the controlled inputs in sync with the URL search params
-/* oxlint-disable react/set-state-in-effect */
 import { useEffect, useState, type ComponentProps } from 'react'
-import {
-  Form,
-  Link,
-  useLocation,
-  useNavigate,
-  useNavigation,
-  useSearchParams,
-  useSubmit,
-} from 'react-router'
+import { Form, Link, useLocation, useNavigate, useSearchParams, useSubmit } from 'react-router'
 import { db } from '../db.server'
 import { CUSTOM_TAG_LABELS, DATE_FILTER, DATE_FILTER_LABELS } from '../filters'
 import { getFilters, getWhereInputs } from '../filters.server'
@@ -60,6 +50,20 @@ export async function loader({ request }: Route.LoaderArgs) {
     filterCount: filters.count,
   }
 }
+
+function getFormValues(searchParams: URLSearchParams) {
+  return {
+    title: searchParams.get('title') ?? '',
+    date: searchParams.get('date') ?? DATE_FILTER.DEFAULT,
+    movieTags: searchParams.getAll('movieTags'),
+    showtimeTags: searchParams.getAll('showtimeTags'),
+    customTags: searchParams.getAll('customTags'),
+    theaters: searchParams.getAll('theaters'),
+  }
+}
+
+type FormValues = ReturnType<typeof getFormValues>
+type ListField = 'movieTags' | 'showtimeTags' | 'customTags' | 'theaters'
 
 type RadioProps = ComponentProps<'input'> & { label: string }
 
@@ -122,7 +126,6 @@ export default function Filters({ loaderData }: Route.ComponentProps) {
   } = loaderData
   const submit = useSubmit()
   const [searchParams] = useSearchParams()
-  const navigation = useNavigation()
   const navigate = useNavigate()
   const location = useLocation()
 
@@ -145,48 +148,27 @@ export default function Filters({ loaderData }: Route.ComponentProps) {
     return () => document.removeEventListener('keyup', handleKeyup)
   }, [navigate])
 
-  const optimisticSearchParams =
-    navigation.state == 'loading' && navigation.location.pathname === location.pathname
-      ? new URLSearchParams(navigation.location.search)
-      : searchParams
+  // The inputs are controlled so typing stays responsive while the form submits on each change.
+  // When the URL changes from outside the form (back/forward, "Effacer"), the inputs follow it:
+  // https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes
+  const search = searchParams.toString()
+  const [values, setValues] = useState(() => getFormValues(searchParams))
+  const [previousSearch, setPreviousSearch] = useState(search)
+  if (search !== previousSearch) {
+    setPreviousSearch(search)
+    setValues(getFormValues(searchParams))
+  }
 
-  const searchParamTitle = optimisticSearchParams.get('title') ?? ''
-  const searchParamDate = optimisticSearchParams.get('date') ?? DATE_FILTER.DEFAULT
-  const searchParamMovieTags = optimisticSearchParams.getAll('movieTags') ?? ''
-  const searchParamShowtimeTags = optimisticSearchParams.getAll('showtimeTags') ?? ''
-  const searchParamCustomTags = optimisticSearchParams.getAll('customTags') ?? ''
-  const searchParamTheaters = optimisticSearchParams.getAll('theaters') ?? ''
+  function setValue<Field extends keyof FormValues>(field: Field, value: FormValues[Field]) {
+    setValues((values) => ({ ...values, [field]: value }))
+  }
 
-  const [searchedTitle, setTitle] = useState(searchParamTitle)
-  const [selectedDate, setDate] = useState(searchParamDate)
-  const [selectedMovieTags, setMovieTags] = useState(searchParamMovieTags)
-  const [selectedShowtimeTags, setShowtimeTags] = useState(searchParamShowtimeTags)
-  const [selectedCustomTags, setCustomTags] = useState(searchParamCustomTags)
-  const [selectedTheaters, setTheaters] = useState(searchParamTheaters)
-
-  useEffect(() => {
-    setTitle(searchParamTitle ?? '')
-  }, [searchParamTitle])
-
-  useEffect(() => {
-    setDate(searchParamDate ?? '')
-  }, [searchParamDate])
-
-  useEffect(() => {
-    setMovieTags(selectedMovieTags ?? [])
-  }, [selectedMovieTags])
-
-  useEffect(() => {
-    setShowtimeTags(selectedShowtimeTags ?? [])
-  }, [selectedShowtimeTags])
-
-  useEffect(() => {
-    setCustomTags(selectedCustomTags ?? [])
-  }, [selectedCustomTags])
-
-  useEffect(() => {
-    setTheaters(selectedTheaters ?? [])
-  }, [selectedTheaters])
+  function toggle(field: ListField, value: string, checked: boolean) {
+    setValues((values) => ({
+      ...values,
+      [field]: checked ? [...values[field], value] : values[field].filter((item) => item !== value),
+    }))
+  }
 
   return (
     <Form
@@ -194,6 +176,7 @@ export default function Filters({ loaderData }: Route.ComponentProps) {
       method="get"
       onChange={(event) => submit(event.currentTarget, { method: 'get', preventScrollReset: true })}
     >
+      <title>Cinecal</title>
       <div className="p-6 pb-28">
         <div className="grid grid-flow-col grid-cols-3 items-center">
           <Link to={{ pathname: '/' }} className="fill-white">
@@ -217,8 +200,8 @@ export default function Filters({ loaderData }: Route.ComponentProps) {
           type="text"
           placeholder={`Essayez ${randomMovie.title}`}
           name="title"
-          value={searchedTitle}
-          onChange={(event) => setTitle(event.target.value)}
+          value={values.title}
+          onChange={(event) => setValue('title', event.target.value)}
           icon={<Icon id="magnifying-glass" />}
         />
         <ul>
@@ -229,8 +212,8 @@ export default function Filters({ loaderData }: Route.ComponentProps) {
                 id={`movieTag-${tag.id.toString()}`}
                 name="movieTags"
                 value={tag.id}
-                checked={searchParamMovieTags.includes(tag.id.toString())}
-                onChange={(event) => setMovieTags([...selectedMovieTags, event.target.value])}
+                checked={values.movieTags.includes(tag.id.toString())}
+                onChange={(event) => toggle('movieTags', event.target.value, event.target.checked)}
                 label={tag.name}
               />
             ))}
@@ -243,8 +226,8 @@ export default function Filters({ loaderData }: Route.ComponentProps) {
                 id={`customTag-${tag.id.toString()}`}
                 name="customTags"
                 value={tag.id}
-                checked={searchParamCustomTags.includes(tag.id.toString())}
-                onChange={(event) => setCustomTags([...selectedCustomTags, event.target.value])}
+                checked={values.customTags.includes(tag.id.toString())}
+                onChange={(event) => toggle('customTags', event.target.value, event.target.checked)}
                 label={tag.name}
               />
             ))}
@@ -259,8 +242,10 @@ export default function Filters({ loaderData }: Route.ComponentProps) {
                 id={`showtimeTag-${tag.id.toString()}`}
                 name="showtimeTags"
                 value={tag.id}
-                checked={searchParamShowtimeTags.includes(tag.id.toString())}
-                onChange={(event) => setShowtimeTags([...selectedShowtimeTags, event.target.value])}
+                checked={values.showtimeTags.includes(tag.id.toString())}
+                onChange={(event) =>
+                  toggle('showtimeTags', event.target.value, event.target.checked)
+                }
                 label={tag.name}
               />
             ))}
@@ -273,8 +258,8 @@ export default function Filters({ loaderData }: Route.ComponentProps) {
                 id={`date-${value}`}
                 name="date"
                 value={value}
-                checked={selectedDate === value}
-                onChange={(event) => setDate(event.target.value)}
+                checked={values.date === value}
+                onChange={(event) => setValue('date', event.target.value)}
                 label={label}
               />
             ))}
@@ -289,8 +274,8 @@ export default function Filters({ loaderData }: Route.ComponentProps) {
                 id={`theater-${theater.id.toString()}`}
                 name="theaters"
                 value={theater.id}
-                checked={searchParamTheaters.includes(theater.id.toString())}
-                onChange={(event) => setTheaters([...selectedTheaters, event.target.value])}
+                checked={values.theaters.includes(theater.id.toString())}
+                onChange={(event) => toggle('theaters', event.target.value, event.target.checked)}
                 label={theater.name}
               />
             ))}

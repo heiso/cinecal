@@ -26,9 +26,8 @@ export function allocineShowtimesHandler(today = new Date()) {
     const match = new URL(request.url).pathname.match(
       /theater-([^/]+)\/(?:d-(\d{4}-\d{2}-\d{2})\/)?(?:p-(\d+)\/)?$/,
     )
-    if (!match) return new HttpResponse(null, { status: 404 })
-
-    const [, theaterId, date, page] = match
+    const [, theaterId, date, page] = match ?? []
+    if (!theaterId) return new HttpResponse(null, { status: 404 })
     const day = date
       ? Math.round(
           (new Date(`${date}T00:00:00`).getTime() -

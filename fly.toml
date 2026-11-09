@@ -1,45 +1,31 @@
+# https://fly.io/docs/reference/configuration/
 app = "cinecal"
 primary_region = "cdg"
-
-[deploy]
-  #release_command = "npx prisma db migrate"
 
 [env]
   ENV = "production"
   PORT = "8080"
   TZ = "Europe/Paris"
   PUBLIC_URL = "https://cinecal.fly.dev"
-  SHOULD_REFRESH_BROWSER_IF_VERSION_MISMATCH = 'true'
+  SHOULD_REFRESH_BROWSER_IF_VERSION_MISMATCH = "true"
 
-[[service]]
+# Migrations run in the deploy workflow before `fly deploy` (.github/workflows/deploy.yml)
+
+[http_service]
   internal_port = 8080
-  processes = [ "app" ]
-  protocol = "tcp"
-  auto_stop_machines = true
+  force_https = true
+  auto_stop_machines = "stop"
   auto_start_machines = true
   min_machines_running = 1
 
-  [[services.ports]]
-    handlers = [ "http" ]
-    port = 80
-    force_https = true
+  [http_service.concurrency]
+    type = "requests"
+    soft_limit = 200
+    hard_limit = 250
 
-  [[services.ports]]
-    handlers = [ "tls", "http" ]
-    port = 443
-
-  [[services.tcp_checks]]
-    grace_period = "1s"
-    interval = "15s"
-    restart_limit = 0
-    timeout = "2s"
-
-  [[services.http_checks]]
-    interval = 10000
+  [[http_service.checks]]
     grace_period = "5s"
-    method = "get"
+    interval = "15s"
+    method = "GET"
     path = "/health"
-    protocol = "http"
-    timeout = 2000
-    tls_skip_verify = false
-  
+    timeout = "2s"

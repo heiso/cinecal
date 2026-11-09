@@ -18,7 +18,6 @@ namespace public {
     createdAt         DateTime(storage: timestamp)          @default(now()) @onCreate(now()) @map("created_at")
     updatedAt         DateTime(storage: timestamp)          @onCreate(now()) @onUpdate(now()) @map("updated_at")
     allocineId        Int                                   @map("allocine_id")
-    themoviedbId      Int?                                  @map("themoviedb_id")
     releaseDate       DateTime(storage: timestamp)?         @map("release_date")
     title             String(storage: varchar, length: 255)
     originalTitle     String(storage: varchar, length: 255) @map("original_title")

@@ -14,6 +14,15 @@ npm run log
 
 Then go to http://localhost:3000
 
+Coming from the Postgres 12 setup? Postgres 18 uses a new volume: drop the old one, then recreate the database.
+
+```bash
+npm run down
+docker volume rm cinecal_pgdata
+npm run up
+npm run reset-database
+```
+
 ## DevEnv actions
 
 Start (Postgres in docker, dev server, contract and icons watchers in pm2)
@@ -82,4 +91,9 @@ npm run db:plan -- my_change    # write the migration in prisma/migrations (comm
 npm run db:migrate              # apply it
 ```
 
-Production applies pending migrations with `prisma db migrate` when the container starts.
+## Deploy
+
+Every push to `main` runs `.github/workflows/deploy.yml`: lint and tests, then the Docker image is built,
+the pending migrations are applied to the production database (through `flyctl proxy`), and the image is released.
+A migration runs while the previous version still serves traffic, so it must stay compatible with it
+(add a column first, drop it in a later release).

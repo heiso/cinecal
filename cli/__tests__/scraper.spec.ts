@@ -90,6 +90,7 @@ describe.skipIf(!TEST_DATABASE_URL)('scrapShowtimes', () => {
     expect(movie).toMatchObject({
       title: 'Everything Everywhere All at Once',
       duration: 139,
+      director: 'Daniel Scheinert, Daniel Kwan',
       Tags: expect.arrayContaining([{ name: 'Action', category: 'GENRE' }]),
     })
 

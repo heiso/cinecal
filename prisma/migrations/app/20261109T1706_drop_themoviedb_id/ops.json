@@ -1,0 +1,52 @@
+[
+  {
+    "id": "dropColumn.movies.themoviedb_id",
+    "label": "Drop column \"themoviedb_id\" from \"movies\"",
+    "operationClass": "destructive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "themoviedb_id",
+        "table": "movies"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"themoviedb_id\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "movies",
+          "themoviedb_id"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "column \"themoviedb_id\" on \"movies\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "drop column \"themoviedb_id\"",
+        "sql": "ALTER TABLE \"public\".\"movies\" DROP COLUMN \"themoviedb_id\""
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"themoviedb_id\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "movies",
+          "themoviedb_id"
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "column \"themoviedb_id\" on \"movies\""
+        }
+      }
+    ]
+  }
+]

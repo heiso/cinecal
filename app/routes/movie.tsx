@@ -13,18 +13,6 @@ import type { Route } from './+types/movie'
 
 const GOOGLE_CALENDAR_DATE_FORMAT = "yyyyMMdd'T'HHmmss"
 
-export const meta: Route.MetaFunction = ({ loaderData, location }) => {
-  if (!loaderData) return []
-  return [
-    { title: `Cinecal - ${loaderData.movie.title}` },
-    { property: 'og:type', content: 'website' },
-    { property: 'og:url', content: location.pathname },
-    { property: 'og:title', content: loaderData.movie.title },
-    { property: 'og:description', content: loaderData.movie.synopsis },
-    { property: 'og:image', content: loaderData.movie.src },
-  ]
-}
-
 export async function loader({ params, request }: Route.LoaderArgs) {
   const movieId = Number(params.movieId)
   if (!Number.isSafeInteger(movieId)) {
@@ -80,6 +68,8 @@ export async function loader({ params, request }: Route.LoaderArgs) {
     .orderBy((theater) => theater.name.asc())
     .all()
 
+  const url = new URL(href('/:movieId', { movieId: String(movie.id) }), env.PUBLIC_URL).toString()
+
   const { src, srcLowDef } = getPosterSrc(
     movie.posterUrl,
     movie.posterBlurHash,
@@ -90,31 +80,27 @@ export async function loader({ params, request }: Route.LoaderArgs) {
     showtime: (typeof theaters)[0]['Showtimes'][0],
     theater: (typeof theaters)[0],
   ) => {
-    const url = new URL('https://calendar.google.com/calendar/event')
-    url.searchParams.append('action', 'TEMPLATE')
-    url.searchParams.append(
+    const calendarUrl = new URL('https://calendar.google.com/calendar/event')
+    calendarUrl.searchParams.append('action', 'TEMPLATE')
+    calendarUrl.searchParams.append(
       'dates',
       `${format(showtime.date, GOOGLE_CALENDAR_DATE_FORMAT)}/${format(
         add(showtime.date, { minutes: movie.duration }),
         GOOGLE_CALENDAR_DATE_FORMAT,
       )}`,
     )
-    url.searchParams.append('text', `${theater.name} - ${movie.title}`)
-    url.searchParams.append('location', `${theater.name} ${theater.address}`)
+    calendarUrl.searchParams.append('text', `${theater.name} - ${movie.title}`)
+    calendarUrl.searchParams.append('location', `${theater.name} ${theater.address}`)
     if (showtime.Tags.length) {
-      const cinecalUrl = new URL(
-        href('/:movieId', { movieId: String(movie.id) }),
-        env.PUBLIC_URL,
-      ).toString()
-      url.searchParams.append(
+      calendarUrl.searchParams.append(
         'details',
-        `Page du film <a href=${cinecalUrl} target="_blank">${cinecalUrl}</a>\nRéserver une place <a href="${showtime.ticketingUrl}" target="_blank">${
+        `Page du film <a href=${url} target="_blank">${url}</a>\nRéserver une place <a href="${showtime.ticketingUrl}" target="_blank">${
           showtime.ticketingUrl
         }</a>`,
       )
     }
 
-    const addToCalendarUrl = url.toString()
+    const addToCalendarUrl = calendarUrl.toString()
 
     return {
       id: showtime.id,
@@ -131,6 +117,7 @@ export async function loader({ params, request }: Route.LoaderArgs) {
 
     movie: {
       id: movie.id,
+      url,
       tags: movie.Tags,
       title: movie.title,
       src,
@@ -223,6 +210,12 @@ export default function Movie({ loaderData }: Route.ComponentProps) {
 
   return (
     <>
+      <title>{`Cinecal - ${movie.title}`}</title>
+      <meta property="og:type" content="website" />
+      <meta property="og:url" content={movie.url} />
+      <meta property="og:title" content={movie.title} />
+      {movie.synopsis && <meta property="og:description" content={movie.synopsis} />}
+      {movie.src && <meta property="og:image" content={movie.src} />}
       <div className="p-6 pb-28">
         <Link
           to={{ pathname: '/', hash: movie.id.toString() }}
@@ -238,7 +231,7 @@ export default function Movie({ loaderData }: Route.ComponentProps) {
           ></div>
           {movie.src ? (
             <ProgressiveImg
-              className="w-1/2 m-auto aspect-poster overflow-hidden rounded-xl"
+              className="block w-1/2 m-auto aspect-poster object-cover rounded-xl"
               src={movie.src}
               srcLowDef={movie.srcLowDef}
               alt={movie.title}
@@ -256,12 +249,12 @@ export default function Movie({ loaderData }: Route.ComponentProps) {
               {movie.duration} min
             </span>
             <span className="text-gray text-sm">
-              {movie.releaseDate}, {movie.director}
+              {[movie.releaseDate, movie.director].filter(Boolean).join(', ')}
             </span>
           </div>
 
           <div className="flex flex-wrap">
-            {movie.tags.length &&
+            {movie.tags.length > 0 &&
               movie.tags.map((tag) => (
                 <span
                   key={tag.id}

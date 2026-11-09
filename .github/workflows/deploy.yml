@@ -4,13 +4,69 @@ on:
   push:
     branches: [main]
 
+# One deploy at a time, so two runs never migrate the database concurrently
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
 jobs:
+  check:
+    name: Lint and test
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_HOST_AUTH_METHOD: trust
+          POSTGRES_DB: cinecal_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 2s
+          --health-timeout 5s
+          --health-retries 15
+    env:
+      TEST_DATABASE_URL: postgresql://postgres@localhost:5432/cinecal_test
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npx prisma db migrate --db "$TEST_DATABASE_URL"
+      - run: npm test
+
   deploy:
     name: Deploy app
+    needs: check
     runs-on: ubuntu-latest
+    env:
+      FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
     steps:
-      - uses: actions/checkout@v3
-      - uses: superfly/flyctl-actions/setup-flyctl@master
-      - run: flyctl deploy --remote-only --config ./fly.toml
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - uses: superfly/flyctl-actions/setup-flyctl@1.5
+
+      # Build the image first, so a failing build never leaves a migrated database behind
+      - run: flyctl deploy --remote-only --build-only --push --image-label ${{ github.sha }}
+
+      # Migrations must keep working with the version still running until the release below
+      - name: Migrate the database
+        run: |
+          flyctl proxy 5432:5432 -a cinecal-db &
+          for i in $(seq 1 30); do
+            (echo > /dev/tcp/127.0.0.1/5432) >/dev/null 2>&1 && echo "proxy up" && break
+            echo "waiting for proxy..."; sleep 1
+          done
+          npx prisma db migrate
         env:
-          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+      - run: flyctl deploy --image registry.fly.io/cinecal:${{ github.sha }}
