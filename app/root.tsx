@@ -49,14 +49,14 @@ export const links: Route.LinksFunction = () => [
 
 export function Layout({ children }: PropsWithChildren) {
   return (
-    <html lang="fr" className="dark bg-background w-full h-full text-white">
+    <html lang="fr" className="dark h-full w-full bg-background text-white">
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width,initial-scale=1" />
         <meta name="description" content="Explorez le cinéma à votre rythme" />
         <Links />
       </head>
-      <body className="w-full h-full max-w-(--breakpoint-sm) m-auto relative">
+      <body className="relative m-auto h-full w-full max-w-(--breakpoint-sm)">
         {children}
         <ScrollRestoration />
         <Scripts />

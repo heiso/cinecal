@@ -78,13 +78,12 @@ export default function Home({ loaderData }: Route.ComponentProps) {
   return (
     <>
       <title>Cinecal</title>
-      <h1 className="text-4xl p-6 pb-0">Séances</h1>
+      <h1 className="p-6 pb-0 text-4xl">Séances</h1>
       <p className="p-6 pt-0 pb-0 text-gray">Explorez le cinéma à votre rythme</p>
       {movies.length === 0 && (
-        <div className="flex w-full h-1/3">
-          <div className="self-end grow text-center text-lg">
-            Aucune séance <br />
-            😕
+        <div className="flex h-1/3 w-full">
+          <div className="grow self-end text-center text-lg">
+            Aucune séance <br />😕
           </div>
         </div>
       )}
@@ -100,7 +99,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
             >
               {movie.src ? (
                 <ProgressiveImg
-                  className="block w-full aspect-poster object-cover rounded-xl"
+                  className="block aspect-poster w-full rounded-xl object-cover"
                   key={movie.id}
                   src={movie.src}
                   srcLowDef={movie.srcLowDef}
@@ -113,7 +112,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
               <div className="absolute top-2 left-2">
                 <div
                   style={{ textShadow: '0 0 1px rgba(0,0,0,.5)' }}
-                  className="text-white pt-1 pb-1 pl-3 pr-3 text-xs font-bold backdrop-blur-xl rounded-full bg-black/50"
+                  className="rounded-full bg-black/50 pt-1 pr-3 pb-1 pl-3 text-xs font-bold text-white backdrop-blur-xl"
                 >
                   <span>{movie.showtimeCount}</span>
                   <span className="text-xs font-light">
@@ -123,10 +122,10 @@ export default function Home({ loaderData }: Route.ComponentProps) {
                 </div>
               </div>
               {movie.tags.length > 0 && (
-                <div className="absolute bottom-0 left-0 right-0">
-                  <div className="backdrop-blur-xl bg-black/50 p-1 rounded-xl w-fit m-auto mb-2">
+                <div className="absolute right-0 bottom-0 left-0">
+                  <div className="m-auto mb-2 w-fit rounded-xl bg-black/50 p-1 backdrop-blur-xl">
                     {movie.tags.map((tag) => (
-                      <div key={tag.id} className="text-white pl-2 pr-2 w-full text-center text-xs">
+                      <div key={tag.id} className="w-full pr-2 pl-2 text-center text-xs text-white">
                         <span>{tag.name}</span>
                       </div>
                     ))}
@@ -138,7 +137,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
         </div>
       )}
 
-      <div className="fixed bottom-0 z-5 p-6 w-full max-w-(--breakpoint-sm) m-auto">
+      <div className="fixed bottom-0 z-5 m-auto w-full max-w-(--breakpoint-sm) p-6">
         <Link
           style={{ textShadow: '0 0 1px rgba(0,0,0,.5)' }}
           className="block items-center rounded-md bg-primary p-4 text-center"
@@ -147,7 +146,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
           {filterCount > 0 ? (
             <>
               Filtres
-              <span className="ml-2 p-1 pl-2 pr-2 text-xs font-bold bg-black/20 rounded-full inline-block">
+              <span className="ml-2 inline-block rounded-full bg-black/20 p-1 pr-2 pl-2 text-xs font-bold">
                 {filterCount}
               </span>
             </>

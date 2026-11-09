@@ -1,7 +1,7 @@
 // Builds one sprite per directory of svgs/ (public/<dir>.svg) and the matching id types (svgs.ts).
 // Runs from the Vite config (dev and build) and as `npm run icons` before type checking.
+// Both outputs are generated, so the formatter ignores them (.oxfmtrc.json).
 import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
-import { format, resolveConfig } from 'prettier'
 
 export const svgsDir = 'svgs'
 const outputPath = 'public'
@@ -13,9 +13,7 @@ function writeIfChanged(path: string, content: string) {
   writeFileSync(path, content)
 }
 
-export async function generateIconSprites() {
-  const prettierConfig = await resolveConfig(process.cwd())
-
+export function generateIconSprites() {
   const filesByDir = readdirSync(svgsDir, { withFileTypes: true })
     .filter((entry) => entry.isDirectory())
     .map(({ name: dir }) => ({
@@ -30,12 +28,12 @@ export async function generateIconSprites() {
       readFileSync(`${svgsDir}/${dir}/${id}.svg`, 'utf8')
         .replace('<svg', `<symbol id="${id}"`)
         .replace('</svg>', '</symbol>')
-        .replace(/fill="[#|a-z|0-9]*"/gi, ''),
+        .replace(/fill="[#|a-z|0-9]*"/gi, '')
+        .trim(),
     )
-    const sprite = `<svg xmlns="http://www.w3.org/2000/svg"><defs>${symbols.join('\n')}</defs></svg>`
     writeIfChanged(
       `${outputPath}/${dir}.svg`,
-      await format(sprite, { ...prettierConfig, parser: 'html' }),
+      `<svg xmlns="http://www.w3.org/2000/svg">\n<defs>\n${symbols.join('\n')}\n</defs>\n</svg>\n`,
     )
   }
 
@@ -43,11 +41,11 @@ export async function generateIconSprites() {
     .filter(({ ids }) => ids.length > 0)
     .map(({ dir, ids }) => {
       const name = `${dir.charAt(0).toUpperCase()}${dir.slice(1)}Svg`
-      return `export const ${dir}Svgs = [${ids.map((id) => `'${id}'`).join(',')}] as const
-        export type ${name} = (typeof ${dir}Svgs)[number]`
+      return `export const ${dir}Svgs = [${ids.map((id) => `'${id}'`).join(', ')}] as const
+export type ${name} = (typeof ${dir}Svgs)[number]`
     })
     .join('\n')
-  writeIfChanged(outputTS, await format(types, { ...prettierConfig, parser: 'typescript' }))
+  writeIfChanged(outputTS, `${types}\n`)
 }
 
-if (import.meta.main) await generateIconSprites()
+if (import.meta.main) generateIconSprites()

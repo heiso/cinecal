@@ -224,36 +224,36 @@ export default function Movie({ loaderData }: Route.ComponentProps) {
       <div className="p-6 pb-28">
         <Link
           to={{ pathname: '/', hash: movie.id.toString() }}
-          className="fill-white w-fit absolute z-10"
+          className="absolute z-10 w-fit fill-white"
         >
           <Icon id="cross-2" width="32px" height="32px" />
         </Link>
 
         <div className="relative mb-6">
           <div
-            className="absolute z-0 top-0 left-0 w-full h-full bg-no-repeat bg-cover bg-center blur-3xl"
+            className="absolute top-0 left-0 z-0 h-full w-full bg-cover bg-center bg-no-repeat blur-3xl"
             style={{ backgroundImage: `url('${movie.srcLowDef}')` }}
           ></div>
           {movie.src ? (
             <ProgressiveImg
-              className="block w-1/2 m-auto aspect-poster object-cover rounded-xl"
+              className="m-auto block aspect-poster w-1/2 rounded-xl object-cover"
               src={movie.src}
               srcLowDef={movie.srcLowDef}
               alt={movie.title}
             />
           ) : (
-            <div className="pt-8 w-full"></div>
+            <div className="w-full pt-8"></div>
           )}
         </div>
 
         <div className="relative z-1 space-y-4 pb-4">
-          <h1 className="text-white text-3xl inline-block">{movie.title}</h1>
+          <h1 className="inline-block text-3xl text-white">{movie.title}</h1>
 
           <div className="space-x-2">
-            <span className="inline-block text-xs border-gray rounded-md border text-gray p-1">
+            <span className="inline-block rounded-md border border-gray p-1 text-xs text-gray">
               {movie.duration} min
             </span>
-            <span className="text-gray text-sm">
+            <span className="text-sm text-gray">
               {[movie.releaseDate, movie.director].filter(Boolean).join(', ')}
             </span>
           </div>
@@ -263,7 +263,7 @@ export default function Movie({ loaderData }: Route.ComponentProps) {
               movie.tags.map((tag) => (
                 <span
                   key={tag.id}
-                  className="mr-2 mb-2 inline-block text-xs border-gray rounded-md border text-gray p-1"
+                  className="mr-2 mb-2 inline-block rounded-md border border-gray p-1 text-xs text-gray"
                 >
                   {tag.name}
                 </span>
@@ -277,8 +277,8 @@ export default function Movie({ loaderData }: Route.ComponentProps) {
           <div className="flex flex-col gap-8 py-4" key={theater.id}>
             {theater.daysByTags.map(({ tags, days }, index) => (
               <div key={index} className="flex flex-col">
-                <div className="flex gap-2 items-center mb-4">
-                  <h2 className="font-medium text-lg mr-2">
+                <div className="mb-4 flex items-center gap-2">
+                  <h2 className="mr-2 text-lg font-medium">
                     <Link to={theater.website} target="_blank">
                       {theater.name}
                     </Link>
@@ -286,7 +286,7 @@ export default function Movie({ loaderData }: Route.ComponentProps) {
 
                   {tags.map(({ name }) => (
                     <div
-                      className="inline-block text-xs font-bold bg-gray rounded-md border text-black px-2 py-1"
+                      className="inline-block rounded-md border bg-gray px-2 py-1 text-xs font-bold text-black"
                       key={name}
                     >
                       {name}
@@ -297,9 +297,9 @@ export default function Movie({ loaderData }: Route.ComponentProps) {
                 {days.map(({ day, showtimes }) => (
                   <div key={day}>
                     {day.startsWith('lundi') && <div className="p-2"></div>}
-                    <div className="flex flex-col gap-4 pb-6 pl-4 border-l-8 border-gray/20">
+                    <div className="flex flex-col gap-4 border-l-8 border-gray/20 pb-6 pl-4">
                       <div className="flex flex-wrap capitalize">{day}</div>
-                      <div className="flex gap-4 flex-wrap">
+                      <div className="flex flex-wrap gap-4">
                         {showtimes.map((showtime) => (
                           <Link
                             key={showtime.id}
@@ -322,7 +322,7 @@ export default function Movie({ loaderData }: Route.ComponentProps) {
       </div>
 
       {filterCount > 0 && (
-        <div className="fixed bottom-0 z-5 p-6 w-full max-w-(--breakpoint-sm) m-auto">
+        <div className="fixed bottom-0 z-5 m-auto w-full max-w-(--breakpoint-sm) p-6">
           <Link
             style={{ textShadow: '0 0 1px rgba(0,0,0,.5)' }}
             className="block items-center rounded-md bg-primary p-4 text-center"
@@ -330,7 +330,7 @@ export default function Movie({ loaderData }: Route.ComponentProps) {
           >
             <>
               Enlever
-              <span className="ml-2 mr-2 p-1 pl-2 pr-2 text-xs font-bold bg-black/20 rounded-full inline-block">
+              <span className="mr-2 ml-2 inline-block rounded-full bg-black/20 p-1 pr-2 pl-2 text-xs font-bold">
                 {filterCount}
               </span>
               filtre{filterCount > 0 ? 's' : ''}

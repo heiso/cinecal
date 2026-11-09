@@ -47,7 +47,7 @@ Recreate the database, apply the migrations and the seeds
 npm run reset-database
 ```
 
-Run Lint (typecheck, oxlint, prettier)
+Run Lint (typecheck, oxlint, oxfmt)
 
 ```bash
 npm run lint

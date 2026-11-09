@@ -12,11 +12,11 @@ const errorStyles =
 
 export function Input({ hasError, className, icon, ...props }: InputProps) {
   return (
-    <div className={`relative  ${className ?? ''}`}>
+    <div className={`relative ${className ?? ''}`}>
       <input
-        className={`block w-full h-full p-3 px-4 ${
+        className={`block h-full w-full p-3 px-4 ${
           icon ? 'pr-11' : ''
-        } appearance-none outline-hidden disabled:pointer-events-none border rounded-md ring-0 focus:ring-0 focus-active:ring-0 ${
+        } focus-active:ring-0 appearance-none rounded-md border ring-0 outline-hidden focus:ring-0 disabled:pointer-events-none ${
           hasError ? errorStyles : defaultStyles
         }`}
         {...props}
@@ -24,8 +24,8 @@ export function Input({ hasError, className, icon, ...props }: InputProps) {
       {icon && (
         <div
           className={`absolute top-0 right-0 bottom-0 z-10 px-4 py-3 select-none ${
-            hasError ? 'text-red-500 fill-red-500' : 'text-white fill-white'
-          } flex justify-center items-center`}
+            hasError ? 'fill-red-500 text-red-500' : 'fill-white text-white'
+          } flex items-center justify-center`}
         >
           {icon}
         </div>

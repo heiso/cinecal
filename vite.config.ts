@@ -10,12 +10,12 @@ import { generateIconSprites, svgsDir } from './scripts/generate-svg-icons-sprit
 function iconSprites(): Plugin {
   return {
     name: 'icon-sprites',
-    buildStart: () => generateIconSprites(),
+    buildStart: generateIconSprites,
     configureServer(server) {
       const dir = resolve(svgsDir)
       server.watcher.add(dir)
       server.watcher.on('all', (_event, file) => {
-        if (file.startsWith(dir) && file.endsWith('.svg')) void generateIconSprites()
+        if (file.startsWith(dir) && file.endsWith('.svg')) generateIconSprites()
       })
     },
   }

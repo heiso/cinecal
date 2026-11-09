@@ -72,14 +72,14 @@ function Radio({ id, label, ...rest }: RadioProps) {
     <li className="mt-4 mb-4">
       <input id={id} className="peer hidden" type="radio" {...rest} />
       <label
-        className="flex flex-row items-center p-3 bg-white/10 border border-white/20 rounded-md peer-checked:border-primary/20 peer-checked:bg-primary/10 peer-checked:[&_.icon]:bg-primary peer-checked:[&_.icon_div]:opacity-100 cursor-pointer"
+        className="flex cursor-pointer flex-row items-center rounded-md border border-white/20 bg-white/10 p-3 peer-checked:border-primary/20 peer-checked:bg-primary/10 peer-checked:[&_.icon]:bg-primary peer-checked:[&_.icon_div]:opacity-100"
         htmlFor={id}
       >
-        <div className="icon border rounded-full border-white/20 aspect-square h-5 p-1.5">
-          <div className="aspect-square h-full w-full bg-white rounded-full opacity-0"></div>
+        <div className="icon aspect-square h-5 rounded-full border border-white/20 p-1.5">
+          <div className="aspect-square h-full w-full rounded-full bg-white opacity-0"></div>
         </div>
 
-        <div className="label pl-3 grow">{label}</div>
+        <div className="label grow pl-3">{label}</div>
       </label>
     </li>
   )
@@ -100,14 +100,14 @@ function Checkbox({ id, name, value, label, defaultChecked, ...rest }: CheckboxP
         {...rest}
       />
       <label
-        className="flex flex-row items-center p-3 bg-white/10 border border-white/20 rounded-md peer-checked:border-primary/20 peer-checked:bg-primary/10 peer-checked:[&_.icon]:bg-primary peer-checked:[&_.icon_svg]:opacity-100 cursor-pointer"
+        className="flex cursor-pointer flex-row items-center rounded-md border border-white/20 bg-white/10 p-3 peer-checked:border-primary/20 peer-checked:bg-primary/10 peer-checked:[&_.icon]:bg-primary peer-checked:[&_.icon_svg]:opacity-100"
         htmlFor={id}
       >
-        <div className="icon border rounded-md border-white/20">
-          <Icon id="check" width="20px" height="20px" className="opacity-0 fill-white" />
+        <div className="icon rounded-md border border-white/20">
+          <Icon id="check" width="20px" height="20px" className="fill-white opacity-0" />
         </div>
 
-        <div className="label pl-3 grow">{label}</div>
+        <div className="label grow pl-3">{label}</div>
       </label>
     </li>
   )
@@ -186,7 +186,7 @@ export default function Filters({ loaderData }: Route.ComponentProps) {
           <Link
             style={{ textShadow: '0 0 1px rgba(0,0,0,.5)' }}
             to={{ pathname: location.pathname }}
-            className={`w-fit justify-self-end bg-primary rounded-md p-1 pl-2 pr-2 ${
+            className={`w-fit justify-self-end rounded-md bg-primary p-1 pr-2 pl-2 ${
               filterCount ? 'opacity-100' : 'opacity-0'
             }`}
           >
@@ -282,11 +282,11 @@ export default function Filters({ loaderData }: Route.ComponentProps) {
         </ul>
       </div>
 
-      <div className="fixed bottom-0 z-5 p-6 w-full max-w-(--breakpoint-sm) m-auto">
+      <div className="fixed bottom-0 z-5 m-auto w-full max-w-(--breakpoint-sm) p-6">
         <Link
           style={{ textShadow: '0 0 1px rgba(0,0,0,.5)' }}
           to={{ pathname: '/', search: location.search }}
-          className="block rounded-md bg-primary p-4 w-full text-center"
+          className="block w-full rounded-md bg-primary p-4 text-center"
         >
           Montrer {resultCount} film{resultCount > 1 ? 's' : ''}
         </Link>
