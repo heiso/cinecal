@@ -22,7 +22,7 @@ function iconSprites(): Plugin {
 }
 
 export default defineConfig(({ command }) => {
-  // The dev server reads .env like the scripts do (production gets its env from Fly)
+  // The dev server reads .env like the scripts do (production gets its env from deploy/compose.yml)
   if (command === 'serve' && existsSync('.env')) process.loadEnvFile('.env')
 
   return {

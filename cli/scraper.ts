@@ -37,7 +37,7 @@ const ALLOCINE_ORIGIN = 'https://www.allocine.fr'
 //    extend it
 // A full 90-day scrape (~1260 requests) blows through the budget, so instead of
 // fighting it we lean on two things the pipeline already gives us:
-//  1. The scrap job runs every 30min (see .github/workflows/scrap.yml), and the
+//  1. The scraper runs every 30min (the scraper service of deploy/compose.yml), and the
 //     showtimes cache lasts until end-of-day, so a run only fetches the URLs the
 //     previous runs' budgets could not reach - cached URLs cost zero requests.
 //  2. 429s are non-fatal per URL (the caller logs and moves on), so a run that

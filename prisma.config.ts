@@ -2,7 +2,7 @@ import { existsSync } from 'node:fs'
 import { definePrismaConfig } from '@prisma/cli-engine'
 import { defineConfig as ormConfig } from '@prisma/orm-postgres/config'
 
-// Node loads .env itself (production gets its env from Fly)
+// Node loads .env itself (production gets its env from deploy/compose.yml)
 if (existsSync('.env')) process.loadEnvFile('.env')
 
 export default definePrismaConfig({

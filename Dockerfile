@@ -1,9 +1,10 @@
 # syntax=docker/dockerfile:1
-# Migrations are not part of the image: the deploy workflow applies them before `fly deploy`
+# Two images, published by .github/workflows/ci.yml:
+# - app (default target): the build output and the production dependencies
+# - jobs: migrations, seed and the scraper, which need the Prisma CLI and the sources
 ARG NODE_VERSION=26.13.0
 
 FROM node:${NODE_VERSION}-slim AS base
-LABEL fly_launch_runtime="React Router"
 WORKDIR /app
 ENV NODE_ENV=production
 
@@ -19,11 +20,16 @@ FROM base AS production-dependencies
 COPY --link package.json package-lock.json ./
 RUN npm ci --omit=dev
 
-# Runtime: the build output and the production dependencies
-FROM base
+FROM build AS jobs
+USER node
+
+FROM base AS app
+# The git commit, so open tabs reload after an update (see app/root.tsx)
+ARG BUILD_VERSION=unknown
+ENV BUILD_VERSION=${BUILD_VERSION}
 COPY --link package.json ./
 COPY --link --from=production-dependencies /app/node_modules ./node_modules
 COPY --link --from=build /app/build ./build
 USER node
-EXPOSE 8080
+EXPOSE 3000
 CMD ["node", "--max-old-space-size=256", "node_modules/@react-router/serve/bin.cjs", "./build/server/index.js"]

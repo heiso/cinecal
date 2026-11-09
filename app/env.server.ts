@@ -6,7 +6,7 @@ declare global {
       ENV: string
       PUBLIC_URL: string
       DATABASE_URL: string
-      FLY_IMAGE_REF?: string
+      BUILD_VERSION?: string
       SHOULD_REFRESH_BROWSER_IF_VERSION_MISMATCH?: string
     }
   }
@@ -19,9 +19,8 @@ assert(process.env.DATABASE_URL, 'DATABASE_URL must be defined')
 export const env = {
   ENV: process.env.ENV,
   PUBLIC_URL: process.env.PUBLIC_URL,
-  BUILD_VERSION: process.env.FLY_IMAGE_REF
-    ? process.env.FLY_IMAGE_REF.replace(/^registry\.fly\.io\/.*:/, '')
-    : (process.env.NODE_ENV ?? 'development'),
+  // Set by the Docker image build (the git commit)
+  BUILD_VERSION: process.env.BUILD_VERSION ?? process.env.NODE_ENV ?? 'development',
   SHOULD_REFRESH_BROWSER_IF_VERSION_MISMATCH: Boolean(
     process.env.SHOULD_REFRESH_BROWSER_IF_VERSION_MISMATCH &&
     process.env.SHOULD_REFRESH_BROWSER_IF_VERSION_MISMATCH !== 'false',

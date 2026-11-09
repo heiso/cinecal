@@ -1,0 +1,71 @@
+# Runs Cinecal on a homelab: copy this file and .env.example (as .env) to a folder there.
+# See "Hosting" in the README.
+name: cinecal
+
+x-env: &env
+  TZ: Europe/Paris
+  ENV: production
+  DATABASE_URL: postgresql://cinecal:${POSTGRES_PASSWORD:?}@postgres:5432/cinecal
+
+services:
+  postgres:
+    image: postgres:18-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: cinecal
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?}
+      POSTGRES_DB: cinecal
+    volumes:
+      - postgres:/var/lib/postgresql
+    healthcheck:
+      test: ['CMD', 'pg_isready', '-U', 'cinecal']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # Applies the pending migrations, then adds the theaters (the seed skips existing rows)
+  migrate:
+    image: ghcr.io/heiso/cinecal-jobs:${CINECAL_VERSION:-latest}
+    environment: *env
+    command: ['sh', '-c', 'node_modules/.bin/prisma db migrate && node src/scripts/seed.ts']
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  app:
+    image: ghcr.io/heiso/cinecal:${CINECAL_VERSION:-latest}
+    restart: unless-stopped
+    init: true
+    environment:
+      <<: *env
+      PUBLIC_URL: ${PUBLIC_URL:?}
+      SHOULD_REFRESH_BROWSER_IF_VERSION_MISMATCH: 'true'
+    ports:
+      - ${PORT:-3000}:3000
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://localhost:3000/health').then((r) => process.exit(r.ok ? 0 : 1), () => process.exit(1))"
+      interval: 30s
+      timeout: 5s
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+  # Scrapes showtimes, posters and blurhashes now and every 30 minutes
+  scraper:
+    image: ghcr.io/heiso/cinecal-jobs:${CINECAL_VERSION:-latest}
+    restart: unless-stopped
+    init: true
+    environment:
+      <<: *env
+      IMAGEKIT_API_KEY: ${IMAGEKIT_API_KEY:?}
+    command: ['node', 'cli/index.ts', 'schedule', '90']
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+volumes:
+  postgres:
