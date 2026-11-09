@@ -3,6 +3,7 @@ import { add, endOfDay, endOfWeek, startOfDay, startOfWeek } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import type { Contract } from '../prisma/contract.d.ts'
 import { CUSTOM_TAG, DATE_FILTER } from './filters'
+import { paris, toDate } from './paris'
 
 type MovieFields = ModelAccessor<Contract, 'Movie', 'public'>
 type ShowtimeFields = ModelAccessor<Contract, 'Showtime', 'public'>
@@ -68,20 +69,22 @@ function escapeLike(value: string) {
  */
 export function getWhereInputs(filters: Filters) {
   const now = new Date()
-  const nextWeek = add(now, { weeks: 1 })
-  const recentReleaseDate = add(now, { days: -14 })
+  const recentReleaseDate = toDate(add(now, { days: -14 }, { in: paris }))
+  const startOfToday = toDate(startOfDay(now, { in: paris }))
+  const endOfToday = toDate(endOfDay(now, { in: paris }))
+  const endOfThisWeek = toDate(endOfWeek(now, { locale: fr, in: paris }))
+  const nextWeek = add(now, { weeks: 1 }, { in: paris })
+  const startOfNextWeek = toDate(startOfWeek(nextWeek, { locale: fr, in: paris }))
+  const endOfNextWeek = toDate(endOfWeek(nextWeek, { locale: fr, in: paris }))
 
   const showtime = (s: ShowtimeFields) =>
     and(
       ...(filters.date === DATE_FILTER.TODAY
-        ? [s.date.gte(now), s.date.lt(endOfDay(now))]
+        ? [s.date.gte(now), s.date.lt(endOfToday)]
         : filters.date === DATE_FILTER.THIS_WEEK
-          ? [s.date.gte(now), s.date.lt(endOfWeek(now, { locale: fr }))]
+          ? [s.date.gte(now), s.date.lt(endOfThisWeek)]
           : filters.date === DATE_FILTER.NEXT_WEEK
-            ? [
-                s.date.gt(startOfWeek(nextWeek, { locale: fr })),
-                s.date.lte(endOfWeek(nextWeek, { locale: fr })),
-              ]
+            ? [s.date.gt(startOfNextWeek), s.date.lte(endOfNextWeek)]
             : [s.date.gte(now)]),
       ...(filters.theaters.length > 0 ? [s.theaterId.in(filters.theaters)] : []),
       ...(filters.showtimeTags.length > 0
@@ -100,7 +103,7 @@ export function getWhereInputs(filters: Filters) {
           : filters.customTags.NEXT_RELEASE
             ? [m.releaseDate.gt(now)]
             : []),
-      ...(filters.customTags.SCRAPED_RECENTLY ? [m.createdAt.gte(startOfDay(now))] : []),
+      ...(filters.customTags.SCRAPED_RECENTLY ? [m.createdAt.gte(startOfToday)] : []),
       ...(filters.movieTags.length > 0 ? [m.Tags.some((tag) => tag.id.in(filters.movieTags))] : []),
     )
 

@@ -9,15 +9,17 @@ npm i
 cp .env.tpl .env
 npm run up
 npm run reset-database
-npm run log
+npm run dev
 ```
 
 Then go to http://localhost:3000
 
-Coming from the Postgres 12 setup? Postgres 18 uses a new volume: drop the old one, then recreate the database.
+Coming from the pm2 and Postgres 12 setup? Stop the old pm2 apps, drop the old database volume
+(Postgres 18 uses a new one), then recreate the database.
 
 ```bash
-npm run down
+pm2 delete prisma icons server
+docker compose down
 docker volume rm cinecal_pgdata
 npm run up
 npm run reset-database
@@ -25,28 +27,18 @@ npm run reset-database
 
 ## DevEnv actions
 
-Start (Postgres in docker, dev server, contract and icons watchers in pm2)
+Start Postgres (docker compose), then the dev server. The dev server also re-emits the Prisma
+contract when `prisma/contract.prisma` changes and rebuilds the icon sprite when `svgs/` changes.
 
 ```bash
 npm run up
+npm run dev
 ```
 
-Show logs
-
-```bash
-npm run log
-```
-
-Stop
+Stop Postgres
 
 ```bash
 npm run down
-```
-
-Restart
-
-```bash
-npm run restart
 ```
 
 Recreate the database, apply the migrations and the seeds
@@ -97,3 +89,8 @@ Every push to `main` runs `.github/workflows/deploy.yml`: lint and tests, then t
 the pending migrations are applied to the production database (through `flyctl proxy`), and the image is released.
 A migration runs while the previous version still serves traffic, so it must stay compatible with it
 (add a column first, drop it in a later release).
+
+## Dates
+
+Showtimes are Paris events: days, weeks and showtime hours are computed in Europe/Paris
+(`app/paris.ts`), whatever time zone the server, the scraper runner or the visitor is in.

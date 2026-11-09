@@ -341,7 +341,7 @@ export interface Data3 {
 export interface Original {
   __typename: string
   internalId: number
-  startsAt: Date
+  startsAt: string
   timeBeforeStart: string
   service?: any
   experience?: any
@@ -370,7 +370,7 @@ export interface Data4 {
 export interface Local {
   __typename: string
   internalId: number
-  startsAt: Date
+  startsAt: string
   timeBeforeStart: string
   service?: any
   experience?: any
@@ -399,7 +399,7 @@ export interface Data5 {
 export interface Multiple {
   __typename: string
   internalId: number
-  startsAt: Date
+  startsAt: string
   timeBeforeStart: string
   service?: any
   experience?: any

@@ -5,8 +5,9 @@
   "sideEffects": false,
   "type": "module",
   "scripts": {
-    "build": "npm run icons && react-router build",
     "dev": "react-router dev",
+    "prebuild": "prisma contract emit",
+    "build": "react-router build",
     "start": "react-router-serve ./build/server/index.js",
     "typecheck": "npm run icons && react-router typegen && tsc",
     "lint": "npm run typecheck && oxlint && prettier --check . && prisma migration check",
@@ -19,13 +20,12 @@
     "db:migrate": "prisma db migrate --advance-ref db",
     "db:seed": "node --env-file-if-exists=.env prisma/seed.ts",
     "reset-database": "docker compose exec -T postgres psql -U postgres -c 'DROP DATABASE IF EXISTS cinecal WITH (FORCE)' -c 'CREATE DATABASE cinecal' && npm run db:migrate && npm run db:seed",
-    "check-dependencies": "npx npm-check-updates --peer --format group -i",
-    "up": "docker compose up -d && pm2 start ecosystem.config.cjs",
-    "down": "pm2 delete ecosystem.config.cjs && docker compose down",
-    "restart": "pm2 delete ecosystem.config.cjs && pm2 start ecosystem.config.cjs",
-    "log": "pm2 log"
+    "up": "docker compose up -d",
+    "down": "docker compose down",
+    "check-dependencies": "npx npm-check-updates --peer --format group -i"
   },
   "dependencies": {
+    "@date-fns/tz": "^1.5.0",
     "@prisma/orm-postgres": "8.0.0-rc.23",
     "@react-router/node": "^8.5.1",
     "@react-router/serve": "^8.5.1",
@@ -47,7 +47,6 @@
     "@types/react-dom": "^19.3.0",
     "msw": "^3.0.4",
     "oxlint": "^1.93.0",
-    "pm2": "^7.1.2",
     "prettier": "^3.9.10",
     "prisma": "8.0.0-rc.33",
     "tailwindcss": "^4.3.5",

@@ -1,7 +1,10 @@
+import { readFileSync } from 'node:fs'
+import { format } from 'date-fns'
 import { http, HttpResponse } from 'msw'
 import { setupServer } from 'msw/node'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
-import { allocineShowtimesHandler } from './allocine-mock.ts'
+import { paris } from '../../app/paris.ts'
+import { allocineShowtimesHandler, theaterShowtimeId } from './allocine-mock.ts'
 
 /**
  * Runs the showtimes scraper against the recorded Allocine responses and a
@@ -93,6 +96,23 @@ describe.skipIf(!TEST_DATABASE_URL)('scrapShowtimes', () => {
       director: 'Daniel Scheinert, Daniel Kwan',
       Tags: expect.arrayContaining([{ name: 'Action', category: 'GENRE' }]),
     })
+
+    // Allocine sends Paris wall clock times: stored showtimes are those instants, whatever the TZ
+    const fixture = JSON.parse(
+      readFileSync(`${import.meta.dirname}/fixtures/showtimes/theater-*.json`, 'utf8'),
+    )
+    const recorded = Object.values(fixture.results[0].showtimes).flat()[0] as {
+      internalId: number
+      startsAt: string
+    }
+    const showtime = await db.orm.public.Showtime.where({
+      allocineId: theaterShowtimeId('C0023', recorded.internalId),
+    })
+      .select('date')
+      .first()
+    expect(showtime && format(showtime.date, "yyyy-MM-dd'T'HH:mm:ss", { in: paris })).toBe(
+      `${format(new Date(), 'yyyy-MM-dd', { in: paris })}T${recorded.startsAt.slice(11)}`,
+    )
 
     requests = 0
     await scrapShowtimes(2)

@@ -1,5 +1,7 @@
 import { readFileSync } from 'node:fs'
+import { addDays, format } from 'date-fns'
 import { http, HttpResponse } from 'msw'
+import { paris } from '../../app/paris.ts'
 
 const FIXTURES = `${import.meta.dirname}/fixtures/showtimes`
 
@@ -11,9 +13,15 @@ function fixturePath(day: number, page: number) {
   return null
 }
 
-function toLocalDate(date: Date) {
-  const pad = (value: number) => String(value).padStart(2, '0')
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
+/** Showtime ids are made unique per theater, like real responses would be */
+export function theaterShowtimeId(theaterId: string, internalId: number) {
+  const theaterOffset = [...theaterId].reduce((acc, c) => acc * 31 + c.charCodeAt(0), 7) % 1000
+  return internalId + theaterOffset * 1_000_000_000
+}
+
+/** The Paris calendar date, like Allocine's day parameter */
+function toParisDate(date: Date) {
+  return format(date, 'yyyy-MM-dd', { in: paris })
 }
 
 /**
@@ -28,29 +36,23 @@ export function allocineShowtimesHandler(today = new Date()) {
     )
     const [, theaterId, date, page] = match ?? []
     if (!theaterId) return new HttpResponse(null, { status: 404 })
-    const day = date
-      ? Math.round(
-          (new Date(`${date}T00:00:00`).getTime() -
-            new Date(`${toLocalDate(today)}T00:00:00`).getTime()) /
-            86_400_000,
-        )
-      : 0
+    // Date-only strings parse as UTC midnight, so the difference is a whole number of days
+    const day = date ? (Date.parse(date) - Date.parse(toParisDate(today))) / 86_400_000 : 0
     const path = fixturePath(day, page ? Number(page) : 1)
     if (!path) {
       return HttpResponse.json({ error: true, message: 'no.showtime.error', results: [] })
     }
 
     const json = JSON.parse(readFileSync(path, 'utf-8'))
-    const target = new Date(today.getFullYear(), today.getMonth(), today.getDate() + day)
-    const theaterOffset = [...theaterId].reduce((acc, c) => acc * 31 + c.charCodeAt(0), 7) % 1000
+    const target = toParisDate(addDays(today, day, { in: paris }))
     for (const result of json.results) {
       for (const showtimes of Object.values(result.showtimes) as {
         startsAt: string
         internalId: number
       }[][]) {
         for (const showtime of showtimes) {
-          showtime.startsAt = `${toLocalDate(target)}T${showtime.startsAt.slice(11)}`
-          showtime.internalId += theaterOffset * 1_000_000_000
+          showtime.startsAt = `${target}T${showtime.startsAt.slice(11)}`
+          showtime.internalId = theaterShowtimeId(theaterId, showtime.internalId)
         }
       }
     }

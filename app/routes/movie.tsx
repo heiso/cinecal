@@ -7,6 +7,7 @@ import { ProgressiveImg } from '../components/progressive-img'
 import { db } from '../db.server'
 import { env } from '../env.server'
 import { getFilters, getWhereInputs } from '../filters.server'
+import { paris } from '../paris'
 import { getPosterSrc } from '../poster.server'
 import { Icon } from '../ui/icon'
 import type { Route } from './+types/movie'
@@ -84,11 +85,14 @@ export async function loader({ params, request }: Route.LoaderArgs) {
     calendarUrl.searchParams.append('action', 'TEMPLATE')
     calendarUrl.searchParams.append(
       'dates',
-      `${format(showtime.date, GOOGLE_CALENDAR_DATE_FORMAT)}/${format(
+      `${format(showtime.date, GOOGLE_CALENDAR_DATE_FORMAT, { in: paris })}/${format(
         add(showtime.date, { minutes: movie.duration }),
         GOOGLE_CALENDAR_DATE_FORMAT,
+        { in: paris },
       )}`,
     )
+    // The dates above are Paris wall clock times
+    calendarUrl.searchParams.append('ctz', 'Europe/Paris')
     calendarUrl.searchParams.append('text', `${theater.name} - ${movie.title}`)
     calendarUrl.searchParams.append('location', `${theater.name} ${theater.address}`)
     if (showtime.Tags.length) {
@@ -104,7 +108,7 @@ export async function loader({ params, request }: Route.LoaderArgs) {
 
     return {
       id: showtime.id,
-      date: format(showtime.date, `HH'h'mm`, { locale: fr }),
+      date: format(showtime.date, `HH'h'mm`, { locale: fr, in: paris }),
       language: showtime.language,
       tags: [{ id: showtime.language, name: showtime.language }, ...showtime.Tags],
       ticketingUrl: showtime.ticketingUrl,
@@ -123,7 +127,8 @@ export async function loader({ params, request }: Route.LoaderArgs) {
       src,
       srcLowDef,
       duration: movie.duration,
-      releaseDate: movie.releaseDate ? format(movie.releaseDate, 'yyyy') : null,
+      // Release dates are calendar dates, stored at midnight UTC
+      releaseDate: movie.releaseDate ? String(movie.releaseDate.getUTCFullYear()) : null,
       director: movie.director,
       synopsis: movie.synopsis,
     },
@@ -137,7 +142,7 @@ export async function loader({ params, request }: Route.LoaderArgs) {
         days: theater.Showtimes.reduce<
           { day: string; showtimes: ReturnType<typeof mapShowtime>[] }[]
         >((acc, showtime) => {
-          const day = format(showtime.date, `E dd LLL`, { locale: fr })
+          const day = format(showtime.date, `E dd LLL`, { locale: fr, in: paris })
           const showtimesByDay = acc.find((item) => item.day === day)
           const extendedShowtime = mapShowtime(showtime, theater)
           if (showtimesByDay) {
@@ -157,7 +162,7 @@ export async function loader({ params, request }: Route.LoaderArgs) {
           const extendedShowtime = mapShowtime(showtime, theater)
           const key = extendedShowtime.tags.map(({ id }) => id).join('-')
           const showtimesByTags = acc.find((showtimeByTags) => showtimeByTags.key === key)
-          const day = format(showtime.date, `EEEE dd LLLL`, { locale: fr })
+          const day = format(showtime.date, `EEEE dd LLLL`, { locale: fr, in: paris })
 
           if (showtimesByTags) {
             const showtimesByDay = showtimesByTags.days.find(

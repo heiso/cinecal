@@ -17,26 +17,29 @@ on:
     # runs. See the note in cli/scraper.ts.
     - cron: '*/30 * * * *'
 
+# A run that outlasts the schedule makes the next one wait instead of overlapping
+concurrency:
+  group: scrap
+  cancel-in-progress: false
+
 jobs:
-  scrap-showtimes:
-    name: Scrap showtimes
+  scrap:
+    name: Scrap showtimes and posters
     runs-on: self-hosted
-    # runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
     steps:
       - uses: actions/checkout@v7
-      # - uses: superfly/flyctl-actions/setup-flyctl@1.5
-      # - run: flyctl ssh console -a cinecal -C "node cli/index.ts scrapShowtimes ${{ inputs.days || 90 }}"
-      #   env:
-      #     FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
-
       - uses: actions/setup-node@v7
         with:
-          node-version-file: '.nvmrc'
-          # cache: 'npm'
-      - run: npm ci
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci --omit=dev
 
       - uses: superfly/flyctl-actions/setup-flyctl@1.5
-      - run: |
+      # The proxy keeps running for the next steps and stops with the job
+      - name: Open a tunnel to the database
+        run: |
           flyctl proxy 5432:5432 -a cinecal-db &
           for i in $(seq 1 30); do
             (echo > /dev/tcp/127.0.0.1/5432) >/dev/null 2>&1 && echo "proxy up" && break
@@ -44,95 +47,11 @@ jobs:
           done
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+
+      # Each step runs only if the previous one succeeded
       - run: node cli/index.ts scrapShowtimes ${{ inputs.days || 90 }}
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-
-  # scrap-ticketing:
-  #   name: Scrap Ticketing
-  #   needs: [scrap-showtimes]
-  #   # runs-on: self-hosted
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v7
-  #     - uses: superfly/flyctl-actions/setup-flyctl@1.5
-  #     - run: flyctl ssh console -a cinecal -C "node cli/index.ts scrapTicketing"
-  #       env:
-  #         FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
-
-  #     # - uses: actions/setup-node@v7
-  #     #   with:
-  #     #     node-version-file: '.nvmrc'
-  #     #     cache: 'npm'
-  #     # - run: npm ci
-
-  #     # - uses: superfly/flyctl-actions/setup-flyctl@1.5
-  #     # - run: flyctl proxy 5432:5432 -a cinecal-db &
-  #     #   env:
-  #     #     FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
-  #     # - run: node cli/index.ts scrapTicketing
-  #     #   env:
-  #     #     DATABASE_URL: ${{ secrets.DATABASE_URL }}
-
-  scrap-posters:
-    name: Scrap Posters
-    needs: [scrap-showtimes]
-    runs-on: self-hosted
-    # runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-      # - uses: superfly/flyctl-actions/setup-flyctl@1.5
-      # - run: flyctl ssh console -a cinecal -C "node cli/index.ts scrapPosters"
-      #   env:
-      #     FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
-
-      - uses: actions/setup-node@v7
-        with:
-          node-version-file: '.nvmrc'
-          # cache: 'npm'
-      - run: npm ci
-
-      - uses: superfly/flyctl-actions/setup-flyctl@1.5
-      - run: |
-          flyctl proxy 5432:5432 -a cinecal-db &
-          for i in $(seq 1 30); do
-            (echo > /dev/tcp/127.0.0.1/5432) >/dev/null 2>&1 && echo "proxy up" && break
-            echo "waiting for proxy..."; sleep 1
-          done
-        env:
-          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
       - run: node cli/index.ts scrapPosters
         env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
           IMAGEKIT_API_KEY: ${{ secrets.IMAGEKIT_API_KEY }}
-
-  save-poster-blur-hashes:
-    name: Save BlurHashes
-    needs: [scrap-posters]
-    runs-on: self-hosted
-    # runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-      # - uses: superfly/flyctl-actions/setup-flyctl@1.5
-      # - run: flyctl ssh console -a cinecal -C "node cli/index.ts savePosterBlurHashes"
-      #   env:
-      #     FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
-
-      - uses: actions/setup-node@v7
-        with:
-          node-version-file: '.nvmrc'
-          # cache: 'npm'
-      - run: npm ci
-
-      - uses: superfly/flyctl-actions/setup-flyctl@1.5
-      - run: |
-          flyctl proxy 5432:5432 -a cinecal-db &
-          for i in $(seq 1 30); do
-            (echo > /dev/tcp/127.0.0.1/5432) >/dev/null 2>&1 && echo "proxy up" && break
-            echo "waiting for proxy..."; sleep 1
-          done
-        env:
-          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
       - run: node cli/index.ts savePosterBlurHashes
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      # scrapTicketing (showtime tags and prices) is disabled

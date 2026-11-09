@@ -2,7 +2,8 @@ import type { Scalars } from '@prisma/orm-postgres/family-contract/types'
 import { and, not, or } from '@prisma/orm-postgres/orm-client'
 import { getPixels } from '@unpic/pixels'
 import { encode } from 'blurhash'
-import { add, addDays, endOfDay, format } from 'date-fns'
+import { add, addDays, endOfDay, format, parseISO } from 'date-fns'
+import { paris, toDate } from '../app/paris.ts'
 import type { Models } from '../prisma/contract.d.ts'
 import { db } from '../prisma/db.ts'
 import type { AllocineResponse, Credit, Release } from './allocine-types.ts'
@@ -19,8 +20,9 @@ const EXCLUSION_LIST = ['Rex Studios', 'Sauvez le cinéma !']
 const IMAGEKIT_FOLDER = process.env.ENV === 'development' ? 'posters-dev' : 'posters-prod'
 const IMAGEKIT_URL = `https://ik.imagekit.io/cinecal/${IMAGEKIT_FOLDER}`
 const POSTER_RATIO = 62 / 85
-const SHOWTIMES_EXPIRATION_DATE = endOfDay(new Date())
-const TICKETING_DETAILS_EXPIRATION_DATE = add(new Date(), { days: 3 })
+// Allocine's days are Paris days
+const SHOWTIMES_EXPIRATION_DATE = toDate(endOfDay(new Date(), { in: paris }))
+const TICKETING_DETAILS_EXPIRATION_DATE = toDate(add(new Date(), { days: 3 }, { in: paris }))
 // Poster cleanup only trusts the showtime state if the last complete scrape is
 // within this window. Showtimes run every 30min, so a healthy pipeline produces
 // a complete run well within a day; if none has succeeded for this long, skip
@@ -280,7 +282,10 @@ async function scrapAllocineShowtimes(
   const theater = theaters[theaterIndex]
   if (!theater) return { successfulTheaterIds }
   const pageParam = page > 1 ? `p-${page}/` : ''
-  const dayParam = day > 0 ? `d-${format(addDays(new Date(), day), 'yyyy-MM-dd')}/` : ''
+  const dayParam =
+    day > 0
+      ? `d-${format(addDays(new Date(), day, { in: paris }), 'yyyy-MM-dd', { in: paris })}/`
+      : ''
   const url = `${URL_ALLOCINE_SHOWTIMES}/theater-${theater.allocineId}/${dayParam}${pageParam}`
 
   try {
@@ -330,7 +335,8 @@ async function scrapAllocineShowtimes(
 
           const data = getUniqueAllocineShowtimes(result.showtimes).map((showtime) => ({
             allocineId: showtime.internalId,
-            date: new Date(showtime.startsAt),
+            // startsAt is a Paris wall clock time without offset
+            date: toDate(parseISO(showtime.startsAt, { in: paris })),
             isPreview: showtime.isPreview,
             language: showtime.tags.includes('Localization.Language.French')
               ? ('VF' as const)
