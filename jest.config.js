@@ -11,7 +11,10 @@ const config = {
     {
       transform: {
         '^.+\\.(t|j)sx?$': '@swc/jest',
+        '^.+\\.mjs$': '@swc/jest',
       },
+      // Recent msw versions pull in ESM-only deps; let swc transpile them to CommonJS
+      transformIgnorePatterns: ['/node_modules/(?!(rettime|until-async|@open-draft)/)'],
       testEnvironment: 'node',
       clearMocks: true,
       testMatch: ['<rootDir>/**/*.spec.ts'],

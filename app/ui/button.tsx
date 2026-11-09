@@ -7,8 +7,7 @@ const primaryClass = 'bg-pink-500 text-pink-50 [text-shadow:0_0_1px_rgb(0,0,0,0.
 const secondaryClass = 'bg-transparent border'
 
 export type ButtonProps = (
-  | (ButtonHTMLAttributes<HTMLButtonElement> & { as?: 'button' })
-  | (LinkProps & { as: 'link' })
+  (ButtonHTMLAttributes<HTMLButtonElement> & { as?: 'button' }) | (LinkProps & { as: 'link' })
 ) & { primary?: boolean }
 
 export function Button({ primary, className, children, ...props }: ButtonProps) {

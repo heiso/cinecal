@@ -1,11 +1,11 @@
 import { readConfig } from '@remix-run/dev/dist/config.js'
-import type { ConfigRoute, RouteManifest } from '@remix-run/dev/dist/config/routes.js'
+import type { RouteManifest, RouteManifestEntry } from '@remix-run/dev/dist/config/routes.js'
 import { writeFileSync } from 'fs'
 import { format, resolveConfig } from 'prettier'
 
 const outputPath = `routes.ts`
 
-function buildPath(routes: RouteManifest, route: ConfigRoute): string {
+function buildPath(routes: RouteManifest, route: RouteManifestEntry): string {
   const result = []
   if (route.parentId) {
     result.push(buildPath(routes, routes[route.parentId]))
