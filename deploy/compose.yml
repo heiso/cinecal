@@ -25,7 +25,7 @@ services:
 
   # Applies the pending migrations, then adds the theaters (the seed skips existing rows)
   migrate:
-    image: ghcr.io/heiso/cinecal-jobs:${CINECAL_VERSION:-latest}
+    image: ghcr.io/heiso/cinecal:${CINECAL_VERSION:-latest}
     environment: *env
     command: ['sh', '-c', 'node_modules/.bin/prisma db migrate && node src/scripts/seed.ts']
     depends_on:
@@ -56,7 +56,7 @@ services:
 
   # Scrapes showtimes, posters and blurhashes now and every 30 minutes
   scraper:
-    image: ghcr.io/heiso/cinecal-jobs:${CINECAL_VERSION:-latest}
+    image: ghcr.io/heiso/cinecal:${CINECAL_VERSION:-latest}
     restart: unless-stopped
     init: true
     environment:

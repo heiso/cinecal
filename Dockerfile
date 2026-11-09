@@ -1,7 +1,6 @@
 # syntax=docker/dockerfile:1
-# Two images, published by .github/workflows/ci.yml:
-# - app (default target): the build output and the production dependencies
-# - jobs: migrations, seed and the scraper, which need the Prisma CLI and the sources
+# One image, published by .github/workflows/ci.yml, for every service of deploy/compose.yml:
+# the app (default command), the migrations and seed, and the scraper.
 ARG NODE_VERSION=26.13.0
 
 FROM node:${NODE_VERSION}-slim AS base
@@ -15,21 +14,22 @@ RUN npm ci --include=dev
 COPY --link . .
 RUN npm run build
 
-# Production dependencies only
+# Production dependencies only (they include the Prisma CLI, for the migrations)
 FROM base AS production-dependencies
 COPY --link package.json package-lock.json ./
 RUN npm ci --omit=dev
 
-FROM build AS jobs
-USER node
-
-FROM base AS app
+FROM base
 # The git commit, so open tabs reload after an update (see app/root.tsx)
 ARG BUILD_VERSION=unknown
 ENV BUILD_VERSION=${BUILD_VERSION}
-COPY --link package.json ./
+COPY --link package.json prisma.config.ts ./
 COPY --link --from=production-dependencies /app/node_modules ./node_modules
 COPY --link --from=build /app/build ./build
+# Migrations, seed and scraper run from the sources (Node runs TypeScript)
+COPY --link migrations ./migrations
+COPY --link src ./src
+COPY --link cli ./cli
 USER node
 EXPOSE 3000
 CMD ["node", "--max-old-space-size=256", "node_modules/@react-router/serve/bin.cjs", "./build/server/index.js"]

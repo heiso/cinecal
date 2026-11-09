@@ -10,3 +10,4 @@ node_modules
 /.react-router
 /build
 svgs.ts
+**/__tests__
