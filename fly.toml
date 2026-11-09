@@ -2,7 +2,7 @@ app = "cinecal"
 primary_region = "cdg"
 
 [deploy]
-  #release_command = "npx prisma migrate deploy"
+  #release_command = "npx prisma db migrate"
 
 [env]
   ENV = "production"

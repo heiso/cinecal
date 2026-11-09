@@ -25,7 +25,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       # - uses: superfly/flyctl-actions/setup-flyctl@master
-      # - run: flyctl ssh console -a cinecal -C "node ./build/cli scrapShowtimes ${{ inputs.days || 90 }}"
+      # - run: flyctl ssh console -a cinecal -C "node cli/index.ts scrapShowtimes ${{ inputs.days || 90 }}"
       #   env:
       #     FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
 
@@ -34,7 +34,6 @@ jobs:
           node-version-file: '.nvmrc'
           # cache: 'npm'
       - run: npm ci
-      - run: npx prisma generate
 
       - uses: superfly/flyctl-actions/setup-flyctl@master
       - run: |
@@ -45,7 +44,7 @@ jobs:
           done
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
-      - run: npx tsx ./cli scrapShowtimes ${{ inputs.days || 90 }}
+      - run: node cli/index.ts scrapShowtimes ${{ inputs.days || 90 }}
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
@@ -57,7 +56,7 @@ jobs:
   #   steps:
   #     - uses: actions/checkout@v3
   #     - uses: superfly/flyctl-actions/setup-flyctl@master
-  #     - run: flyctl ssh console -a cinecal -C "node ./build/cli scrapTicketing"
+  #     - run: flyctl ssh console -a cinecal -C "node cli/index.ts scrapTicketing"
   #       env:
   #         FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
 
@@ -66,13 +65,12 @@ jobs:
   #     #     node-version-file: '.nvmrc'
   #     #     cache: 'npm'
   #     # - run: npm ci
-  #     # - run: npx prisma generate
 
   #     # - uses: superfly/flyctl-actions/setup-flyctl@master
   #     # - run: flyctl proxy 5432:5432 -a cinecal-db &
   #     #   env:
   #     #     FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
-  #     # - run: npx tsx ./cli scrapTicketing
+  #     # - run: node cli/index.ts scrapTicketing
   #     #   env:
   #     #     DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
@@ -84,7 +82,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       # - uses: superfly/flyctl-actions/setup-flyctl@master
-      # - run: flyctl ssh console -a cinecal -C "node ./build/cli scrapPosters"
+      # - run: flyctl ssh console -a cinecal -C "node cli/index.ts scrapPosters"
       #   env:
       #     FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
 
@@ -93,7 +91,6 @@ jobs:
           node-version-file: '.nvmrc'
           # cache: 'npm'
       - run: npm ci
-      - run: npx prisma generate
 
       - uses: superfly/flyctl-actions/setup-flyctl@master
       - run: |
@@ -104,7 +101,7 @@ jobs:
           done
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
-      - run: npx tsx ./cli scrapPosters
+      - run: node cli/index.ts scrapPosters
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           IMAGEKIT_API_KEY: ${{ secrets.IMAGEKIT_API_KEY }}
@@ -117,7 +114,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       # - uses: superfly/flyctl-actions/setup-flyctl@master
-      # - run: flyctl ssh console -a cinecal -C "node ./build/cli savePosterBlurHashes"
+      # - run: flyctl ssh console -a cinecal -C "node cli/index.ts savePosterBlurHashes"
       #   env:
       #     FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
 
@@ -126,7 +123,6 @@ jobs:
           node-version-file: '.nvmrc'
           # cache: 'npm'
       - run: npm ci
-      - run: npx prisma generate
 
       - uses: superfly/flyctl-actions/setup-flyctl@master
       - run: |
@@ -137,6 +133,6 @@ jobs:
           done
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
-      - run: npx tsx ./cli savePosterBlurHashes
+      - run: node cli/index.ts savePosterBlurHashes
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}

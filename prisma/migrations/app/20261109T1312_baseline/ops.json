@@ -1,0 +1,1419 @@
+[
+  {
+    "id": "schema.public",
+    "label": "Create schema \"public\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres"
+    },
+    "precheck": [],
+    "execute": [
+      {
+        "description": "Create schema \"public\"",
+        "sql": "CREATE SCHEMA IF NOT EXISTS \"public\"",
+        "params": []
+      }
+    ],
+    "postcheck": []
+  },
+  {
+    "id": "createNativeEnumType.Language",
+    "label": "Create enum type \"Language\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "type",
+        "name": "Language"
+      }
+    },
+    "precheck": [],
+    "execute": [
+      {
+        "description": "create enum type \"Language\"",
+        "sql": "CREATE TYPE \"public\".\"Language\" AS ENUM ('VO', 'VF')",
+        "params": []
+      }
+    ],
+    "postcheck": []
+  },
+  {
+    "id": "createNativeEnumType.ScrapedUrlType",
+    "label": "Create enum type \"ScrapedUrlType\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "type",
+        "name": "ScrapedUrlType"
+      }
+    },
+    "precheck": [],
+    "execute": [
+      {
+        "description": "create enum type \"ScrapedUrlType\"",
+        "sql": "CREATE TYPE \"public\".\"ScrapedUrlType\" AS ENUM ('SHOWTIMES', 'TICKETING')",
+        "params": []
+      }
+    ],
+    "postcheck": []
+  },
+  {
+    "id": "createNativeEnumType.TagCategory",
+    "label": "Create enum type \"TagCategory\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "type",
+        "name": "TagCategory"
+      }
+    },
+    "precheck": [],
+    "execute": [
+      {
+        "description": "create enum type \"TagCategory\"",
+        "sql": "CREATE TYPE \"public\".\"TagCategory\" AS ENUM ('GENRE', 'SUB_GENRE', 'CHARACTERISTIC', 'AWARD')",
+        "params": []
+      }
+    ],
+    "postcheck": []
+  },
+  {
+    "id": "table._MovieToMovieTag",
+    "label": "Create table \"_MovieToMovieTag\"",
+    "summary": "Creates table \"_MovieToMovieTag\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "_MovieToMovieTag"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"_MovieToMovieTag\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"_MovieToMovieTag\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "table \"_MovieToMovieTag\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"_MovieToMovieTag\"",
+        "sql": "CREATE TABLE \"public\".\"_MovieToMovieTag\" (\n  \"A\" int4 NOT NULL,\n  \"B\" int4 NOT NULL\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"_MovieToMovieTag\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3))) AS \"result\"",
+        "params": [
+          "\"public\".\"_MovieToMovieTag\"",
+          "r",
+          "p"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "table \"_MovieToMovieTag\""
+        }
+      }
+    ]
+  },
+  {
+    "id": "table._ShowtimeToShowtimeTag",
+    "label": "Create table \"_ShowtimeToShowtimeTag\"",
+    "summary": "Creates table \"_ShowtimeToShowtimeTag\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "_ShowtimeToShowtimeTag"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"_ShowtimeToShowtimeTag\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"_ShowtimeToShowtimeTag\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "table \"_ShowtimeToShowtimeTag\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"_ShowtimeToShowtimeTag\"",
+        "sql": "CREATE TABLE \"public\".\"_ShowtimeToShowtimeTag\" (\n  \"A\" int4 NOT NULL,\n  \"B\" int4 NOT NULL\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"_ShowtimeToShowtimeTag\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3))) AS \"result\"",
+        "params": [
+          "\"public\".\"_ShowtimeToShowtimeTag\"",
+          "r",
+          "p"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "table \"_ShowtimeToShowtimeTag\""
+        }
+      }
+    ]
+  },
+  {
+    "id": "table.app_state",
+    "label": "Create table \"app_state\"",
+    "summary": "Creates table \"app_state\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "app_state"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"app_state\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"app_state\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "table \"app_state\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"app_state\"",
+        "sql": "CREATE TABLE \"public\".\"app_state\" (\n  \"id\" int4 DEFAULT 1 NOT NULL,\n  \"last_complete_scrape_at\" timestamp(3),\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"app_state\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3))) AS \"result\"",
+        "params": [
+          "\"public\".\"app_state\"",
+          "r",
+          "p"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "table \"app_state\""
+        }
+      }
+    ]
+  },
+  {
+    "id": "table.movie_tags",
+    "label": "Create table \"movie_tags\"",
+    "summary": "Creates table \"movie_tags\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "movie_tags"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"movie_tags\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"movie_tags\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "table \"movie_tags\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"movie_tags\"",
+        "sql": "CREATE TABLE \"public\".\"movie_tags\" (\n  \"category\" \"TagCategory\" NOT NULL,\n  \"featured\" bool DEFAULT false NOT NULL,\n  \"id\" SERIAL NOT NULL,\n  \"is_filter_enabled\" bool DEFAULT false NOT NULL,\n  \"name\" character varying(255) NOT NULL,\n  \"reg_exp\" character varying(255),\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"movie_tags\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3))) AS \"result\"",
+        "params": [
+          "\"public\".\"movie_tags\"",
+          "r",
+          "p"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "table \"movie_tags\""
+        }
+      }
+    ]
+  },
+  {
+    "id": "table.movies",
+    "label": "Create table \"movies\"",
+    "summary": "Creates table \"movies\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "movies"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"movies\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"movies\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "table \"movies\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"movies\"",
+        "sql": "CREATE TABLE \"public\".\"movies\" (\n  \"allocine_id\" int4 NOT NULL,\n  \"created_at\" timestamp(3) DEFAULT (now()) NOT NULL,\n  \"director\" text,\n  \"duration\" int4 DEFAULT 0 NOT NULL,\n  \"id\" SERIAL NOT NULL,\n  \"original_title\" character varying(255) NOT NULL,\n  \"poster_allocine_url\" text,\n  \"poster_blur_hash\" text,\n  \"poster_url\" text,\n  \"release_date\" timestamp(3),\n  \"synopsis\" text,\n  \"themoviedb_id\" int4,\n  \"title\" character varying(255) NOT NULL,\n  \"updated_at\" timestamp(3) NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"movies\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3))) AS \"result\"",
+        "params": [
+          "\"public\".\"movies\"",
+          "r",
+          "p"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "table \"movies\""
+        }
+      }
+    ]
+  },
+  {
+    "id": "table.prices",
+    "label": "Create table \"prices\"",
+    "summary": "Creates table \"prices\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "prices"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"prices\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"prices\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "table \"prices\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"prices\"",
+        "sql": "CREATE TABLE \"public\".\"prices\" (\n  \"description\" text,\n  \"id\" SERIAL NOT NULL,\n  \"label\" text NOT NULL,\n  \"price\" float8 NOT NULL,\n  \"showtimeId\" int4,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"prices\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3))) AS \"result\"",
+        "params": [
+          "\"public\".\"prices\"",
+          "r",
+          "p"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "table \"prices\""
+        }
+      }
+    ]
+  },
+  {
+    "id": "table.scraped_urls",
+    "label": "Create table \"scraped_urls\"",
+    "summary": "Creates table \"scraped_urls\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "scraped_urls"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"scraped_urls\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"scraped_urls\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "table \"scraped_urls\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"scraped_urls\"",
+        "sql": "CREATE TABLE \"public\".\"scraped_urls\" (\n  \"content\" text NOT NULL,\n  \"created_at\" timestamp(3) DEFAULT (now()) NOT NULL,\n  \"expires_at\" timestamp(3) NOT NULL,\n  \"type\" \"ScrapedUrlType\" NOT NULL,\n  \"url\" text NOT NULL,\n  PRIMARY KEY (\"url\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"scraped_urls\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3))) AS \"result\"",
+        "params": [
+          "\"public\".\"scraped_urls\"",
+          "r",
+          "p"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "table \"scraped_urls\""
+        }
+      }
+    ]
+  },
+  {
+    "id": "table.showtime_tags",
+    "label": "Create table \"showtime_tags\"",
+    "summary": "Creates table \"showtime_tags\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "showtime_tags"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"showtime_tags\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"showtime_tags\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "table \"showtime_tags\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"showtime_tags\"",
+        "sql": "CREATE TABLE \"public\".\"showtime_tags\" (\n  \"featured\" bool DEFAULT false NOT NULL,\n  \"id\" SERIAL NOT NULL,\n  \"is_filter_enabled\" bool DEFAULT false NOT NULL,\n  \"name\" character varying(255) NOT NULL,\n  \"reg_exp\" character varying(255),\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"showtime_tags\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3))) AS \"result\"",
+        "params": [
+          "\"public\".\"showtime_tags\"",
+          "r",
+          "p"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "table \"showtime_tags\""
+        }
+      }
+    ]
+  },
+  {
+    "id": "table.showtimes",
+    "label": "Create table \"showtimes\"",
+    "summary": "Creates table \"showtimes\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "showtimes"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"showtimes\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"showtimes\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "table \"showtimes\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"showtimes\"",
+        "sql": "CREATE TABLE \"public\".\"showtimes\" (\n  \"allocine_id\" int8 NOT NULL,\n  \"created_at\" timestamp(3) DEFAULT (now()) NOT NULL,\n  \"date\" timestamp(3) NOT NULL,\n  \"id\" SERIAL NOT NULL,\n  \"is_preview\" bool DEFAULT false NOT NULL,\n  \"language\" \"Language\" NOT NULL,\n  \"movie_id\" int4 NOT NULL,\n  \"theater_id\" int4 NOT NULL,\n  \"ticketingUrl\" text,\n  \"updated_at\" timestamp(3) NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"showtimes\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3))) AS \"result\"",
+        "params": [
+          "\"public\".\"showtimes\"",
+          "r",
+          "p"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "table \"showtimes\""
+        }
+      }
+    ]
+  },
+  {
+    "id": "table.theaters",
+    "label": "Create table \"theaters\"",
+    "summary": "Creates table \"theaters\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "theaters"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"theaters\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"theaters\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "table \"theaters\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"theaters\"",
+        "sql": "CREATE TABLE \"public\".\"theaters\" (\n  \"address\" text NOT NULL,\n  \"allocine_id\" character varying(10) NOT NULL,\n  \"created_at\" timestamp(3) DEFAULT (now()) NOT NULL,\n  \"id\" SERIAL NOT NULL,\n  \"name\" character varying(255) NOT NULL,\n  \"updated_at\" timestamp(3) NOT NULL,\n  \"website\" character varying(255) NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"theaters\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3))) AS \"result\"",
+        "params": [
+          "\"public\".\"theaters\"",
+          "r",
+          "p"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "table \"theaters\""
+        }
+      }
+    ]
+  },
+  {
+    "id": "index._MovieToMovieTag._MovieToMovieTag_AB_unique",
+    "label": "Create index \"_MovieToMovieTag_AB_unique\" on \"_MovieToMovieTag\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "_MovieToMovieTag_AB_unique",
+        "table": "_MovieToMovieTag"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"_MovieToMovieTag_AB_unique\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"_MovieToMovieTag_AB_unique\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "index \"_MovieToMovieTag_AB_unique\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"_MovieToMovieTag_AB_unique\"",
+        "sql": "CREATE UNIQUE INDEX \"_MovieToMovieTag_AB_unique\" ON \"public\".\"_MovieToMovieTag\" (\"A\", \"B\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"_MovieToMovieTag_AB_unique\" exists on \"_MovieToMovieTag\" with the planned definition",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_index\" AS \"i\" ON \"i\".\"indexrelid\" = \"c\".\"oid\" INNER JOIN \"pg_am\" AS \"m\" ON \"m\".\"oid\" = \"c\".\"relam\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3) AND \"i\".\"indrelid\" = to_regclass($4) AND \"i\".\"indisunique\" AND \"m\".\"amname\" = $5 AND (\"i\".\"indexprs\" IS NULL AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"i\".\"indkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"i\".\"indrelid\" AND key_attribute.attnum = key_column.attnum) = ($6)::jsonb) AND \"i\".\"indpred\" IS NULL)) AS \"result\"",
+        "params": [
+          "\"public\".\"_MovieToMovieTag_AB_unique\"",
+          "i",
+          "I",
+          "\"public\".\"_MovieToMovieTag\"",
+          "btree",
+          "[\"A\",\"B\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index._MovieToMovieTag._MovieToMovieTag_B_index",
+    "label": "Create index \"_MovieToMovieTag_B_index\" on \"_MovieToMovieTag\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "_MovieToMovieTag_B_index",
+        "table": "_MovieToMovieTag"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"_MovieToMovieTag_B_index\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"_MovieToMovieTag_B_index\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "index \"_MovieToMovieTag_B_index\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"_MovieToMovieTag_B_index\"",
+        "sql": "CREATE INDEX \"_MovieToMovieTag_B_index\" ON \"public\".\"_MovieToMovieTag\" (\"B\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"_MovieToMovieTag_B_index\" exists on \"_MovieToMovieTag\" with the planned definition",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_index\" AS \"i\" ON \"i\".\"indexrelid\" = \"c\".\"oid\" INNER JOIN \"pg_am\" AS \"m\" ON \"m\".\"oid\" = \"c\".\"relam\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3) AND \"i\".\"indrelid\" = to_regclass($4) AND NOT (\"i\".\"indisunique\") AND \"m\".\"amname\" = $5 AND (\"i\".\"indexprs\" IS NULL AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"i\".\"indkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"i\".\"indrelid\" AND key_attribute.attnum = key_column.attnum) = ($6)::jsonb) AND \"i\".\"indpred\" IS NULL)) AS \"result\"",
+        "params": [
+          "\"public\".\"_MovieToMovieTag_B_index\"",
+          "i",
+          "I",
+          "\"public\".\"_MovieToMovieTag\"",
+          "btree",
+          "[\"B\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index._ShowtimeToShowtimeTag._ShowtimeToShowtimeTag_AB_unique",
+    "label": "Create index \"_ShowtimeToShowtimeTag_AB_unique\" on \"_ShowtimeToShowtimeTag\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "_ShowtimeToShowtimeTag_AB_unique",
+        "table": "_ShowtimeToShowtimeTag"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"_ShowtimeToShowtimeTag_AB_unique\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"_ShowtimeToShowtimeTag_AB_unique\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "index \"_ShowtimeToShowtimeTag_AB_unique\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"_ShowtimeToShowtimeTag_AB_unique\"",
+        "sql": "CREATE UNIQUE INDEX \"_ShowtimeToShowtimeTag_AB_unique\" ON \"public\".\"_ShowtimeToShowtimeTag\" (\"A\", \"B\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"_ShowtimeToShowtimeTag_AB_unique\" exists on \"_ShowtimeToShowtimeTag\" with the planned definition",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_index\" AS \"i\" ON \"i\".\"indexrelid\" = \"c\".\"oid\" INNER JOIN \"pg_am\" AS \"m\" ON \"m\".\"oid\" = \"c\".\"relam\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3) AND \"i\".\"indrelid\" = to_regclass($4) AND \"i\".\"indisunique\" AND \"m\".\"amname\" = $5 AND (\"i\".\"indexprs\" IS NULL AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"i\".\"indkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"i\".\"indrelid\" AND key_attribute.attnum = key_column.attnum) = ($6)::jsonb) AND \"i\".\"indpred\" IS NULL)) AS \"result\"",
+        "params": [
+          "\"public\".\"_ShowtimeToShowtimeTag_AB_unique\"",
+          "i",
+          "I",
+          "\"public\".\"_ShowtimeToShowtimeTag\"",
+          "btree",
+          "[\"A\",\"B\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index._ShowtimeToShowtimeTag._ShowtimeToShowtimeTag_B_index",
+    "label": "Create index \"_ShowtimeToShowtimeTag_B_index\" on \"_ShowtimeToShowtimeTag\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "_ShowtimeToShowtimeTag_B_index",
+        "table": "_ShowtimeToShowtimeTag"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"_ShowtimeToShowtimeTag_B_index\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"_ShowtimeToShowtimeTag_B_index\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "index \"_ShowtimeToShowtimeTag_B_index\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"_ShowtimeToShowtimeTag_B_index\"",
+        "sql": "CREATE INDEX \"_ShowtimeToShowtimeTag_B_index\" ON \"public\".\"_ShowtimeToShowtimeTag\" (\"B\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"_ShowtimeToShowtimeTag_B_index\" exists on \"_ShowtimeToShowtimeTag\" with the planned definition",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_index\" AS \"i\" ON \"i\".\"indexrelid\" = \"c\".\"oid\" INNER JOIN \"pg_am\" AS \"m\" ON \"m\".\"oid\" = \"c\".\"relam\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3) AND \"i\".\"indrelid\" = to_regclass($4) AND NOT (\"i\".\"indisunique\") AND \"m\".\"amname\" = $5 AND (\"i\".\"indexprs\" IS NULL AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"i\".\"indkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"i\".\"indrelid\" AND key_attribute.attnum = key_column.attnum) = ($6)::jsonb) AND \"i\".\"indpred\" IS NULL)) AS \"result\"",
+        "params": [
+          "\"public\".\"_ShowtimeToShowtimeTag_B_index\"",
+          "i",
+          "I",
+          "\"public\".\"_ShowtimeToShowtimeTag\"",
+          "btree",
+          "[\"B\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.movie_tags.movie_tags_name_key",
+    "label": "Create index \"movie_tags_name_key\" on \"movie_tags\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "movie_tags_name_key",
+        "table": "movie_tags"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"movie_tags_name_key\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"movie_tags_name_key\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "index \"movie_tags_name_key\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"movie_tags_name_key\"",
+        "sql": "CREATE UNIQUE INDEX \"movie_tags_name_key\" ON \"public\".\"movie_tags\" (\"name\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"movie_tags_name_key\" exists on \"movie_tags\" with the planned definition",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_index\" AS \"i\" ON \"i\".\"indexrelid\" = \"c\".\"oid\" INNER JOIN \"pg_am\" AS \"m\" ON \"m\".\"oid\" = \"c\".\"relam\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3) AND \"i\".\"indrelid\" = to_regclass($4) AND \"i\".\"indisunique\" AND \"m\".\"amname\" = $5 AND (\"i\".\"indexprs\" IS NULL AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"i\".\"indkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"i\".\"indrelid\" AND key_attribute.attnum = key_column.attnum) = ($6)::jsonb) AND \"i\".\"indpred\" IS NULL)) AS \"result\"",
+        "params": [
+          "\"public\".\"movie_tags_name_key\"",
+          "i",
+          "I",
+          "\"public\".\"movie_tags\"",
+          "btree",
+          "[\"name\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.movies.movies_allocine_id_key",
+    "label": "Create index \"movies_allocine_id_key\" on \"movies\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "movies_allocine_id_key",
+        "table": "movies"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"movies_allocine_id_key\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"movies_allocine_id_key\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "index \"movies_allocine_id_key\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"movies_allocine_id_key\"",
+        "sql": "CREATE UNIQUE INDEX \"movies_allocine_id_key\" ON \"public\".\"movies\" (\"allocine_id\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"movies_allocine_id_key\" exists on \"movies\" with the planned definition",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_index\" AS \"i\" ON \"i\".\"indexrelid\" = \"c\".\"oid\" INNER JOIN \"pg_am\" AS \"m\" ON \"m\".\"oid\" = \"c\".\"relam\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3) AND \"i\".\"indrelid\" = to_regclass($4) AND \"i\".\"indisunique\" AND \"m\".\"amname\" = $5 AND (\"i\".\"indexprs\" IS NULL AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"i\".\"indkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"i\".\"indrelid\" AND key_attribute.attnum = key_column.attnum) = ($6)::jsonb) AND \"i\".\"indpred\" IS NULL)) AS \"result\"",
+        "params": [
+          "\"public\".\"movies_allocine_id_key\"",
+          "i",
+          "I",
+          "\"public\".\"movies\"",
+          "btree",
+          "[\"allocine_id\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.showtime_tags.showtime_tags_name_key",
+    "label": "Create index \"showtime_tags_name_key\" on \"showtime_tags\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "showtime_tags_name_key",
+        "table": "showtime_tags"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"showtime_tags_name_key\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"showtime_tags_name_key\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "index \"showtime_tags_name_key\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"showtime_tags_name_key\"",
+        "sql": "CREATE UNIQUE INDEX \"showtime_tags_name_key\" ON \"public\".\"showtime_tags\" (\"name\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"showtime_tags_name_key\" exists on \"showtime_tags\" with the planned definition",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_index\" AS \"i\" ON \"i\".\"indexrelid\" = \"c\".\"oid\" INNER JOIN \"pg_am\" AS \"m\" ON \"m\".\"oid\" = \"c\".\"relam\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3) AND \"i\".\"indrelid\" = to_regclass($4) AND \"i\".\"indisunique\" AND \"m\".\"amname\" = $5 AND (\"i\".\"indexprs\" IS NULL AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"i\".\"indkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"i\".\"indrelid\" AND key_attribute.attnum = key_column.attnum) = ($6)::jsonb) AND \"i\".\"indpred\" IS NULL)) AS \"result\"",
+        "params": [
+          "\"public\".\"showtime_tags_name_key\"",
+          "i",
+          "I",
+          "\"public\".\"showtime_tags\"",
+          "btree",
+          "[\"name\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.showtimes.showtimes_allocine_id_key",
+    "label": "Create index \"showtimes_allocine_id_key\" on \"showtimes\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "showtimes_allocine_id_key",
+        "table": "showtimes"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"showtimes_allocine_id_key\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"showtimes_allocine_id_key\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "index \"showtimes_allocine_id_key\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"showtimes_allocine_id_key\"",
+        "sql": "CREATE UNIQUE INDEX \"showtimes_allocine_id_key\" ON \"public\".\"showtimes\" (\"allocine_id\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"showtimes_allocine_id_key\" exists on \"showtimes\" with the planned definition",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_index\" AS \"i\" ON \"i\".\"indexrelid\" = \"c\".\"oid\" INNER JOIN \"pg_am\" AS \"m\" ON \"m\".\"oid\" = \"c\".\"relam\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3) AND \"i\".\"indrelid\" = to_regclass($4) AND \"i\".\"indisunique\" AND \"m\".\"amname\" = $5 AND (\"i\".\"indexprs\" IS NULL AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"i\".\"indkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"i\".\"indrelid\" AND key_attribute.attnum = key_column.attnum) = ($6)::jsonb) AND \"i\".\"indpred\" IS NULL)) AS \"result\"",
+        "params": [
+          "\"public\".\"showtimes_allocine_id_key\"",
+          "i",
+          "I",
+          "\"public\".\"showtimes\"",
+          "btree",
+          "[\"allocine_id\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.showtimes.showtimes_date_movie_id_theater_id_key",
+    "label": "Create index \"showtimes_date_movie_id_theater_id_key\" on \"showtimes\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "showtimes_date_movie_id_theater_id_key",
+        "table": "showtimes"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"showtimes_date_movie_id_theater_id_key\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"showtimes_date_movie_id_theater_id_key\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "index \"showtimes_date_movie_id_theater_id_key\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"showtimes_date_movie_id_theater_id_key\"",
+        "sql": "CREATE UNIQUE INDEX \"showtimes_date_movie_id_theater_id_key\" ON \"public\".\"showtimes\" (\"date\", \"movie_id\", \"theater_id\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"showtimes_date_movie_id_theater_id_key\" exists on \"showtimes\" with the planned definition",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_index\" AS \"i\" ON \"i\".\"indexrelid\" = \"c\".\"oid\" INNER JOIN \"pg_am\" AS \"m\" ON \"m\".\"oid\" = \"c\".\"relam\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3) AND \"i\".\"indrelid\" = to_regclass($4) AND \"i\".\"indisunique\" AND \"m\".\"amname\" = $5 AND (\"i\".\"indexprs\" IS NULL AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"i\".\"indkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"i\".\"indrelid\" AND key_attribute.attnum = key_column.attnum) = ($6)::jsonb) AND \"i\".\"indpred\" IS NULL)) AS \"result\"",
+        "params": [
+          "\"public\".\"showtimes_date_movie_id_theater_id_key\"",
+          "i",
+          "I",
+          "\"public\".\"showtimes\"",
+          "btree",
+          "[\"date\",\"movie_id\",\"theater_id\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.theaters.theaters_allocine_id_key",
+    "label": "Create index \"theaters_allocine_id_key\" on \"theaters\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "theaters_allocine_id_key",
+        "table": "theaters"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"theaters_allocine_id_key\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"theaters_allocine_id_key\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "index \"theaters_allocine_id_key\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"theaters_allocine_id_key\"",
+        "sql": "CREATE UNIQUE INDEX \"theaters_allocine_id_key\" ON \"public\".\"theaters\" (\"allocine_id\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"theaters_allocine_id_key\" exists on \"theaters\" with the planned definition",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_index\" AS \"i\" ON \"i\".\"indexrelid\" = \"c\".\"oid\" INNER JOIN \"pg_am\" AS \"m\" ON \"m\".\"oid\" = \"c\".\"relam\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3) AND \"i\".\"indrelid\" = to_regclass($4) AND \"i\".\"indisunique\" AND \"m\".\"amname\" = $5 AND (\"i\".\"indexprs\" IS NULL AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"i\".\"indkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"i\".\"indrelid\" AND key_attribute.attnum = key_column.attnum) = ($6)::jsonb) AND \"i\".\"indpred\" IS NULL)) AS \"result\"",
+        "params": [
+          "\"public\".\"theaters_allocine_id_key\"",
+          "i",
+          "I",
+          "\"public\".\"theaters\"",
+          "btree",
+          "[\"allocine_id\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey._MovieToMovieTag._MovieToMovieTag_A_fkey",
+    "label": "Add foreign key \"_MovieToMovieTag_A_fkey\" on \"_MovieToMovieTag\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "_MovieToMovieTag_A_fkey",
+        "table": "_MovieToMovieTag"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"_MovieToMovieTag_A_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "_MovieToMovieTag_A_fkey",
+          "public",
+          "\"public\".\"_MovieToMovieTag\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "FK \"_MovieToMovieTag_A_fkey\" on \"_MovieToMovieTag\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"_MovieToMovieTag_A_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"_MovieToMovieTag\"\nADD CONSTRAINT \"_MovieToMovieTag_A_fkey\"\nFOREIGN KEY (\"A\")\nREFERENCES \"public\".\"movies\" (\"id\")\nON DELETE CASCADE\nON UPDATE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"_MovieToMovieTag_A_fkey\" exists with the planned columns, referenced table and actions",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3) AND \"c\".\"contype\" = $4 AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"conkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"conrelid\" AND key_attribute.attnum = key_column.attnum) = ($5)::jsonb AND \"c\".\"confrelid\" = to_regclass($6) AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"confkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"confrelid\" AND key_attribute.attnum = key_column.attnum) = ($7)::jsonb AND \"c\".\"confdeltype\" = $8 AND \"c\".\"confupdtype\" = $9)) AS \"result\"",
+        "params": [
+          "_MovieToMovieTag_A_fkey",
+          "public",
+          "\"public\".\"_MovieToMovieTag\"",
+          "f",
+          "[\"A\"]",
+          "\"public\".\"movies\"",
+          "[\"id\"]",
+          "c",
+          "c"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey._MovieToMovieTag._MovieToMovieTag_B_fkey",
+    "label": "Add foreign key \"_MovieToMovieTag_B_fkey\" on \"_MovieToMovieTag\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "_MovieToMovieTag_B_fkey",
+        "table": "_MovieToMovieTag"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"_MovieToMovieTag_B_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "_MovieToMovieTag_B_fkey",
+          "public",
+          "\"public\".\"_MovieToMovieTag\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "FK \"_MovieToMovieTag_B_fkey\" on \"_MovieToMovieTag\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"_MovieToMovieTag_B_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"_MovieToMovieTag\"\nADD CONSTRAINT \"_MovieToMovieTag_B_fkey\"\nFOREIGN KEY (\"B\")\nREFERENCES \"public\".\"movie_tags\" (\"id\")\nON DELETE CASCADE\nON UPDATE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"_MovieToMovieTag_B_fkey\" exists with the planned columns, referenced table and actions",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3) AND \"c\".\"contype\" = $4 AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"conkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"conrelid\" AND key_attribute.attnum = key_column.attnum) = ($5)::jsonb AND \"c\".\"confrelid\" = to_regclass($6) AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"confkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"confrelid\" AND key_attribute.attnum = key_column.attnum) = ($7)::jsonb AND \"c\".\"confdeltype\" = $8 AND \"c\".\"confupdtype\" = $9)) AS \"result\"",
+        "params": [
+          "_MovieToMovieTag_B_fkey",
+          "public",
+          "\"public\".\"_MovieToMovieTag\"",
+          "f",
+          "[\"B\"]",
+          "\"public\".\"movie_tags\"",
+          "[\"id\"]",
+          "c",
+          "c"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey._ShowtimeToShowtimeTag._ShowtimeToShowtimeTag_A_fkey",
+    "label": "Add foreign key \"_ShowtimeToShowtimeTag_A_fkey\" on \"_ShowtimeToShowtimeTag\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "_ShowtimeToShowtimeTag_A_fkey",
+        "table": "_ShowtimeToShowtimeTag"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"_ShowtimeToShowtimeTag_A_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "_ShowtimeToShowtimeTag_A_fkey",
+          "public",
+          "\"public\".\"_ShowtimeToShowtimeTag\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "FK \"_ShowtimeToShowtimeTag_A_fkey\" on \"_ShowtimeToShowtimeTag\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"_ShowtimeToShowtimeTag_A_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"_ShowtimeToShowtimeTag\"\nADD CONSTRAINT \"_ShowtimeToShowtimeTag_A_fkey\"\nFOREIGN KEY (\"A\")\nREFERENCES \"public\".\"showtimes\" (\"id\")\nON DELETE CASCADE\nON UPDATE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"_ShowtimeToShowtimeTag_A_fkey\" exists with the planned columns, referenced table and actions",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3) AND \"c\".\"contype\" = $4 AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"conkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"conrelid\" AND key_attribute.attnum = key_column.attnum) = ($5)::jsonb AND \"c\".\"confrelid\" = to_regclass($6) AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"confkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"confrelid\" AND key_attribute.attnum = key_column.attnum) = ($7)::jsonb AND \"c\".\"confdeltype\" = $8 AND \"c\".\"confupdtype\" = $9)) AS \"result\"",
+        "params": [
+          "_ShowtimeToShowtimeTag_A_fkey",
+          "public",
+          "\"public\".\"_ShowtimeToShowtimeTag\"",
+          "f",
+          "[\"A\"]",
+          "\"public\".\"showtimes\"",
+          "[\"id\"]",
+          "c",
+          "c"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey._ShowtimeToShowtimeTag._ShowtimeToShowtimeTag_B_fkey",
+    "label": "Add foreign key \"_ShowtimeToShowtimeTag_B_fkey\" on \"_ShowtimeToShowtimeTag\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "_ShowtimeToShowtimeTag_B_fkey",
+        "table": "_ShowtimeToShowtimeTag"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"_ShowtimeToShowtimeTag_B_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "_ShowtimeToShowtimeTag_B_fkey",
+          "public",
+          "\"public\".\"_ShowtimeToShowtimeTag\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "FK \"_ShowtimeToShowtimeTag_B_fkey\" on \"_ShowtimeToShowtimeTag\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"_ShowtimeToShowtimeTag_B_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"_ShowtimeToShowtimeTag\"\nADD CONSTRAINT \"_ShowtimeToShowtimeTag_B_fkey\"\nFOREIGN KEY (\"B\")\nREFERENCES \"public\".\"showtime_tags\" (\"id\")\nON DELETE CASCADE\nON UPDATE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"_ShowtimeToShowtimeTag_B_fkey\" exists with the planned columns, referenced table and actions",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3) AND \"c\".\"contype\" = $4 AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"conkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"conrelid\" AND key_attribute.attnum = key_column.attnum) = ($5)::jsonb AND \"c\".\"confrelid\" = to_regclass($6) AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"confkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"confrelid\" AND key_attribute.attnum = key_column.attnum) = ($7)::jsonb AND \"c\".\"confdeltype\" = $8 AND \"c\".\"confupdtype\" = $9)) AS \"result\"",
+        "params": [
+          "_ShowtimeToShowtimeTag_B_fkey",
+          "public",
+          "\"public\".\"_ShowtimeToShowtimeTag\"",
+          "f",
+          "[\"B\"]",
+          "\"public\".\"showtime_tags\"",
+          "[\"id\"]",
+          "c",
+          "c"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.prices.prices_showtimeId_fkey",
+    "label": "Add foreign key \"prices_showtimeId_fkey\" on \"prices\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "prices_showtimeId_fkey",
+        "table": "prices"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"prices_showtimeId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "prices_showtimeId_fkey",
+          "public",
+          "\"public\".\"prices\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "FK \"prices_showtimeId_fkey\" on \"prices\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"prices_showtimeId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"prices\"\nADD CONSTRAINT \"prices_showtimeId_fkey\"\nFOREIGN KEY (\"showtimeId\")\nREFERENCES \"public\".\"showtimes\" (\"id\")\nON DELETE CASCADE\nON UPDATE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"prices_showtimeId_fkey\" exists with the planned columns, referenced table and actions",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3) AND \"c\".\"contype\" = $4 AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"conkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"conrelid\" AND key_attribute.attnum = key_column.attnum) = ($5)::jsonb AND \"c\".\"confrelid\" = to_regclass($6) AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"confkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"confrelid\" AND key_attribute.attnum = key_column.attnum) = ($7)::jsonb AND \"c\".\"confdeltype\" = $8 AND \"c\".\"confupdtype\" = $9)) AS \"result\"",
+        "params": [
+          "prices_showtimeId_fkey",
+          "public",
+          "\"public\".\"prices\"",
+          "f",
+          "[\"showtimeId\"]",
+          "\"public\".\"showtimes\"",
+          "[\"id\"]",
+          "c",
+          "c"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.showtimes.showtimes_theater_id_fkey",
+    "label": "Add foreign key \"showtimes_theater_id_fkey\" on \"showtimes\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "showtimes_theater_id_fkey",
+        "table": "showtimes"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"showtimes_theater_id_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "showtimes_theater_id_fkey",
+          "public",
+          "\"public\".\"showtimes\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "FK \"showtimes_theater_id_fkey\" on \"showtimes\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"showtimes_theater_id_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"showtimes\"\nADD CONSTRAINT \"showtimes_theater_id_fkey\"\nFOREIGN KEY (\"theater_id\")\nREFERENCES \"public\".\"theaters\" (\"id\")\nON DELETE CASCADE\nON UPDATE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"showtimes_theater_id_fkey\" exists with the planned columns, referenced table and actions",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3) AND \"c\".\"contype\" = $4 AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"conkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"conrelid\" AND key_attribute.attnum = key_column.attnum) = ($5)::jsonb AND \"c\".\"confrelid\" = to_regclass($6) AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"confkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"confrelid\" AND key_attribute.attnum = key_column.attnum) = ($7)::jsonb AND \"c\".\"confdeltype\" = $8 AND \"c\".\"confupdtype\" = $9)) AS \"result\"",
+        "params": [
+          "showtimes_theater_id_fkey",
+          "public",
+          "\"public\".\"showtimes\"",
+          "f",
+          "[\"theater_id\"]",
+          "\"public\".\"theaters\"",
+          "[\"id\"]",
+          "c",
+          "c"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.showtimes.showtimes_movie_id_fkey",
+    "label": "Add foreign key \"showtimes_movie_id_fkey\" on \"showtimes\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "showtimes_movie_id_fkey",
+        "table": "showtimes"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"showtimes_movie_id_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "showtimes_movie_id_fkey",
+          "public",
+          "\"public\".\"showtimes\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "FK \"showtimes_movie_id_fkey\" on \"showtimes\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"showtimes_movie_id_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"showtimes\"\nADD CONSTRAINT \"showtimes_movie_id_fkey\"\nFOREIGN KEY (\"movie_id\")\nREFERENCES \"public\".\"movies\" (\"id\")\nON DELETE CASCADE\nON UPDATE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"showtimes_movie_id_fkey\" exists with the planned columns, referenced table and actions",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3) AND \"c\".\"contype\" = $4 AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"conkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"conrelid\" AND key_attribute.attnum = key_column.attnum) = ($5)::jsonb AND \"c\".\"confrelid\" = to_regclass($6) AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"confkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"confrelid\" AND key_attribute.attnum = key_column.attnum) = ($7)::jsonb AND \"c\".\"confdeltype\" = $8 AND \"c\".\"confupdtype\" = $9)) AS \"result\"",
+        "params": [
+          "showtimes_movie_id_fkey",
+          "public",
+          "\"public\".\"showtimes\"",
+          "f",
+          "[\"movie_id\"]",
+          "\"public\".\"movies\"",
+          "[\"id\"]",
+          "c",
+          "c"
+        ]
+      }
+    ]
+  }
+]

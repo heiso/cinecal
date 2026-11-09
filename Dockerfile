@@ -6,12 +6,9 @@ ARG NODE_VERSION=26.13.0
 # ===
 # base node image
 # ===
-FROM node:${NODE_VERSION}-slim as base
+FROM node:${NODE_VERSION}-slim AS base
 
-RUN apt-get update -qq && \
-    apt-get install -y openssl curl
-
-LABEL fly_launch_runtime="Remix/Prisma"
+LABEL fly_launch_runtime="React Router/Prisma"
 
 WORKDIR /app
 
@@ -22,34 +19,20 @@ ENV NODE_ENV=production
 # ===
 # Build the app
 # ===
-FROM base as build
-
-# Install packages needed to build node modules
-RUN apt-get update -qq && \
-    apt-get install -y python-is-python3 pkg-config build-essential 
+FROM base AS build
 
 # Install node modules
 COPY --link package.json package-lock.json ./
-RUN npm install --production=false
-
-# Generate Prisma Client
-COPY --link prisma .
-RUN npx prisma generate
+RUN npm ci --include=dev
 
 # Copy application code
 COPY --link . .
 
-# Generate Routes
-RUN npx tsx generate-remix-routes.ts
-
-# Generate SVGs
-RUN npx tsx generate-svg-icons-sprite.ts
-
-# Build application
+# Build application (also generates the SVG icons sprite)
 RUN npm run build
 
-# Remove development dependencies
-RUN npm prune --production
+# Remove development dependencies (prisma stays: it applies the migrations at start)
+RUN npm prune --omit=dev
 
 
 
@@ -61,4 +44,4 @@ FROM base
 # Copy built application
 COPY --from=build /app /app
 
-CMD npx prisma migrate deploy && node --max-old-space-size=256 build/server
+CMD ["sh", "-c", "node_modules/.bin/prisma db migrate && exec node --max-old-space-size=256 node_modules/@react-router/serve/bin.cjs ./build/server/index.js"]

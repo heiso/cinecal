@@ -1,36 +1,42 @@
-import type { Prisma } from '@prisma/client'
-import type { LoaderFunctionArgs } from '@remix-run/node'
+import { and, type ModelAccessor } from '@prisma/orm-postgres/orm-client'
 import { add, endOfDay, endOfWeek, startOfDay, startOfWeek } from 'date-fns'
 import { fr } from 'date-fns/locale'
+import type { Contract } from '../prisma/contract.d.ts'
 import { CUSTOM_TAG, DATE_FILTER } from './filters'
 
-export function getFilters(request: LoaderFunctionArgs['request']) {
-  const url = new URL(request.url)
-  const search = new URLSearchParams(url.search)
+type MovieFields = ModelAccessor<Contract, 'Movie', 'public'>
+type ShowtimeFields = ModelAccessor<Contract, 'Showtime', 'public'>
+
+export type Filters = ReturnType<typeof getFilters>
+
+function isDateFilter(value: string): value is DATE_FILTER {
+  return value in DATE_FILTER
+}
+
+function isCustomTag(value: string): value is CUSTOM_TAG {
+  return value in CUSTOM_TAG
+}
+
+function getIds(search: URLSearchParams, name: string) {
+  return search
+    .getAll(name)
+    .map((value) => parseInt(value))
+    .filter((value) => !isNaN(value))
+}
+
+export function getFilters(request: Request) {
+  const search = new URL(request.url).searchParams
   const searchDateParam = search.get('date')
 
   const title = search.get('title') || null
   const date =
-    searchDateParam && searchDateParam in DATE_FILTER
-      ? (searchDateParam as DATE_FILTER)
-      : DATE_FILTER.DEFAULT
-  const movieTags = search
-    .getAll('movieTags')
-    .map((value) => parseInt(value))
-    .filter((value) => !isNaN(value))
-  const showtimeTags = search
-    .getAll('showtimeTags')
-    .map((value) => parseInt(value))
-    .filter((value) => !isNaN(value))
-  const theaters = search
-    .getAll('theaters')
-    .map((value) => parseInt(value))
-    .filter((value) => !isNaN(value))
-  const customTags = search
-    .getAll('customTags')
-    .filter((value) => value in CUSTOM_TAG) as CUSTOM_TAG[]
+    searchDateParam && isDateFilter(searchDateParam) ? searchDateParam : DATE_FILTER.DEFAULT
+  const movieTags = getIds(search, 'movieTags')
+  const showtimeTags = getIds(search, 'showtimeTags')
+  const theaters = getIds(search, 'theaters')
+  const customTags = search.getAll('customTags').filter(isCustomTag)
 
-  let count =
+  const count =
     Number(Boolean(title)) +
     Number(date !== DATE_FILTER.DEFAULT) +
     movieTags.length +
@@ -44,69 +50,59 @@ export function getFilters(request: LoaderFunctionArgs['request']) {
     movieTags,
     showtimeTags,
     theaters,
-    customTags: (Object.keys(CUSTOM_TAG) as CUSTOM_TAG[]).reduce<Record<CUSTOM_TAG, Boolean>>(
-      (acc, key) => {
-        acc[key] = Boolean(customTags.find((tag) => key === tag))
-        return acc
-      },
-      {} as Record<CUSTOM_TAG, Boolean>,
-    ),
+    customTags: Object.fromEntries(
+      Object.values(CUSTOM_TAG).map((tag) => [tag, customTags.includes(tag)]),
+    ) as Record<CUSTOM_TAG, boolean>,
     count,
   }
 }
 
-export function getWhereInputs(filters: ReturnType<typeof getFilters>): {
-  showtimeWhereInput: Prisma.ShowtimeWhereInput
-  movieWhereInput: Prisma.MovieWhereInput
-} {
+/** Escape the LIKE wildcards so a title is matched literally, like Prisma's `contains` did. */
+function escapeLike(value: string) {
+  return value.replace(/[\\%_]/g, '\\$&')
+}
+
+/**
+ * Builds the filter predicates for a movie and for its showtimes. A movie is
+ * listed when it matches `movie` and has at least one showtime matching `showtime`.
+ */
+export function getWhereInputs(filters: Filters) {
   const now = new Date()
+  const nextWeek = add(now, { weeks: 1 })
+  const recentReleaseDate = add(now, { days: -14 })
 
-  const whereDate =
-    filters.date === DATE_FILTER.TODAY
-      ? { date: { gte: now, lt: endOfDay(now) } }
-      : filters.date === DATE_FILTER.THIS_WEEK
-        ? { date: { gte: now, lt: endOfWeek(now, { locale: fr }) } }
-        : filters.date === DATE_FILTER.NEXT_WEEK
-          ? {
-              date: {
-                gt: startOfWeek(add(now, { weeks: 1 }), { locale: fr }),
-                lte: endOfWeek(add(now, { weeks: 1 }), { locale: fr }),
-              },
-            }
-          : { date: { gte: now } }
+  const showtime = (s: ShowtimeFields) =>
+    and(
+      ...(filters.date === DATE_FILTER.TODAY
+        ? [s.date.gte(now), s.date.lt(endOfDay(now))]
+        : filters.date === DATE_FILTER.THIS_WEEK
+          ? [s.date.gte(now), s.date.lt(endOfWeek(now, { locale: fr }))]
+          : filters.date === DATE_FILTER.NEXT_WEEK
+            ? [
+                s.date.gt(startOfWeek(nextWeek, { locale: fr })),
+                s.date.lte(endOfWeek(nextWeek, { locale: fr })),
+              ]
+            : [s.date.gte(now)]),
+      ...(filters.theaters.length > 0 ? [s.theaterId.in(filters.theaters)] : []),
+      ...(filters.showtimeTags.length > 0
+        ? [s.Tags.some((tag) => tag.id.in(filters.showtimeTags))]
+        : []),
+    )
 
-  const whereReleaseDate =
-    filters.customTags.NEW_RELEASE && filters.customTags.NEXT_RELEASE
-      ? { releaseDate: { gte: add(now, { days: -14 }) } }
-      : filters.customTags.NEW_RELEASE
-        ? { releaseDate: { gte: add(now, { days: -14 }), lte: now } }
-        : filters.customTags.NEXT_RELEASE
-          ? { releaseDate: { gt: now } }
-          : {}
+  const movie = (m: MovieFields) =>
+    and(
+      m.Showtimes.some(showtime),
+      ...(filters.title ? [m.title.ilike(`%${escapeLike(filters.title)}%`)] : []),
+      ...(filters.customTags.NEW_RELEASE && filters.customTags.NEXT_RELEASE
+        ? [m.releaseDate.gte(recentReleaseDate)]
+        : filters.customTags.NEW_RELEASE
+          ? [m.releaseDate.gte(recentReleaseDate), m.releaseDate.lte(now)]
+          : filters.customTags.NEXT_RELEASE
+            ? [m.releaseDate.gt(now)]
+            : []),
+      ...(filters.customTags.SCRAPED_RECENTLY ? [m.createdAt.gte(startOfDay(now))] : []),
+      ...(filters.movieTags.length > 0 ? [m.Tags.some((tag) => tag.id.in(filters.movieTags))] : []),
+    )
 
-  return {
-    movieWhereInput: {
-      Showtimes: { some: { id: { not: undefined } } },
-      ...(filters.title && { title: { contains: filters.title, mode: 'insensitive' } }),
-      ...whereReleaseDate,
-      ...(filters.customTags.SCRAPED_RECENTLY && { createdAt: { gte: startOfDay(now) } }),
-      ...(filters.movieTags.length > 0 && {
-        Tags: {
-          some: { id: { in: filters.movieTags } },
-        },
-      }),
-    },
-
-    showtimeWhereInput: {
-      ...whereDate,
-      ...(filters.theaters.length > 0 && {
-        theaterId: { in: filters.theaters },
-      }),
-      ...(filters.showtimeTags.length > 0 && {
-        Tags: {
-          some: { id: { in: filters.showtimeTags } },
-        },
-      }),
-    },
-  }
+  return { movie, showtime }
 }

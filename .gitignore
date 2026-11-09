@@ -1,5 +1,5 @@
 node_modules
-routes.ts
+/.react-router
 svgs.ts
 data.sqlite
 data.sqlite-journal

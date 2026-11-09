@@ -1,13 +1,8 @@
-import { json } from '@remix-run/node'
+import { env } from '../env.server'
 
 export function loader() {
-  const shouldRefreshIfVersionMismatch = Boolean(
-    process.env.SHOULD_REFRESH_BROWSER_IF_VERSION_MISMATCH &&
-    process.env.SHOULD_REFRESH_BROWSER_IF_VERSION_MISMATCH !== 'false',
-  )
-
-  return json({
-    build: process.env.BUILD_VERSION,
-    shouldRefreshIfVersionMismatch,
+  return Response.json({
+    build: env.BUILD_VERSION,
+    shouldRefreshIfVersionMismatch: env.SHOULD_REFRESH_BROWSER_IF_VERSION_MISMATCH,
   })
 }

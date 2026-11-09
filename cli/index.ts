@@ -1,30 +1,34 @@
-import { parseArgs } from 'util'
-import { savePosterBlurHashes, scrapPosters, scrapShowtimes, scrapTicketing } from './scraper.js'
+import { parseArgs } from 'node:util'
+import { db } from '../prisma/db.ts'
+import { savePosterBlurHashes, scrapPosters, scrapShowtimes, scrapTicketing } from './scraper.ts'
 
-type Step = 'scrapShowtimes' | 'scrapTicketing' | 'scrapPosters' | 'savePosterBlurHashes'
+const { positionals } = parseArgs({ allowPositionals: true })
 
-const { positionals } = parseArgs({
-  allowPositionals: true,
-  args: process.argv,
-})
+const [step, days] = positionals
 
-const step = positionals[2] as Step | undefined
-
-;(async () => {
+try {
   switch (step) {
     case 'scrapShowtimes':
-      return scrapShowtimes(parseInt(positionals[3] ?? '90'))
+      await scrapShowtimes(parseInt(days ?? '90'))
+      break
 
     case 'scrapTicketing':
-      return scrapTicketing()
+      await scrapTicketing()
+      break
 
     case 'scrapPosters':
-      return scrapPosters()
+      await scrapPosters()
+      break
 
     case 'savePosterBlurHashes':
-      return savePosterBlurHashes()
+      await savePosterBlurHashes()
+      break
 
     default:
       console.error(`step ${step} does not exist`)
+      process.exitCode = 1
   }
-})()
+} finally {
+  // The connection pool keeps the event loop alive
+  await db.close()
+}

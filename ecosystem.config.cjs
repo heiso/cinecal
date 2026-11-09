@@ -17,29 +17,23 @@ const config = {
     {
       ...common,
       name: 'prisma',
-      script: 'npx prisma generate',
-      watch: ['prisma/schema.prisma'],
+      script: 'npx prisma contract emit',
+      watch: ['prisma/contract.prisma'],
     },
 
     {
       ...common,
       name: 'icons',
-      script: 'npx tsx generate-svg-icons-sprite.ts',
-      watch: ['generate-svg-icons-sprite.ts', './svgs/**/*.svg'],
+      script: 'node scripts/generate-svg-icons-sprite.ts',
+      watch: ['scripts/generate-svg-icons-sprite.ts', './svgs/**/*.svg'],
     },
 
     {
       ...common,
-      name: 'routes',
-      script: 'npx tsx generate-remix-routes.ts',
-      watch: ['generate-remix-routes.ts', 'remix.config.js', './app/routes/**/*.tsx'],
-    },
-
-    {
-      ...common,
+      // Vite dev server with HMR, it regenerates the route types on change
       name: 'server',
-      watch: ['server/**/*', '.env'],
-      script: 'node --env-file=.env --inspect --import tsx server',
+      script: 'node --inspect --conditions=development node_modules/@react-router/dev/bin.cjs dev',
+      watch: ['.env', 'vite.config.ts', 'react-router.config.ts'],
     },
   ],
 }

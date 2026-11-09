@@ -1,18 +1,14 @@
-import { vitePlugin as remix } from '@remix-run/dev'
-import { installGlobals } from '@remix-run/node'
-
+import { existsSync } from 'node:fs'
+import { reactRouter } from '@react-router/dev/vite'
+import tailwindcss from '@tailwindcss/vite'
 import { defineConfig } from 'vite'
 
-installGlobals()
+export default defineConfig(({ command }) => {
+  // The dev server reads .env like the scripts do (production gets its env from Fly)
+  if (command === 'serve' && existsSync('.env')) process.loadEnvFile('.env')
 
-export default defineConfig({
-  server: {
-    port: 3000,
-  },
-  plugins: [
-    remix({
-      serverModuleFormat: 'esm',
-      buildDirectory: 'build/vite-server',
-    }),
-  ],
+  return {
+    server: { port: 3000 },
+    plugins: [tailwindcss(), reactRouter()],
+  }
 })

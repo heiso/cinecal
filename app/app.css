@@ -1,0 +1,16 @@
+@import 'tailwindcss';
+
+@theme {
+  /* The system font stack the app has always rendered with (Tailwind 3's fallback) */
+  --font-sans:
+    ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
+    'Noto Color Emoji';
+  --font-default: open-sans, sans-serif;
+  --font-AtkinsonHyperlegible: 'Atkinson Hyperlegible', 'Atkinson Hyperlegible Fallback';
+
+  --color-gray: #ccc;
+  --color-background: #0d1116;
+  --color-primary: #009ddc;
+
+  --aspect-poster: 62 / 85;
+}

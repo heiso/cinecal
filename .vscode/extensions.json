@@ -3,7 +3,7 @@
     "bradlc.vscode-tailwindcss",
     "esbenp.prettier-vscode",
     "prisma.prisma",
-    "dbaeumer.vscode-eslint",
+    "oxc.oxc-vscode",
     "emeraldwalk.runonsave",
     "qwtel.sqlite-viewer"
   ]

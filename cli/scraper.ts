@@ -1,16 +1,15 @@
-import {
-  Language,
-  PrismaClient,
-  TagCategory,
-  type MovieTag,
-  type Prisma,
-  type ShowtimeTag,
-  type Theater,
-} from '@prisma/client'
+import type { Scalars } from '@prisma/orm-postgres/family-contract/types'
+import { and, not, or } from '@prisma/orm-postgres/orm-client'
 import { getPixels } from '@unpic/pixels'
 import { encode } from 'blurhash'
 import { add, addDays, endOfDay, format } from 'date-fns'
-import type { AllocineResponse, Credit, Release } from './allocine-types'
+import type { Models } from '../prisma/contract.d.ts'
+import { db } from '../prisma/db.ts'
+import type { AllocineResponse, Credit, Release } from './allocine-types.ts'
+
+type Theater = Scalars<Models.public_Theater>
+type TagCategory = Models.public_MovieTag['category']
+type AllocineMovie = NonNullable<AllocineResponse['results'][number]['movie']>
 
 const API_ENDPOINT = 'https://api.imagekit.io/v1/files'
 const URL_ALLOCINE_SHOWTIMES = 'https://www.allocine.fr/_/showtimes'
@@ -27,8 +26,6 @@ const TICKETING_DETAILS_EXPIRATION_DATE = add(new Date(), { days: 3 })
 // a complete run well within a day; if none has succeeded for this long, skip
 // cleanup rather than risk deleting posters based on stale/partial data.
 const POSTER_CLEANUP_MAX_AGE_HOURS = 24
-
-const prisma = new PrismaClient()
 
 const ALLOCINE_ORIGIN = 'https://www.allocine.fr'
 // Allocine sits behind Cloudflare, which enforces a per-IP rolling request
@@ -114,30 +111,25 @@ function getReleaseDate(releases: Release[]) {
   return new Date(date)
 }
 
-function getDirector(credits: Credit[]) {
-  /**
-   * @todo allocine changed its api, credits is now edges and nodes
-   */
+/**
+ * @todo allocine changed its api, credits is now edges and nodes. Directors
+ * used to be the credits whose position name is DIRECTOR, joined as
+ * "firstName lastName".
+ */
+function getDirector(_credits: Credit[]): string | null {
   return null
-  const persons = credits
-    .filter((credit) => credit.position?.name === 'DIRECTOR')
-    .map((credit) => credit.person)
+}
 
-  if (persons.length === 0) {
-    return null
-  }
-
-  return persons.map((person) => `${person.firstName} ${person.lastName}`).join(', ')
+function getCachedUrl(url: string) {
+  return db.orm.public.ScrapedUrl.where((scrapedUrl) =>
+    and(scrapedUrl.url.eq(url), scrapedUrl.expiresAt.gte(new Date())),
+  )
+    .select('content')
+    .first()
 }
 
 async function getAllocineTicketingDetails(url: string) {
-  const cached = await prisma.scrapedUrl.findFirst({
-    where: {
-      url,
-      expiresAt: { gte: new Date() },
-    },
-    select: { content: true },
-  })
+  const cached = await getCachedUrl(url)
 
   if (cached) {
     console.log(`${url} - cached`)
@@ -154,8 +146,7 @@ async function getAllocineTicketingDetails(url: string) {
 
   const content = await res.text()
 
-  await prisma.scrapedUrl.upsert({
-    where: { url },
+  await db.orm.public.ScrapedUrl.upsert({
     create: { url, content, expiresAt: TICKETING_DETAILS_EXPIRATION_DATE, type: 'TICKETING' },
     update: { content, expiresAt: TICKETING_DETAILS_EXPIRATION_DATE },
   })
@@ -164,13 +155,7 @@ async function getAllocineTicketingDetails(url: string) {
 }
 
 async function getAllocineShowtimes(url: string) {
-  const cached = await prisma.scrapedUrl.findFirst({
-    where: {
-      url,
-      expiresAt: { gte: new Date() },
-    },
-    select: { content: true },
-  })
+  const cached = await getCachedUrl(url)
 
   if (cached) {
     console.log(`${url} - cached`)
@@ -209,13 +194,68 @@ async function getAllocineShowtimes(url: string) {
     }
   }
 
-  await prisma.scrapedUrl.upsert({
-    where: { url },
+  await db.orm.public.ScrapedUrl.upsert({
     create: { url, content, expiresAt: SHOWTIMES_EXPIRATION_DATE, type: 'SHOWTIMES' },
     update: { content, expiresAt: SHOWTIMES_EXPIRATION_DATE },
   })
 
   return { json, fromCache: false }
+}
+
+function getMovieTags(movie: AllocineMovie) {
+  const tags: { name: string; category: TagCategory }[] = []
+
+  for (const { name, tags: types } of movie.relatedTags) {
+    const resolvedName = typeof name === 'string' ? name : name.translate
+    if (types.list.find((type) => 'Tag.Type.SubGenre' === type)) {
+      tags.push({ name: resolvedName, category: 'SUB_GENRE' })
+    } else if (types.list.find((type) => 'Tag.Type.Characteristic' === type)) {
+      tags.push({ name: resolvedName, category: 'CHARACTERISTIC' })
+    }
+  }
+
+  for (const name of movie.genres) {
+    tags.push({ name: typeof name === 'string' ? name : name.translate, category: 'GENRE' })
+  }
+
+  return tags
+}
+
+/**
+ * Returns the movie with this Allocine id, creating it (and connecting its
+ * tags, creating the missing ones) when it does not exist yet. An existing
+ * movie is left untouched.
+ */
+async function findOrCreateMovie(movie: AllocineMovie) {
+  const existing = await db.orm.public.Movie.where({ allocineId: movie.internalId })
+    .select('id')
+    .first()
+
+  if (existing) {
+    return existing
+  }
+
+  const tagIds = new Set<number>()
+  for (const { name, category } of getMovieTags(movie)) {
+    const tag =
+      (await db.orm.public.MovieTag.where({ name }).select('id').first()) ??
+      (await db.orm.public.MovieTag.select('id').create({ name, category }))
+    tagIds.add(tag.id)
+  }
+
+  return db.orm.public.Movie.select('id').create({
+    originalTitle: movie.originalTitle,
+    title: movie.title,
+    duration: getDuration(movie.runtime),
+    synopsis: movie.synopsis,
+    releaseDate: getReleaseDate(movie.releases),
+    allocineId: movie.internalId,
+    posterAllocineUrl: movie.poster?.url,
+    director: getDirector(movie.credits),
+    ...(tagIds.size > 0 && {
+      Tags: (tags) => tags.connect([...tagIds].map((id) => ({ id }))),
+    }),
+  })
 }
 
 async function scrapAllocineShowtimes(
@@ -226,11 +266,7 @@ async function scrapAllocineShowtimes(
   theaterIndex: number = 0,
   day: number = 0,
   page: number = 1,
-  showtimeCreateInputs: Record<
-    ReturnType<typeof getUniqueAllocineShowtimes>[0]['internalId'],
-    Prisma.ShowtimeCreateInput
-  > = {},
-): Promise<{ showtimeInputs: Prisma.ShowtimeCreateInput[]; successfulTheaterIds: Set<number> }> {
+): Promise<{ successfulTheaterIds: Set<number> }> {
   const theater = theaters[theaterIndex]
   const pageParam = page > 1 ? `p-${page}/` : ''
   const dayParam = day > 0 ? `d-${format(addDays(new Date(), day), 'yyyy-MM-dd')}/` : ''
@@ -279,76 +315,23 @@ async function scrapAllocineShowtimes(
             continue
           }
 
-          const movie = await prisma.movie.upsert({
-            where: { allocineId: result.movie.internalId },
-            update: {},
-            create: {
-              originalTitle: result.movie.originalTitle,
-              title: result.movie.title,
-              duration: getDuration(result.movie.runtime),
-              synopsis: result.movie.synopsis,
-              releaseDate: getReleaseDate(result.movie.releases),
-              allocineId: result.movie.internalId,
-              posterAllocineUrl: result.movie.poster?.url,
-              director: getDirector(result.movie.credits),
-              Tags: {
-                connectOrCreate: [
-                  ...result.movie.relatedTags.reduce<
-                    Prisma.MovieTagCreateOrConnectWithoutMoviesInput[]
-                  >((acc, { name, tags }) => {
-                    const resolvedName = typeof name === 'string' ? name : name.translate
-                    if (tags.list.find((type) => 'Tag.Type.SubGenre' === type)) {
-                      acc.push({
-                        where: { name: resolvedName },
-                        create: {
-                          name: resolvedName,
-                          category: TagCategory.SUB_GENRE,
-                        },
-                      })
-                    } else if (tags.list.find((type) => 'Tag.Type.Characteristic' === type)) {
-                      acc.push({
-                        where: { name: resolvedName },
-                        create: {
-                          name: resolvedName,
-                          category: TagCategory.CHARACTERISTIC,
-                        },
-                      })
-                    }
-                    return acc
-                  }, [] as Prisma.MovieTagCreateOrConnectWithoutMoviesInput[]),
-                  ...result.movie.genres.map<Prisma.MovieTagCreateOrConnectWithoutMoviesInput>(
-                    (name) => {
-                      const resolvedName = typeof name === 'string' ? name : name.translate
-                      return {
-                        where: { name: resolvedName },
-                        create: {
-                          name: resolvedName,
-                          category: TagCategory.GENRE,
-                        },
-                      }
-                    },
-                  ),
-                ],
-              },
-            },
-          })
+          const movie = await findOrCreateMovie(result.movie)
 
           const data = getUniqueAllocineShowtimes(result.showtimes).map((showtime) => ({
             allocineId: showtime.internalId,
             date: new Date(showtime.startsAt),
             isPreview: showtime.isPreview,
             language: showtime.tags.includes('Localization.Language.French')
-              ? Language.VF
-              : Language.VO,
+              ? ('VF' as const)
+              : ('VO' as const),
             ticketingUrl: showtime.data.ticketing?.[0]?.urls[0],
             theaterId: theater.id,
             movieId: movie.id,
           }))
 
-          await prisma.showtime.createMany({
-            data,
-            skipDuplicates: true,
-          })
+          if (data.length > 0) {
+            await db.orm.public.Showtime.createAndCount(data, { onConflict: 'skip' })
+          }
 
           data.forEach(({ allocineId }) => foundShowtimeAllocineIds.add(allocineId))
         } catch (err) {
@@ -365,7 +348,6 @@ async function scrapAllocineShowtimes(
           theaterIndex,
           day,
           Number(body.pagination.page) + 1,
-          showtimeCreateInputs,
         )
       }
     }
@@ -390,7 +372,6 @@ async function scrapAllocineShowtimes(
       theaterIndex,
       day + 1,
       1,
-      showtimeCreateInputs,
     )
   }
 
@@ -403,31 +384,28 @@ async function scrapAllocineShowtimes(
       theaterIndex + 1,
       0,
       1,
-      showtimeCreateInputs,
     )
   }
 
-  return { showtimeInputs: Object.values(showtimeCreateInputs), successfulTheaterIds }
+  return { successfulTheaterIds }
 }
 
 async function scrapAllocineTicketingUrl(): Promise<void> {
-  const movieTags = (await prisma.movieTag.findMany({
-    where: { regExp: { not: null } },
-  })) as Array<Omit<MovieTag, 'regExp'> & { regExp: NonNullable<MovieTag['regExp']> }>
-  const showtimeTags = (await prisma.showtimeTag.findMany({
-    where: { regExp: { not: null } },
-  })) as Array<Omit<ShowtimeTag, 'regExp'> & { regExp: NonNullable<ShowtimeTag['regExp']> }>
+  const movieTags = await db.orm.public.MovieTag.where((tag) => tag.regExp.isNotNull())
+    .select('id', 'regExp')
+    .all()
+  const showtimeTags = await db.orm.public.ShowtimeTag.where((tag) => tag.regExp.isNotNull())
+    .select('id', 'regExp')
+    .all()
 
-  const showtimes = await prisma.showtime.findMany({
-    where: {
-      ticketingUrl: { not: null },
-    },
-    select: {
-      id: true,
-      movieId: true,
-      ticketingUrl: true,
-    },
-  })
+  const showtimes = await db.orm.public.Showtime.where((showtime) =>
+    showtime.ticketingUrl.isNotNull(),
+  )
+    .select('id', 'movieId', 'ticketingUrl')
+    .all()
+
+  const matchingTags = (tags: { id: number; regExp: string | null }[], details: string) =>
+    tags.filter(({ regExp }) => regExp && new RegExp(regExp, 'i').test(details))
 
   for (const { id, movieId, ticketingUrl } of showtimes.filter(
     ({ ticketingUrl }) => ticketingUrl,
@@ -436,9 +414,8 @@ async function scrapAllocineTicketingUrl(): Promise<void> {
       const details = await getAllocineTicketingDetails(ticketingUrl!)
       let prices: { label: string; description?: string | null; price: number }[] = []
 
-      const regx = new RegExp(
-        /<p>([^<]*)(?:<a[^<]*title\=\"([^<]*)"[^<]*>i<\/a>)?<span[^<]*[^>]*>(\d*.\d*)\ &euro;/g,
-      )
+      const regx =
+        /<p>([^<]*)(?:<a[^<]*title="([^<]*)"[^<]*>i<\/a>)?<span[^<]*[^>]*>(\d*.\d*) &euro;/g
       const matches = [...details.matchAll(regx)]
 
       prices = matches.map((match) => ({
@@ -451,43 +428,37 @@ async function scrapAllocineTicketingUrl(): Promise<void> {
         price: parseInt(match[3]),
       }))
 
-      await prisma.movie.update({
-        where: { id: movieId },
-        data: {
-          Tags: {
-            connect: movieTags
-              .filter(({ regExp }) => new RegExp(regExp, 'i').test(details))
-              .map(({ id }) => ({
-                id,
-              })),
-          },
-        },
-      })
+      const movieTagLinks = matchingTags(movieTags, details).map((tag) => ({
+        movieId,
+        tagId: tag.id,
+      }))
+      if (movieTagLinks.length > 0) {
+        await db.orm.public.MovieToMovieTag.createAndCount(movieTagLinks, { onConflict: 'skip' })
+      }
 
-      const oldPrices = await prisma.price.findMany({
-        where: { showtimeId: id },
-        select: { id: true },
-      })
+      const oldPrices = await db.orm.public.Price.where({ showtimeId: id }).select('id').all()
 
-      await prisma.showtime.update({
-        where: { id },
-        data: {
-          Tags: {
-            connect: showtimeTags
-              .filter(({ regExp }) => new RegExp(regExp, 'i').test(details))
-              .map(({ id }) => ({
-                id,
-              })),
-          },
-          Prices: {
-            createMany: { data: prices },
-          },
-        },
-      })
+      const showtimeTagLinks = matchingTags(showtimeTags, details).map((tag) => ({
+        showtimeId: id,
+        tagId: tag.id,
+      }))
+      if (showtimeTagLinks.length > 0) {
+        await db.orm.public.ShowtimeToShowtimeTag.createAndCount(showtimeTagLinks, {
+          onConflict: 'skip',
+        })
+      }
 
-      await prisma.price.deleteMany({
-        where: { id: { in: oldPrices.map((price) => price.id) } },
-      })
+      if (prices.length > 0) {
+        await db.orm.public.Price.createAndCount(
+          prices.map((price) => ({ ...price, showtimeId: id })),
+        )
+      }
+
+      if (oldPrices.length > 0) {
+        await db.orm.public.Price.where((price) =>
+          price.id.in(oldPrices.map(({ id }) => id)),
+        ).deleteAndCount()
+      }
     } catch (err) {
       console.error(err)
     }
@@ -708,10 +679,11 @@ async function deleteUnusedPosters() {
   // keying on `posterUrl != null` would keep every poster forever and the
   // ImageKit folder would grow without bound. Past showtimes are pruned earlier
   // in the run, so "has a showtime" effectively means "has an upcoming showtime".
-  const moviesWithShowtime = await prisma.movie.findMany({
-    where: { posterUrl: { not: null }, Showtimes: { some: {} } },
-    select: { posterUrl: true },
-  })
+  const moviesWithShowtime = await db.orm.public.Movie.where((movie) =>
+    and(movie.posterUrl.isNotNull(), movie.Showtimes.some()),
+  )
+    .select('posterUrl')
+    .all()
   const usedPosterNames = new Set(moviesWithShowtime.map((movie) => movie.posterUrl))
 
   const uploadedPosters = await getAllUploadedPosters()
@@ -735,10 +707,11 @@ async function scrapAllocinePosters() {
   // deleting its poster then would just force a re-upload next run (churn, and
   // risk when storage is full). Cleanup runs first so ImageKit has room for the
   // uploads below. Best-effort: a transient failure still lets uploads proceed.
-  const appState = await prisma.appState.findUnique({ where: { id: 1 } })
+  const appState = await db.orm.public.AppState.where({ id: 1 }).first()
   const lastComplete = appState?.lastCompleteScrapeAt
   const scrapeIsFresh =
-    lastComplete != null && lastComplete >= add(new Date(), { hours: -POSTER_CLEANUP_MAX_AGE_HOURS })
+    lastComplete != null &&
+    lastComplete >= add(new Date(), { hours: -POSTER_CLEANUP_MAX_AGE_HOURS })
 
   if (scrapeIsFresh) {
     try {
@@ -757,11 +730,12 @@ async function scrapAllocinePosters() {
   // Only upload posters for movies that currently have a showtime: those are
   // the only ones displayed, and it keeps the ImageKit folder from filling up
   // with posters for movies no longer playing.
-  const movies = await prisma.movie.findMany({
-    where: { posterAllocineUrl: { not: null }, Showtimes: { some: {} } },
-    select: { id: true, originalTitle: true, posterAllocineUrl: true },
-    orderBy: { id: 'desc' },
-  })
+  const movies = await db.orm.public.Movie.where((movie) =>
+    and(movie.posterAllocineUrl.isNotNull(), movie.Showtimes.some()),
+  )
+    .select('id', 'originalTitle', 'posterAllocineUrl')
+    .orderBy((movie) => movie.id.desc())
+    .all()
 
   const posters = await getUploadedPosterList(movies.map(({ id }) => id))
 
@@ -784,16 +758,16 @@ async function scrapAllocinePosters() {
         console.log(` - uploading...`)
         try {
           posterUrl = await uploadAllocinePosterToImageKit(movie)
-        } catch (err) {
+        } catch {
           await new Promise((resolve) => setTimeout(resolve, 1000))
           console.log(` - trying again...`)
           try {
             posterUrl = await uploadAllocinePosterToImageKit(movie)
-          } catch (err) {}
+          } catch {}
         }
 
         if (posterUrl) {
-          await prisma.movie.update({ where: { id: movie.id }, data: { posterUrl } })
+          await db.orm.public.Movie.where({ id: movie.id }).update({ posterUrl })
 
           console.log(` - uploaded - ${posterUrl}`)
         }
@@ -804,25 +778,45 @@ async function scrapAllocinePosters() {
   }
 }
 
+async function countScrapedUrls(type: 'SHOWTIMES' | 'TICKETING') {
+  const { count } = await db.orm.public.ScrapedUrl.where({ type }).aggregate((aggregate) => ({
+    count: aggregate.count(),
+  }))
+  return count
+}
+
+async function countShowtimes() {
+  const { count } = await db.orm.public.Showtime.aggregate((aggregate) => ({
+    count: aggregate.count(),
+  }))
+  return count
+}
+
+async function countMovies() {
+  const { count } = await db.orm.public.Movie.aggregate((aggregate) => ({
+    count: aggregate.count(),
+  }))
+  return count
+}
+
 export async function scrapShowtimes(maxDay: number) {
   const foundShowtimeAllocineIds = new Set<number>()
 
   const [countCacheItemsBefore, countShowtimesBefore, countMoviesBefore, theaters] =
     await Promise.all([
-      prisma.scrapedUrl.count({ where: { type: 'SHOWTIMES' } }),
-      prisma.showtime.count(),
-      prisma.movie.count(),
-      prisma.theater.findMany(),
+      countScrapedUrls('SHOWTIMES'),
+      countShowtimes(),
+      countMovies(),
+      db.orm.public.Theater.orderBy((theater) => theater.id.asc()).all(),
     ])
 
-  await prisma.$transaction([
-    prisma.showtime.deleteMany({
-      where: { date: { lt: new Date() } },
-    }),
-    prisma.scrapedUrl.deleteMany({
-      where: { expiresAt: { lt: new Date() }, type: 'SHOWTIMES' },
-    }),
-  ])
+  const now = new Date()
+  await db.transaction(async (tx) => {
+    await tx.orm.public.Showtime.where((showtime) => showtime.date.lt(now)).deleteAndCount()
+    await tx.orm.public.ScrapedUrl.where((scrapedUrl) =>
+      and(scrapedUrl.expiresAt.lt(now), scrapedUrl.type.eq('SHOWTIMES')),
+    ).deleteAndCount()
+  })
 
   let complete = true
   let successfulTheaterIds = new Set<number>()
@@ -854,48 +848,51 @@ export async function scrapShowtimes(maxDay: number) {
   // reached, so their showtimes are missing from foundShowtimeAllocineIds -
   // pruning then would delete valid future showtimes. Skipping the prune on
   // incomplete runs prevents that data loss.
-  let deletedShowtimes = { count: 0 }
+  let deletedShowtimes = 0
   if (complete) {
-    deletedShowtimes = await prisma.showtime.deleteMany({
-      where: {
-        allocineId: { notIn: [...foundShowtimeAllocineIds] },
-        theaterId: { in: [...successfulTheaterIds] },
-      },
-    })
+    if (successfulTheaterIds.size > 0) {
+      const foundIds = [...foundShowtimeAllocineIds]
+      deletedShowtimes = await db.orm.public.Showtime.where((showtime) =>
+        and(
+          showtime.theaterId.in([...successfulTheaterIds]),
+          ...(foundIds.length > 0 ? [not(showtime.allocineId.in(foundIds))] : []),
+        ),
+      ).deleteAndCount()
+    }
 
     // Record that showtime state is trustworthy right now, so the poster
     // cleanup (a separate job) knows it can safely delete posters for movies
     // that have no showtimes.
-    await prisma.appState.upsert({
-      where: { id: 1 },
+    await db.orm.public.AppState.upsert({
       create: { id: 1, lastCompleteScrapeAt: new Date() },
       update: { lastCompleteScrapeAt: new Date() },
     })
   }
 
   const [countCacheItemsAfter, countShowtimesAfter, countMoviesAfter] = await Promise.all([
-    prisma.scrapedUrl.count({ where: { type: 'SHOWTIMES' } }),
-    prisma.showtime.count(),
-    prisma.movie.count(),
+    countScrapedUrls('SHOWTIMES'),
+    countShowtimes(),
+    countMovies(),
   ])
 
   console.log(`CachedUrls: ${countCacheItemsBefore} -> ${countCacheItemsAfter}`)
   console.log(`Movies: ${countMoviesBefore} -> ${countMoviesAfter}`)
   console.log(`Showtimes: ${countShowtimesBefore} -> ${countShowtimesAfter}`)
   console.log(
-    `Deleted ${deletedShowtimes.count} old showtimes${complete ? '' : ' (skipped - incomplete run)'}`,
+    `Deleted ${deletedShowtimes} old showtimes${complete ? '' : ' (skipped - incomplete run)'}`,
   )
 }
 
 export async function scrapTicketing() {
-  const countCacheItemsBefore = await prisma.scrapedUrl.count({ where: { type: 'TICKETING' } })
-  await prisma.scrapedUrl.deleteMany({
-    where: { expiresAt: { lt: new Date() }, type: 'TICKETING' },
-  })
+  const countCacheItemsBefore = await countScrapedUrls('TICKETING')
+  const now = new Date()
+  await db.orm.public.ScrapedUrl.where((scrapedUrl) =>
+    and(scrapedUrl.expiresAt.lt(now), scrapedUrl.type.eq('TICKETING')),
+  ).deleteAndCount()
 
   await scrapAllocineTicketingUrl()
 
-  const countCacheItemsAfter = await prisma.scrapedUrl.count({ where: { type: 'TICKETING' } })
+  const countCacheItemsAfter = await countScrapedUrls('TICKETING')
 
   console.log(`CachedUrls: ${countCacheItemsBefore} -> ${countCacheItemsAfter}`)
 }
@@ -905,27 +902,28 @@ export async function scrapPosters() {
 }
 
 export async function savePosterBlurHashes() {
-  const movies = await prisma.movie.findMany({
-    where: {
-      OR: [{ posterUrl: { not: null } }, { posterAllocineUrl: { not: null } }],
-      posterBlurHash: null,
-    },
-    select: { id: true, posterUrl: true, posterAllocineUrl: true },
-    orderBy: { id: 'asc' },
-  })
+  const movies = await db.orm.public.Movie.where((movie) =>
+    and(
+      or(movie.posterUrl.isNotNull(), movie.posterAllocineUrl.isNotNull()),
+      movie.posterBlurHash.isNull(),
+    ),
+  )
+    .select('id', 'posterUrl', 'posterAllocineUrl')
+    .orderBy((movie) => movie.id.asc())
+    .all()
 
   for (const movie of movies) {
     try {
       const url = movie.posterUrl
         ? `${IMAGEKIT_URL}/${movie.posterUrl}/tr:w-310,q-50,ar-62-85`
-        : movie.posterAllocineUrl ?? ''
+        : (movie.posterAllocineUrl ?? '')
       const pixels = await getPixels(url)
       const data = Uint8ClampedArray.from(pixels.data)
       const blurHash = encode(data, pixels.width, pixels.height, Math.round(9 * POSTER_RATIO), 9)
 
       console.log(`${url} -> ${blurHash}`)
 
-      await prisma.movie.update({ where: { id: movie.id }, data: { posterBlurHash: blurHash } })
+      await db.orm.public.Movie.where({ id: movie.id }).update({ posterBlurHash: blurHash })
     } catch (err) {
       console.error(err)
     }

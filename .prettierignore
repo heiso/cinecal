@@ -1,2 +1,9 @@
 node_modules
 package-lock.json
+build
+.react-router
+svgs.ts
+prisma/contract.json
+prisma/contract.d.ts
+prisma/migrations
+.claude
