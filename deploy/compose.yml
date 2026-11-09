@@ -5,16 +5,18 @@ name: cinecal
 x-env: &env
   TZ: Europe/Paris
   ENV: production
-  DATABASE_URL: postgresql://cinecal:${POSTGRES_PASSWORD:?}@postgres:5432/cinecal
+  DATABASE_URL: postgresql://cinecal@postgres:5432/cinecal
 
 services:
+  # No password: only the services of this compose can reach it, over its private network.
+  # Never publish its port (no `ports:`), or the database would be open to anyone reaching it.
   postgres:
     image: postgres:18-alpine
     restart: unless-stopped
     environment:
       POSTGRES_USER: cinecal
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?}
       POSTGRES_DB: cinecal
+      POSTGRES_HOST_AUTH_METHOD: trust
     volumes:
       - postgres:/var/lib/postgresql
     healthcheck:

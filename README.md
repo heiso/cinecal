@@ -114,7 +114,7 @@ curl -fsSLO https://raw.githubusercontent.com/heiso/cinecal/main/deploy/compose.
 curl -fsSL -o .env https://raw.githubusercontent.com/heiso/cinecal/main/deploy/.env.tpl
 ```
 
-Fill in `.env` (database password, public URL, ImageKit key), then start everything:
+Fill in `.env` (public URL, ImageKit key), then start everything:
 
 ```bash
 docker compose up -d

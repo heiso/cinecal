@@ -1,8 +1,5 @@
 # Copy to .env next to compose.yml
 
-# Letters and digits only: it goes into the database URL as is
-POSTGRES_PASSWORD=change-me
-
 # The address people use to reach the app (calendar links point to it)
 PUBLIC_URL=https://cinecal.example.com
 
