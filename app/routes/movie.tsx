@@ -234,7 +234,8 @@ export default function Movie({ loaderData }: Route.ComponentProps) {
           ></div>
           {movie.src ? (
             <ProgressiveImg
-              className="m-auto block aspect-poster w-1/2 rounded-xl object-cover"
+              // Positioned so it paints above the blurred backdrop
+              className="relative z-1 m-auto block aspect-poster w-1/2 rounded-xl object-cover"
               src={movie.src}
               srcLowDef={movie.srcLowDef}
               alt={movie.title}
