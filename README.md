@@ -96,7 +96,7 @@ npm run db:seed
 ## CI
 
 Every push to `main` and every pull request runs `.github/workflows/ci.yml`: lint and tests. On `main`, it then
-publishes `ghcr.io/heiso/cinecal` to GitHub Container Registry, tagged `latest` and with the commit. The same image
+publishes `ghcr.io/heiso/cinecal` (amd64 and arm64) to GitHub Container Registry, tagged `latest` and with the commit. The same image
 runs the app, the migrations and seed (the Prisma CLI is a dependency for them), and the scraper.
 
 ## Hosting

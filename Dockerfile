@@ -7,14 +7,17 @@ FROM node:${NODE_VERSION}-slim AS base
 WORKDIR /app
 ENV NODE_ENV=production
 
-# Build the app with every dependency
-FROM base AS build
+# Build the app with every dependency, on the machine's own platform: the output is plain
+# JavaScript, the same for amd64 and arm64
+FROM --platform=$BUILDPLATFORM node:${NODE_VERSION}-slim AS build
+WORKDIR /app
+ENV NODE_ENV=production
 COPY --link package.json package-lock.json ./
 RUN npm ci --include=dev
 COPY --link . .
 RUN npm run build
 
-# Production dependencies only (they include the Prisma CLI, for the migrations)
+# Production dependencies only, for the target platform (they include the Prisma CLI, for the migrations)
 FROM base AS production-dependencies
 COPY --link package.json package-lock.json ./
 RUN npm ci --omit=dev
