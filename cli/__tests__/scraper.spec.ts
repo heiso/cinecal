@@ -3,7 +3,6 @@ import { format } from 'date-fns'
 import { http, HttpResponse } from 'msw'
 import { setupServer } from 'msw/node'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
-import { paris } from '../../app/paris.ts'
 import { allocineShowtimesHandler, theaterShowtimeId } from './allocine-mock.ts'
 
 /**
@@ -22,7 +21,7 @@ describe.skipIf(!TEST_DATABASE_URL)('scrapShowtimes', () => {
     requests++
   })
 
-  let db: typeof import('../../prisma/db.ts').db
+  let db: typeof import('../../src/prisma/db.ts').db
   let scrapShowtimes: typeof import('../scraper.ts').scrapShowtimes
 
   async function count(table: 'movies' | 'movie_tags' | 'showtimes' | 'scraped_urls') {
@@ -38,7 +37,7 @@ describe.skipIf(!TEST_DATABASE_URL)('scrapShowtimes', () => {
 
   beforeAll(async () => {
     process.env.DATABASE_URL = TEST_DATABASE_URL!
-    ;({ db } = await import('../../prisma/db.ts'))
+    ;({ db } = await import('../../src/prisma/db.ts'))
     ;({ scrapShowtimes } = await import('../scraper.ts'))
     server.listen({ onUnhandledFrame: 'error' })
   })
@@ -97,7 +96,7 @@ describe.skipIf(!TEST_DATABASE_URL)('scrapShowtimes', () => {
       Tags: expect.arrayContaining([{ name: 'Action', category: 'GENRE' }]),
     })
 
-    // Allocine sends Paris wall clock times: stored showtimes are those instants, whatever the TZ
+    // Allocine sends Paris wall clock times, read in TZ=Europe/Paris (vitest.config.ts)
     const fixture = JSON.parse(
       readFileSync(`${import.meta.dirname}/fixtures/showtimes/theater-*.json`, 'utf8'),
     )
@@ -110,8 +109,8 @@ describe.skipIf(!TEST_DATABASE_URL)('scrapShowtimes', () => {
     })
       .select('date')
       .first()
-    expect(showtime && format(showtime.date, "yyyy-MM-dd'T'HH:mm:ss", { in: paris })).toBe(
-      `${format(new Date(), 'yyyy-MM-dd', { in: paris })}T${recorded.startsAt.slice(11)}`,
+    expect(showtime && format(showtime.date, "yyyy-MM-dd'T'HH:mm:ss")).toBe(
+      `${format(new Date(), 'yyyy-MM-dd')}T${recorded.startsAt.slice(11)}`,
     )
 
     requests = 0

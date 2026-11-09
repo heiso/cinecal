@@ -1,7 +1,6 @@
 import { readFileSync } from 'node:fs'
 import { addDays, format } from 'date-fns'
 import { http, HttpResponse } from 'msw'
-import { paris } from '../../app/paris.ts'
 
 const FIXTURES = `${import.meta.dirname}/fixtures/showtimes`
 
@@ -19,9 +18,8 @@ export function theaterShowtimeId(theaterId: string, internalId: number) {
   return internalId + theaterOffset * 1_000_000_000
 }
 
-/** The Paris calendar date, like Allocine's day parameter */
-function toParisDate(date: Date) {
-  return format(date, 'yyyy-MM-dd', { in: paris })
+function toLocalDate(date: Date) {
+  return format(date, 'yyyy-MM-dd')
 }
 
 /**
@@ -37,14 +35,14 @@ export function allocineShowtimesHandler(today = new Date()) {
     const [, theaterId, date, page] = match ?? []
     if (!theaterId) return new HttpResponse(null, { status: 404 })
     // Date-only strings parse as UTC midnight, so the difference is a whole number of days
-    const day = date ? (Date.parse(date) - Date.parse(toParisDate(today))) / 86_400_000 : 0
+    const day = date ? (Date.parse(date) - Date.parse(toLocalDate(today))) / 86_400_000 : 0
     const path = fixturePath(day, page ? Number(page) : 1)
     if (!path) {
       return HttpResponse.json({ error: true, message: 'no.showtime.error', results: [] })
     }
 
     const json = JSON.parse(readFileSync(path, 'utf-8'))
-    const target = toParisDate(addDays(today, day, { in: paris }))
+    const target = toLocalDate(addDays(today, day))
     for (const result of json.results) {
       for (const showtimes of Object.values(result.showtimes) as {
         startsAt: string

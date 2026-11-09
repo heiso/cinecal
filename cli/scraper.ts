@@ -2,10 +2,9 @@ import type { Scalars } from '@prisma/orm-postgres/family-contract/types'
 import { and, not, or } from '@prisma/orm-postgres/orm-client'
 import { getPixels } from '@unpic/pixels'
 import { encode } from 'blurhash'
-import { add, addDays, endOfDay, format, parseISO } from 'date-fns'
-import { paris, toDate } from '../app/paris.ts'
-import type { Models } from '../prisma/contract.d.ts'
-import { db } from '../prisma/db.ts'
+import { add, addDays, endOfDay, format } from 'date-fns'
+import type { Models } from '../src/prisma/contract.d.ts'
+import { db } from '../src/prisma/db.ts'
 import type { AllocineResponse, Credit, Release } from './allocine-types.ts'
 
 type Theater = Scalars<Models.public_Theater>
@@ -20,9 +19,8 @@ const EXCLUSION_LIST = ['Rex Studios', 'Sauvez le cinéma !']
 const IMAGEKIT_FOLDER = process.env.ENV === 'development' ? 'posters-dev' : 'posters-prod'
 const IMAGEKIT_URL = `https://ik.imagekit.io/cinecal/${IMAGEKIT_FOLDER}`
 const POSTER_RATIO = 62 / 85
-// Allocine's days are Paris days
-const SHOWTIMES_EXPIRATION_DATE = toDate(endOfDay(new Date(), { in: paris }))
-const TICKETING_DETAILS_EXPIRATION_DATE = toDate(add(new Date(), { days: 3 }, { in: paris }))
+const SHOWTIMES_EXPIRATION_DATE = endOfDay(new Date())
+const TICKETING_DETAILS_EXPIRATION_DATE = add(new Date(), { days: 3 })
 // Poster cleanup only trusts the showtime state if the last complete scrape is
 // within this window. Showtimes run every 30min, so a healthy pipeline produces
 // a complete run well within a day; if none has succeeded for this long, skip
@@ -110,12 +108,10 @@ function getDuration(runtime: number | string) {
   return runtime / 60 || 0
 }
 
+/** The release calendar date, "yyyy-MM-dd" */
 function getReleaseDate(releases: Release[]) {
   const date = releases.find((release) => release.name === 'Released')?.releaseDate?.date
-  if (!date) {
-    return null
-  }
-  return new Date(date)
+  return date ? date.slice(0, 10) : null
 }
 
 function getDirector(credits: Credit[]): string | null {
@@ -282,10 +278,7 @@ async function scrapAllocineShowtimes(
   const theater = theaters[theaterIndex]
   if (!theater) return { successfulTheaterIds }
   const pageParam = page > 1 ? `p-${page}/` : ''
-  const dayParam =
-    day > 0
-      ? `d-${format(addDays(new Date(), day, { in: paris }), 'yyyy-MM-dd', { in: paris })}/`
-      : ''
+  const dayParam = day > 0 ? `d-${format(addDays(new Date(), day), 'yyyy-MM-dd')}/` : ''
   const url = `${URL_ALLOCINE_SHOWTIMES}/theater-${theater.allocineId}/${dayParam}${pageParam}`
 
   try {
@@ -335,8 +328,8 @@ async function scrapAllocineShowtimes(
 
           const data = getUniqueAllocineShowtimes(result.showtimes).map((showtime) => ({
             allocineId: showtime.internalId,
-            // startsAt is a Paris wall clock time without offset
-            date: toDate(parseISO(showtime.startsAt, { in: paris })),
+            // startsAt is a Paris wall clock time without offset, read in TZ=Europe/Paris
+            date: new Date(showtime.startsAt),
             isPreview: showtime.isPreview,
             language: showtime.tags.includes('Localization.Language.French')
               ? ('VF' as const)

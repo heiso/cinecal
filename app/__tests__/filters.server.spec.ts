@@ -93,16 +93,18 @@ describe('getWhereInputs', () => {
       '?theaters=2&showtimeTags=5&movieTags=3&customTags=NEW_RELEASE&customTags=SCRAPED_RECENTLY',
     )
     expect(sql).toContain('"showtimes"."theater_id" IN ($2)')
-    expect(sql).toContain('"_ShowtimeToShowtimeTag"')
-    expect(sql).toContain('"movies"."release_date" >= $4 AND "movies"."release_date" <= $5')
+    expect(sql).toContain('"showtimes_showtime_tags"')
+    expect(sql).toContain(
+      '"movies"."release_date" >= $4::date AND "movies"."release_date" <= $5::date',
+    )
     expect(sql).toContain('"movies"."created_at" >= $6')
-    expect(sql).toContain('"_MovieToMovieTag"')
+    expect(sql).toContain('"movies_movie_tags"')
     expect(params).toEqual([
       '2026-11-09T12:00:00.000Z',
       2,
       5,
-      '2026-10-26T12:00:00.000Z',
-      '2026-11-09T12:00:00.000Z',
+      '2026-10-26',
+      '2026-11-09',
       '2026-11-08T23:00:00.000Z',
       3,
     ])

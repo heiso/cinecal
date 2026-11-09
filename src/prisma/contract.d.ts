@@ -23,7 +23,7 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'38b10d7396cb5f9ba280ec3e75e5bfbd8d0572ecb266cfb5a30a5255375988a6'>;
+  StorageHashBase<'817d123f6550d07673c318c6928b5524326151ba8e90daec46c74299ac7d301c'>;
 export type ExecutionHash =
   ExecutionHashBase<'e225ef7deb0bb81fc2d27513aedfcedefc7c6ec5161397f331a00a620430dc2d'>;
 export type ProfileHash =
@@ -364,7 +364,6 @@ export namespace Models {
     posterUrl: FieldOutputTypes['public']['Movie']['posterUrl'];
     releaseDate: FieldOutputTypes['public']['Movie']['releaseDate'];
     synopsis: FieldOutputTypes['public']['Movie']['synopsis'];
-    themoviedbId: FieldOutputTypes['public']['Movie']['themoviedbId'];
     title: FieldOutputTypes['public']['Movie']['title'];
     updatedAt: FieldOutputTypes['public']['Movie']['updatedAt'];
     Showtimes: public_Showtime[];
@@ -484,114 +483,6 @@ type ContractBase = Omit<
         readonly kind: 'postgres-schema';
         readonly entries: {
           readonly table: {
-            readonly _MovieToMovieTag: {
-              columns: {
-                readonly A: {
-                  readonly dataType: 'pg/int4';
-                  readonly codecId: 'pg/int4@1';
-                  readonly nullable: false;
-                  readonly many: false;
-                };
-                readonly B: {
-                  readonly dataType: 'pg/int4';
-                  readonly codecId: 'pg/int4@1';
-                  readonly nullable: false;
-                  readonly many: false;
-                };
-              };
-              primaryKey: {
-                readonly columns: readonly ['A', 'B'];
-                readonly name: '_MovieToMovieTag_AB_pkey';
-              };
-              uniques: readonly [];
-              indexes: readonly [
-                {
-                  readonly name: '_MovieToMovieTag_B_index';
-                  readonly columns: readonly ['B'];
-                  readonly unique: false;
-                },
-              ];
-              foreignKeys: readonly [
-                {
-                  readonly source: {
-                    readonly namespaceId: 'public' & NamespaceId;
-                    readonly tableName: '_MovieToMovieTag';
-                    readonly columns: readonly ['A'];
-                  };
-                  readonly target: {
-                    readonly namespaceId: 'public' & NamespaceId;
-                    readonly tableName: 'movies';
-                    readonly columns: readonly ['id'];
-                  };
-                },
-                {
-                  readonly source: {
-                    readonly namespaceId: 'public' & NamespaceId;
-                    readonly tableName: '_MovieToMovieTag';
-                    readonly columns: readonly ['B'];
-                  };
-                  readonly target: {
-                    readonly namespaceId: 'public' & NamespaceId;
-                    readonly tableName: 'movie_tags';
-                    readonly columns: readonly ['id'];
-                  };
-                },
-              ];
-            };
-            readonly _ShowtimeToShowtimeTag: {
-              columns: {
-                readonly A: {
-                  readonly dataType: 'pg/int4';
-                  readonly codecId: 'pg/int4@1';
-                  readonly nullable: false;
-                  readonly many: false;
-                };
-                readonly B: {
-                  readonly dataType: 'pg/int4';
-                  readonly codecId: 'pg/int4@1';
-                  readonly nullable: false;
-                  readonly many: false;
-                };
-              };
-              primaryKey: {
-                readonly columns: readonly ['A', 'B'];
-                readonly name: '_ShowtimeToShowtimeTag_AB_pkey';
-              };
-              uniques: readonly [];
-              indexes: readonly [
-                {
-                  readonly name: '_ShowtimeToShowtimeTag_B_index';
-                  readonly columns: readonly ['B'];
-                  readonly unique: false;
-                },
-              ];
-              foreignKeys: readonly [
-                {
-                  readonly source: {
-                    readonly namespaceId: 'public' & NamespaceId;
-                    readonly tableName: '_ShowtimeToShowtimeTag';
-                    readonly columns: readonly ['A'];
-                  };
-                  readonly target: {
-                    readonly namespaceId: 'public' & NamespaceId;
-                    readonly tableName: 'showtimes';
-                    readonly columns: readonly ['id'];
-                  };
-                },
-                {
-                  readonly source: {
-                    readonly namespaceId: 'public' & NamespaceId;
-                    readonly tableName: '_ShowtimeToShowtimeTag';
-                    readonly columns: readonly ['B'];
-                  };
-                  readonly target: {
-                    readonly namespaceId: 'public' & NamespaceId;
-                    readonly tableName: 'showtime_tags';
-                    readonly columns: readonly ['id'];
-                  };
-                },
-              ];
-            };
             readonly app_state: {
               columns: {
                 readonly id: {
@@ -605,8 +496,8 @@ type ContractBase = Omit<
                   readonly many: false;
                 };
                 readonly last_complete_scrape_at: {
-                  readonly dataType: 'pg/timestamp';
-                  readonly codecId: 'pg/timestamp-date@1';
+                  readonly dataType: 'pg/timestamptz';
+                  readonly codecId: 'pg/timestamptz-date@1';
                   readonly nullable: true;
                   readonly typeParams: { readonly precision: 3 };
                   readonly many: false;
@@ -657,29 +548,21 @@ type ContractBase = Omit<
                   readonly many: false;
                 };
                 readonly name: {
-                  readonly dataType: 'pg/varchar';
-                  readonly codecId: 'sql/varchar@1';
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
                   readonly nullable: false;
-                  readonly typeParams: { readonly length: 255 };
                   readonly many: false;
                 };
                 readonly reg_exp: {
-                  readonly dataType: 'pg/varchar';
-                  readonly codecId: 'sql/varchar@1';
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
                   readonly nullable: true;
-                  readonly typeParams: { readonly length: 255 };
                   readonly many: false;
                 };
               };
               primaryKey: { readonly columns: readonly ['id'] };
-              uniques: readonly [];
-              indexes: readonly [
-                {
-                  readonly name: 'movie_tags_name_key';
-                  readonly columns: readonly ['name'];
-                  readonly unique: true;
-                },
-              ];
+              uniques: readonly [{ readonly columns: readonly ['name'] }];
+              indexes: readonly [];
               foreignKeys: readonly [];
             };
             readonly movies: {
@@ -691,10 +574,9 @@ type ContractBase = Omit<
                   readonly many: false;
                 };
                 readonly created_at: {
-                  readonly dataType: 'pg/timestamp';
-                  readonly codecId: 'pg/timestamp-date@1';
+                  readonly dataType: 'pg/timestamptz';
+                  readonly codecId: 'pg/timestamptz-date@1';
                   readonly nullable: false;
-                  readonly default: { readonly kind: 'function'; readonly expression: 'now()' };
                   readonly typeParams: { readonly precision: 3 };
                   readonly many: false;
                 };
@@ -725,10 +607,9 @@ type ContractBase = Omit<
                   readonly many: false;
                 };
                 readonly original_title: {
-                  readonly dataType: 'pg/varchar';
-                  readonly codecId: 'sql/varchar@1';
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
                   readonly nullable: false;
-                  readonly typeParams: { readonly length: 255 };
                   readonly many: false;
                 };
                 readonly poster_allocine_url: {
@@ -750,10 +631,9 @@ type ContractBase = Omit<
                   readonly many: false;
                 };
                 readonly release_date: {
-                  readonly dataType: 'pg/timestamp';
-                  readonly codecId: 'pg/timestamp-date@1';
+                  readonly dataType: 'pg/date';
+                  readonly codecId: 'pg/date-string@1';
                   readonly nullable: true;
-                  readonly typeParams: { readonly precision: 3 };
                   readonly many: false;
                 };
                 readonly synopsis: {
@@ -762,37 +642,82 @@ type ContractBase = Omit<
                   readonly nullable: true;
                   readonly many: false;
                 };
-                readonly themoviedb_id: {
-                  readonly dataType: 'pg/int4';
-                  readonly codecId: 'pg/int4@1';
-                  readonly nullable: true;
-                  readonly many: false;
-                };
                 readonly title: {
-                  readonly dataType: 'pg/varchar';
-                  readonly codecId: 'sql/varchar@1';
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
                   readonly nullable: false;
-                  readonly typeParams: { readonly length: 255 };
                   readonly many: false;
                 };
                 readonly updated_at: {
-                  readonly dataType: 'pg/timestamp';
-                  readonly codecId: 'pg/timestamp-date@1';
+                  readonly dataType: 'pg/timestamptz';
+                  readonly codecId: 'pg/timestamptz-date@1';
                   readonly nullable: false;
                   readonly typeParams: { readonly precision: 3 };
                   readonly many: false;
                 };
               };
               primaryKey: { readonly columns: readonly ['id'] };
+              uniques: readonly [{ readonly columns: readonly ['allocine_id'] }];
+              indexes: readonly [];
+              foreignKeys: readonly [];
+            };
+            readonly movies_movie_tags: {
+              columns: {
+                readonly movie_id: {
+                  readonly dataType: 'pg/int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly tag_id: {
+                  readonly dataType: 'pg/int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+              };
+              primaryKey: { readonly columns: readonly ['movie_id', 'tag_id'] };
               uniques: readonly [];
               indexes: readonly [
                 {
-                  readonly name: 'movies_allocine_id_key';
-                  readonly columns: readonly ['allocine_id'];
-                  readonly unique: true;
+                  readonly name: 'movies_movie_tags_movie_id_idx_b2c3efa2';
+                  readonly prefix: 'movies_movie_tags_movie_id_idx';
+                  readonly columns: readonly ['movie_id'];
+                  readonly unique: false;
+                },
+                {
+                  readonly name: 'movies_movie_tags_tag_id_idx_94b47830';
+                  readonly prefix: 'movies_movie_tags_tag_id_idx';
+                  readonly columns: readonly ['tag_id'];
+                  readonly unique: false;
                 },
               ];
-              foreignKeys: readonly [];
+              foreignKeys: readonly [
+                {
+                  readonly source: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'movies_movie_tags';
+                    readonly columns: readonly ['movie_id'];
+                  };
+                  readonly target: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'movies';
+                    readonly columns: readonly ['id'];
+                  };
+                },
+                {
+                  readonly source: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'movies_movie_tags';
+                    readonly columns: readonly ['tag_id'];
+                  };
+                  readonly target: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'movie_tags';
+                    readonly columns: readonly ['id'];
+                  };
+                },
+              ];
             };
             readonly prices: {
               columns: {
@@ -824,7 +749,7 @@ type ContractBase = Omit<
                   readonly nullable: false;
                   readonly many: false;
                 };
-                readonly showtimeId: {
+                readonly showtime_id: {
                   readonly dataType: 'pg/int4';
                   readonly codecId: 'pg/int4@1';
                   readonly nullable: true;
@@ -833,13 +758,20 @@ type ContractBase = Omit<
               };
               primaryKey: { readonly columns: readonly ['id'] };
               uniques: readonly [];
-              indexes: readonly [];
+              indexes: readonly [
+                {
+                  readonly name: 'prices_showtime_id_idx_4d080e2f';
+                  readonly prefix: 'prices_showtime_id_idx';
+                  readonly columns: readonly ['showtime_id'];
+                  readonly unique: false;
+                },
+              ];
               foreignKeys: readonly [
                 {
                   readonly source: {
                     readonly namespaceId: 'public' & NamespaceId;
                     readonly tableName: 'prices';
-                    readonly columns: readonly ['showtimeId'];
+                    readonly columns: readonly ['showtime_id'];
                   };
                   readonly target: {
                     readonly namespaceId: 'public' & NamespaceId;
@@ -858,16 +790,15 @@ type ContractBase = Omit<
                   readonly many: false;
                 };
                 readonly created_at: {
-                  readonly dataType: 'pg/timestamp';
-                  readonly codecId: 'pg/timestamp-date@1';
+                  readonly dataType: 'pg/timestamptz';
+                  readonly codecId: 'pg/timestamptz-date@1';
                   readonly nullable: false;
-                  readonly default: { readonly kind: 'function'; readonly expression: 'now()' };
                   readonly typeParams: { readonly precision: 3 };
                   readonly many: false;
                 };
                 readonly expires_at: {
-                  readonly dataType: 'pg/timestamp';
-                  readonly codecId: 'pg/timestamp-date@1';
+                  readonly dataType: 'pg/timestamptz';
+                  readonly codecId: 'pg/timestamptz-date@1';
                   readonly nullable: false;
                   readonly typeParams: { readonly precision: 3 };
                   readonly many: false;
@@ -924,29 +855,21 @@ type ContractBase = Omit<
                   readonly many: false;
                 };
                 readonly name: {
-                  readonly dataType: 'pg/varchar';
-                  readonly codecId: 'sql/varchar@1';
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
                   readonly nullable: false;
-                  readonly typeParams: { readonly length: 255 };
                   readonly many: false;
                 };
                 readonly reg_exp: {
-                  readonly dataType: 'pg/varchar';
-                  readonly codecId: 'sql/varchar@1';
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
                   readonly nullable: true;
-                  readonly typeParams: { readonly length: 255 };
                   readonly many: false;
                 };
               };
               primaryKey: { readonly columns: readonly ['id'] };
-              uniques: readonly [];
-              indexes: readonly [
-                {
-                  readonly name: 'showtime_tags_name_key';
-                  readonly columns: readonly ['name'];
-                  readonly unique: true;
-                },
-              ];
+              uniques: readonly [{ readonly columns: readonly ['name'] }];
+              indexes: readonly [];
               foreignKeys: readonly [];
             };
             readonly showtimes: {
@@ -958,16 +881,15 @@ type ContractBase = Omit<
                   readonly many: false;
                 };
                 readonly created_at: {
-                  readonly dataType: 'pg/timestamp';
-                  readonly codecId: 'pg/timestamp-date@1';
+                  readonly dataType: 'pg/timestamptz';
+                  readonly codecId: 'pg/timestamptz-date@1';
                   readonly nullable: false;
-                  readonly default: { readonly kind: 'function'; readonly expression: 'now()' };
                   readonly typeParams: { readonly precision: 3 };
                   readonly many: false;
                 };
                 readonly date: {
-                  readonly dataType: 'pg/timestamp';
-                  readonly codecId: 'pg/timestamp-date@1';
+                  readonly dataType: 'pg/timestamptz';
+                  readonly codecId: 'pg/timestamptz-date@1';
                   readonly nullable: false;
                   readonly typeParams: { readonly precision: 3 };
                   readonly many: false;
@@ -1011,32 +933,37 @@ type ContractBase = Omit<
                   readonly nullable: false;
                   readonly many: false;
                 };
-                readonly ticketingUrl: {
+                readonly ticketing_url: {
                   readonly dataType: 'pg/text';
                   readonly codecId: 'pg/text@1';
                   readonly nullable: true;
                   readonly many: false;
                 };
                 readonly updated_at: {
-                  readonly dataType: 'pg/timestamp';
-                  readonly codecId: 'pg/timestamp-date@1';
+                  readonly dataType: 'pg/timestamptz';
+                  readonly codecId: 'pg/timestamptz-date@1';
                   readonly nullable: false;
                   readonly typeParams: { readonly precision: 3 };
                   readonly many: false;
                 };
               };
               primaryKey: { readonly columns: readonly ['id'] };
-              uniques: readonly [];
+              uniques: readonly [
+                { readonly columns: readonly ['allocine_id'] },
+                { readonly columns: readonly ['date', 'movie_id', 'theater_id'] },
+              ];
               indexes: readonly [
                 {
-                  readonly name: 'showtimes_allocine_id_key';
-                  readonly columns: readonly ['allocine_id'];
-                  readonly unique: true;
+                  readonly name: 'showtimes_movie_id_idx_b2c3efa2';
+                  readonly prefix: 'showtimes_movie_id_idx';
+                  readonly columns: readonly ['movie_id'];
+                  readonly unique: false;
                 },
                 {
-                  readonly name: 'showtimes_date_movie_id_theater_id_key';
-                  readonly columns: readonly ['date', 'movie_id', 'theater_id'];
-                  readonly unique: true;
+                  readonly name: 'showtimes_theater_id_idx_e7576363';
+                  readonly prefix: 'showtimes_theater_id_idx';
+                  readonly columns: readonly ['theater_id'];
+                  readonly unique: false;
                 },
               ];
               foreignKeys: readonly [
@@ -1066,6 +993,64 @@ type ContractBase = Omit<
                 },
               ];
             };
+            readonly showtimes_showtime_tags: {
+              columns: {
+                readonly showtime_id: {
+                  readonly dataType: 'pg/int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly tag_id: {
+                  readonly dataType: 'pg/int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+              };
+              primaryKey: { readonly columns: readonly ['showtime_id', 'tag_id'] };
+              uniques: readonly [];
+              indexes: readonly [
+                {
+                  readonly name: 'showtimes_showtime_tags_showtime_id_idx_4d080e2f';
+                  readonly prefix: 'showtimes_showtime_tags_showtime_id_idx';
+                  readonly columns: readonly ['showtime_id'];
+                  readonly unique: false;
+                },
+                {
+                  readonly name: 'showtimes_showtime_tags_tag_id_idx_94b47830';
+                  readonly prefix: 'showtimes_showtime_tags_tag_id_idx';
+                  readonly columns: readonly ['tag_id'];
+                  readonly unique: false;
+                },
+              ];
+              foreignKeys: readonly [
+                {
+                  readonly source: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'showtimes_showtime_tags';
+                    readonly columns: readonly ['showtime_id'];
+                  };
+                  readonly target: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'showtimes';
+                    readonly columns: readonly ['id'];
+                  };
+                },
+                {
+                  readonly source: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'showtimes_showtime_tags';
+                    readonly columns: readonly ['tag_id'];
+                  };
+                  readonly target: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'showtime_tags';
+                    readonly columns: readonly ['id'];
+                  };
+                },
+              ];
+            };
             readonly theaters: {
               columns: {
                 readonly address: {
@@ -1075,17 +1060,15 @@ type ContractBase = Omit<
                   readonly many: false;
                 };
                 readonly allocine_id: {
-                  readonly dataType: 'pg/varchar';
-                  readonly codecId: 'sql/varchar@1';
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
                   readonly nullable: false;
-                  readonly typeParams: { readonly length: 10 };
                   readonly many: false;
                 };
                 readonly created_at: {
-                  readonly dataType: 'pg/timestamp';
-                  readonly codecId: 'pg/timestamp-date@1';
+                  readonly dataType: 'pg/timestamptz';
+                  readonly codecId: 'pg/timestamptz-date@1';
                   readonly nullable: false;
-                  readonly default: { readonly kind: 'function'; readonly expression: 'now()' };
                   readonly typeParams: { readonly precision: 3 };
                   readonly many: false;
                 };
@@ -1100,36 +1083,28 @@ type ContractBase = Omit<
                   readonly many: false;
                 };
                 readonly name: {
-                  readonly dataType: 'pg/varchar';
-                  readonly codecId: 'sql/varchar@1';
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
                   readonly nullable: false;
-                  readonly typeParams: { readonly length: 255 };
                   readonly many: false;
                 };
                 readonly updated_at: {
-                  readonly dataType: 'pg/timestamp';
-                  readonly codecId: 'pg/timestamp-date@1';
+                  readonly dataType: 'pg/timestamptz';
+                  readonly codecId: 'pg/timestamptz-date@1';
                   readonly nullable: false;
                   readonly typeParams: { readonly precision: 3 };
                   readonly many: false;
                 };
                 readonly website: {
-                  readonly dataType: 'pg/varchar';
-                  readonly codecId: 'sql/varchar@1';
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
                   readonly nullable: false;
-                  readonly typeParams: { readonly length: 255 };
                   readonly many: false;
                 };
               };
               primaryKey: { readonly columns: readonly ['id'] };
-              uniques: readonly [];
-              indexes: readonly [
-                {
-                  readonly name: 'theaters_allocine_id_key';
-                  readonly columns: readonly ['allocine_id'];
-                  readonly unique: true;
-                },
-              ];
+              uniques: readonly [{ readonly columns: readonly ['allocine_id'] }];
+              indexes: readonly [];
               foreignKeys: readonly [];
             };
           };
@@ -1157,17 +1132,13 @@ type ContractBase = Omit<
   readonly target: 'postgres';
   readonly targetFamily: 'sql';
   readonly roots: {
-    readonly _MovieToMovieTag: {
-      readonly namespace: 'public' & NamespaceId;
-      readonly model: 'MovieToMovieTag';
-    };
-    readonly _ShowtimeToShowtimeTag: {
-      readonly namespace: 'public' & NamespaceId;
-      readonly model: 'ShowtimeToShowtimeTag';
-    };
     readonly app_state: { readonly namespace: 'public' & NamespaceId; readonly model: 'AppState' };
     readonly movie_tags: { readonly namespace: 'public' & NamespaceId; readonly model: 'MovieTag' };
     readonly movies: { readonly namespace: 'public' & NamespaceId; readonly model: 'Movie' };
+    readonly movies_movie_tags: {
+      readonly namespace: 'public' & NamespaceId;
+      readonly model: 'MovieToMovieTag';
+    };
     readonly prices: { readonly namespace: 'public' & NamespaceId; readonly model: 'Price' };
     readonly scraped_urls: {
       readonly namespace: 'public' & NamespaceId;
@@ -1178,6 +1149,10 @@ type ContractBase = Omit<
       readonly model: 'ShowtimeTag';
     };
     readonly showtimes: { readonly namespace: 'public' & NamespaceId; readonly model: 'Showtime' };
+    readonly showtimes_showtime_tags: {
+      readonly namespace: 'public' & NamespaceId;
+      readonly model: 'ShowtimeToShowtimeTag';
+    };
     readonly theaters: { readonly namespace: 'public' & NamespaceId; readonly model: 'Theater' };
   };
   readonly domain: {
@@ -1194,7 +1169,7 @@ type ContractBase = Omit<
                 readonly nullable: true;
                 readonly type: {
                   readonly kind: 'scalar';
-                  readonly codecId: 'pg/timestamp-date@1';
+                  readonly codecId: 'pg/timestamptz-date@1';
                   readonly typeParams: { readonly precision: 3 };
                 };
               };
@@ -1219,7 +1194,7 @@ type ContractBase = Omit<
                 readonly nullable: false;
                 readonly type: {
                   readonly kind: 'scalar';
-                  readonly codecId: 'pg/timestamp-date@1';
+                  readonly codecId: 'pg/timestamptz-date@1';
                   readonly typeParams: { readonly precision: 3 };
                 };
               };
@@ -1237,11 +1212,7 @@ type ContractBase = Omit<
               };
               readonly originalTitle: {
                 readonly nullable: false;
-                readonly type: {
-                  readonly kind: 'scalar';
-                  readonly codecId: 'sql/varchar@1';
-                  readonly typeParams: { readonly length: 255 };
-                };
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
               };
               readonly posterAllocineUrl: {
                 readonly nullable: true;
@@ -1257,33 +1228,21 @@ type ContractBase = Omit<
               };
               readonly releaseDate: {
                 readonly nullable: true;
-                readonly type: {
-                  readonly kind: 'scalar';
-                  readonly codecId: 'pg/timestamp-date@1';
-                  readonly typeParams: { readonly precision: 3 };
-                };
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/date-string@1' };
               };
               readonly synopsis: {
                 readonly nullable: true;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
               };
-              readonly themoviedbId: {
-                readonly nullable: true;
-                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
-              };
               readonly title: {
                 readonly nullable: false;
-                readonly type: {
-                  readonly kind: 'scalar';
-                  readonly codecId: 'sql/varchar@1';
-                  readonly typeParams: { readonly length: 255 };
-                };
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
               };
               readonly updatedAt: {
                 readonly nullable: false;
                 readonly type: {
                   readonly kind: 'scalar';
-                  readonly codecId: 'pg/timestamp-date@1';
+                  readonly codecId: 'pg/timestamptz-date@1';
                   readonly typeParams: { readonly precision: 3 };
                 };
               };
@@ -1308,13 +1267,13 @@ type ContractBase = Omit<
                 readonly cardinality: 'N:M';
                 readonly on: {
                   readonly localFields: readonly ['id'];
-                  readonly targetFields: readonly ['A'];
+                  readonly targetFields: readonly ['movie_id'];
                 };
                 readonly through: {
-                  readonly table: '_MovieToMovieTag';
+                  readonly table: 'movies_movie_tags';
                   readonly namespaceId: 'public';
-                  readonly parentColumns: readonly ['A'];
-                  readonly childColumns: readonly ['B'];
+                  readonly parentColumns: readonly ['movie_id'];
+                  readonly childColumns: readonly ['tag_id'];
                   readonly targetColumns: readonly ['id'];
                 };
               };
@@ -1334,7 +1293,6 @@ type ContractBase = Omit<
                 readonly posterUrl: { readonly column: 'poster_url' };
                 readonly releaseDate: { readonly column: 'release_date' };
                 readonly synopsis: { readonly column: 'synopsis' };
-                readonly themoviedbId: { readonly column: 'themoviedb_id' };
                 readonly title: { readonly column: 'title' };
                 readonly updatedAt: { readonly column: 'updated_at' };
               };
@@ -1364,19 +1322,11 @@ type ContractBase = Omit<
               };
               readonly name: {
                 readonly nullable: false;
-                readonly type: {
-                  readonly kind: 'scalar';
-                  readonly codecId: 'sql/varchar@1';
-                  readonly typeParams: { readonly length: 255 };
-                };
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
               };
               readonly regExp: {
                 readonly nullable: true;
-                readonly type: {
-                  readonly kind: 'scalar';
-                  readonly codecId: 'sql/varchar@1';
-                  readonly typeParams: { readonly length: 255 };
-                };
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
               };
             };
             readonly relations: {
@@ -1388,13 +1338,13 @@ type ContractBase = Omit<
                 readonly cardinality: 'N:M';
                 readonly on: {
                   readonly localFields: readonly ['id'];
-                  readonly targetFields: readonly ['B'];
+                  readonly targetFields: readonly ['tag_id'];
                 };
                 readonly through: {
-                  readonly table: '_MovieToMovieTag';
+                  readonly table: 'movies_movie_tags';
                   readonly namespaceId: 'public';
-                  readonly parentColumns: readonly ['B'];
-                  readonly childColumns: readonly ['A'];
+                  readonly parentColumns: readonly ['tag_id'];
+                  readonly childColumns: readonly ['movie_id'];
                   readonly targetColumns: readonly ['id'];
                 };
               };
@@ -1450,11 +1400,11 @@ type ContractBase = Omit<
               };
             };
             readonly storage: {
-              readonly table: '_MovieToMovieTag';
+              readonly table: 'movies_movie_tags';
               readonly namespaceId: 'public';
               readonly fields: {
-                readonly movieId: { readonly column: 'A' };
-                readonly tagId: { readonly column: 'B' };
+                readonly movieId: { readonly column: 'movie_id' };
+                readonly tagId: { readonly column: 'tag_id' };
               };
             };
           };
@@ -1503,7 +1453,7 @@ type ContractBase = Omit<
                 readonly id: { readonly column: 'id' };
                 readonly label: { readonly column: 'label' };
                 readonly price: { readonly column: 'price' };
-                readonly showtimeId: { readonly column: 'showtimeId' };
+                readonly showtimeId: { readonly column: 'showtime_id' };
               };
             };
           };
@@ -1517,7 +1467,7 @@ type ContractBase = Omit<
                 readonly nullable: false;
                 readonly type: {
                   readonly kind: 'scalar';
-                  readonly codecId: 'pg/timestamp-date@1';
+                  readonly codecId: 'pg/timestamptz-date@1';
                   readonly typeParams: { readonly precision: 3 };
                 };
               };
@@ -1525,7 +1475,7 @@ type ContractBase = Omit<
                 readonly nullable: false;
                 readonly type: {
                   readonly kind: 'scalar';
-                  readonly codecId: 'pg/timestamp-date@1';
+                  readonly codecId: 'pg/timestamptz-date@1';
                   readonly typeParams: { readonly precision: 3 };
                 };
               };
@@ -1565,7 +1515,7 @@ type ContractBase = Omit<
                 readonly nullable: false;
                 readonly type: {
                   readonly kind: 'scalar';
-                  readonly codecId: 'pg/timestamp-date@1';
+                  readonly codecId: 'pg/timestamptz-date@1';
                   readonly typeParams: { readonly precision: 3 };
                 };
               };
@@ -1573,7 +1523,7 @@ type ContractBase = Omit<
                 readonly nullable: false;
                 readonly type: {
                   readonly kind: 'scalar';
-                  readonly codecId: 'pg/timestamp-date@1';
+                  readonly codecId: 'pg/timestamptz-date@1';
                   readonly typeParams: { readonly precision: 3 };
                 };
               };
@@ -1609,7 +1559,7 @@ type ContractBase = Omit<
                 readonly nullable: false;
                 readonly type: {
                   readonly kind: 'scalar';
-                  readonly codecId: 'pg/timestamp-date@1';
+                  readonly codecId: 'pg/timestamptz-date@1';
                   readonly typeParams: { readonly precision: 3 };
                 };
               };
@@ -1646,13 +1596,13 @@ type ContractBase = Omit<
                 readonly cardinality: 'N:M';
                 readonly on: {
                   readonly localFields: readonly ['id'];
-                  readonly targetFields: readonly ['A'];
+                  readonly targetFields: readonly ['showtime_id'];
                 };
                 readonly through: {
-                  readonly table: '_ShowtimeToShowtimeTag';
+                  readonly table: 'showtimes_showtime_tags';
                   readonly namespaceId: 'public';
-                  readonly parentColumns: readonly ['A'];
-                  readonly childColumns: readonly ['B'];
+                  readonly parentColumns: readonly ['showtime_id'];
+                  readonly childColumns: readonly ['tag_id'];
                   readonly targetColumns: readonly ['id'];
                 };
               };
@@ -1681,7 +1631,7 @@ type ContractBase = Omit<
                 readonly language: { readonly column: 'language' };
                 readonly movieId: { readonly column: 'movie_id' };
                 readonly theaterId: { readonly column: 'theater_id' };
-                readonly ticketingUrl: { readonly column: 'ticketingUrl' };
+                readonly ticketingUrl: { readonly column: 'ticketing_url' };
                 readonly updatedAt: { readonly column: 'updated_at' };
               };
             };
@@ -1702,19 +1652,11 @@ type ContractBase = Omit<
               };
               readonly name: {
                 readonly nullable: false;
-                readonly type: {
-                  readonly kind: 'scalar';
-                  readonly codecId: 'sql/varchar@1';
-                  readonly typeParams: { readonly length: 255 };
-                };
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
               };
               readonly regExp: {
                 readonly nullable: true;
-                readonly type: {
-                  readonly kind: 'scalar';
-                  readonly codecId: 'sql/varchar@1';
-                  readonly typeParams: { readonly length: 255 };
-                };
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
               };
             };
             readonly relations: {
@@ -1726,13 +1668,13 @@ type ContractBase = Omit<
                 readonly cardinality: 'N:M';
                 readonly on: {
                   readonly localFields: readonly ['id'];
-                  readonly targetFields: readonly ['B'];
+                  readonly targetFields: readonly ['tag_id'];
                 };
                 readonly through: {
-                  readonly table: '_ShowtimeToShowtimeTag';
+                  readonly table: 'showtimes_showtime_tags';
                   readonly namespaceId: 'public';
-                  readonly parentColumns: readonly ['B'];
-                  readonly childColumns: readonly ['A'];
+                  readonly parentColumns: readonly ['tag_id'];
+                  readonly childColumns: readonly ['showtime_id'];
                   readonly targetColumns: readonly ['id'];
                 };
               };
@@ -1787,11 +1729,11 @@ type ContractBase = Omit<
               };
             };
             readonly storage: {
-              readonly table: '_ShowtimeToShowtimeTag';
+              readonly table: 'showtimes_showtime_tags';
               readonly namespaceId: 'public';
               readonly fields: {
-                readonly showtimeId: { readonly column: 'A' };
-                readonly tagId: { readonly column: 'B' };
+                readonly showtimeId: { readonly column: 'showtime_id' };
+                readonly tagId: { readonly column: 'tag_id' };
               };
             };
           };
@@ -1803,17 +1745,13 @@ type ContractBase = Omit<
               };
               readonly allocineId: {
                 readonly nullable: false;
-                readonly type: {
-                  readonly kind: 'scalar';
-                  readonly codecId: 'sql/varchar@1';
-                  readonly typeParams: { readonly length: 10 };
-                };
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
               };
               readonly createdAt: {
                 readonly nullable: false;
                 readonly type: {
                   readonly kind: 'scalar';
-                  readonly codecId: 'pg/timestamp-date@1';
+                  readonly codecId: 'pg/timestamptz-date@1';
                   readonly typeParams: { readonly precision: 3 };
                 };
               };
@@ -1823,27 +1761,19 @@ type ContractBase = Omit<
               };
               readonly name: {
                 readonly nullable: false;
-                readonly type: {
-                  readonly kind: 'scalar';
-                  readonly codecId: 'sql/varchar@1';
-                  readonly typeParams: { readonly length: 255 };
-                };
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
               };
               readonly updatedAt: {
                 readonly nullable: false;
                 readonly type: {
                   readonly kind: 'scalar';
-                  readonly codecId: 'pg/timestamp-date@1';
+                  readonly codecId: 'pg/timestamptz-date@1';
                   readonly typeParams: { readonly precision: 3 };
                 };
               };
               readonly website: {
                 readonly nullable: false;
-                readonly type: {
-                  readonly kind: 'scalar';
-                  readonly codecId: 'sql/varchar@1';
-                  readonly typeParams: { readonly length: 255 };
-                };
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
               };
             };
             readonly relations: {

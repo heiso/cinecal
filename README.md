@@ -63,7 +63,7 @@ The scraper test needs an empty, migrated database, which it truncates:
 
 ```bash
 createdb -h 127.0.0.1 -U postgres cinecal_test
-DATABASE_URL=postgresql://postgres@127.0.0.1:5432/cinecal_test npm run db:migrate
+npx prisma db migrate --db postgresql://postgres@127.0.0.1:5432/cinecal_test
 TEST_DATABASE_URL=postgresql://postgres@127.0.0.1:5432/cinecal_test npm run test
 ```
 
@@ -75,12 +75,22 @@ npm run scraper -- scrapShowtimes 7
 
 ## Database
 
-The data contract is `prisma/contract.prisma`. After changing it:
+Prisma 8's standard layout: the data contract is `src/prisma/contract.prisma`, next to the generated
+`contract.json` and `contract.d.ts` (commit them) and `db.ts`, the client scripts import. The app has its
+own client in `app/db.server.ts`. Migrations live in `migrations/`.
+
+After changing the contract (the dev server re-emits it on save, `npm run db:emit` does it otherwise):
 
 ```bash
-npm run db:emit                 # regenerate prisma/contract.json and contract.d.ts (commit them)
-npm run db:plan -- my_change    # write the migration in prisma/migrations (commit it)
+npm run db:plan -- my_change    # write the migration in migrations/app (commit it)
 npm run db:migrate              # apply it
+```
+
+A new database is created by the migrations, then gets its theaters (and tags) from the seed script:
+
+```bash
+npm run db:migrate
+npm run db:seed
 ```
 
 ## Deploy
@@ -92,5 +102,5 @@ A migration runs while the previous version still serves traffic, so it must sta
 
 ## Dates
 
-Showtimes are Paris events: days, weeks and showtime hours are computed in Europe/Paris
-(`app/paris.ts`), whatever time zone the server, the scraper runner or the visitor is in.
+Showtimes are Paris events: days, weeks and showtime hours are computed in the process time zone,
+so every process runs with `TZ=Europe/Paris`: `fly.toml`, the scrape workflow, `vitest.config.ts` and `.env`.

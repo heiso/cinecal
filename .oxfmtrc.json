@@ -16,9 +16,9 @@
     ".react-router",
     "svgs.ts",
     "public/icons.svg",
-    "prisma/contract.json",
-    "prisma/contract.d.ts",
-    "prisma/migrations",
-    ".claude"
+    ".claude",
+    "src/prisma/contract.json",
+    "src/prisma/contract.d.ts",
+    "migrations"
   ]
 }

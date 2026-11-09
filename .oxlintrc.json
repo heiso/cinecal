@@ -10,5 +10,11 @@
     "react/react-in-jsx-scope": "off",
     "import/no-cycle": "error"
   },
-  "ignorePatterns": ["build/**", ".react-router/**", "svgs.ts", "prisma/contract.d.ts"]
+  "ignorePatterns": [
+    "build/**",
+    ".react-router/**",
+    "svgs.ts",
+    "src/prisma/contract.d.ts",
+    "migrations/**"
+  ]
 }

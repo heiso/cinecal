@@ -5,6 +5,8 @@ primary_region = "cdg"
 [env]
 ENV = "production"
 PORT = "8080"
+# Showtimes are Paris events: days, weeks and showtime hours are computed in Paris time
+TZ = "Europe/Paris"
 PUBLIC_URL = "https://cinecal.fly.dev"
 SHOULD_REFRESH_BROWSER_IF_VERSION_MISMATCH = "true"
 

@@ -1,4 +1,4 @@
-import { db } from './db.ts'
+import { db } from '../prisma/db.ts'
 
 async function main() {
   await db.orm.public.Theater.createAndCount([

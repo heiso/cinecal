@@ -1,6 +1,7 @@
 # Config
 ENV=development
 NODE_ENV=development
+TZ=Europe/Paris
 PUBLIC_URL=http://localhost:3000
 # IMAGEKIT_API_KEY=
 

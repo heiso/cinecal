@@ -1,9 +1,8 @@
 import { and, type ModelAccessor } from '@prisma/orm-postgres/orm-client'
-import { add, endOfDay, endOfWeek, startOfDay, startOfWeek } from 'date-fns'
+import { add, endOfDay, endOfWeek, format, startOfDay, startOfWeek } from 'date-fns'
 import { fr } from 'date-fns/locale'
-import type { Contract } from '../prisma/contract.d.ts'
+import type { Contract } from '../src/prisma/contract.d'
 import { CUSTOM_TAG, DATE_FILTER } from './filters'
-import { paris, toDate } from './paris'
 
 type MovieFields = ModelAccessor<Contract, 'Movie', 'public'>
 type ShowtimeFields = ModelAccessor<Contract, 'Showtime', 'public'>
@@ -69,13 +68,15 @@ function escapeLike(value: string) {
  */
 export function getWhereInputs(filters: Filters) {
   const now = new Date()
-  const recentReleaseDate = toDate(add(now, { days: -14 }, { in: paris }))
-  const startOfToday = toDate(startOfDay(now, { in: paris }))
-  const endOfToday = toDate(endOfDay(now, { in: paris }))
-  const endOfThisWeek = toDate(endOfWeek(now, { locale: fr, in: paris }))
-  const nextWeek = add(now, { weeks: 1 }, { in: paris })
-  const startOfNextWeek = toDate(startOfWeek(nextWeek, { locale: fr, in: paris }))
-  const endOfNextWeek = toDate(endOfWeek(nextWeek, { locale: fr, in: paris }))
+  // Release dates are calendar dates ("yyyy-MM-dd")
+  const today = format(now, 'yyyy-MM-dd')
+  const recentReleaseDate = format(add(now, { days: -14 }), 'yyyy-MM-dd')
+  const startOfToday = startOfDay(now)
+  const endOfToday = endOfDay(now)
+  const endOfThisWeek = endOfWeek(now, { locale: fr })
+  const nextWeek = add(now, { weeks: 1 })
+  const startOfNextWeek = startOfWeek(nextWeek, { locale: fr })
+  const endOfNextWeek = endOfWeek(nextWeek, { locale: fr })
 
   const showtime = (s: ShowtimeFields) =>
     and(
@@ -99,9 +100,9 @@ export function getWhereInputs(filters: Filters) {
       ...(filters.customTags.NEW_RELEASE && filters.customTags.NEXT_RELEASE
         ? [m.releaseDate.gte(recentReleaseDate)]
         : filters.customTags.NEW_RELEASE
-          ? [m.releaseDate.gte(recentReleaseDate), m.releaseDate.lte(now)]
+          ? [m.releaseDate.gte(recentReleaseDate), m.releaseDate.lte(today)]
           : filters.customTags.NEXT_RELEASE
-            ? [m.releaseDate.gt(now)]
+            ? [m.releaseDate.gt(today)]
             : []),
       ...(filters.customTags.SCRAPED_RECENTLY ? [m.createdAt.gte(startOfToday)] : []),
       ...(filters.movieTags.length > 0 ? [m.Tags.some((tag) => tag.id.in(filters.movieTags))] : []),

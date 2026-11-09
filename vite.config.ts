@@ -30,8 +30,8 @@ export default defineConfig(({ command }) => {
     plugins: [
       tailwindcss(),
       reactRouter(),
-      // Re-emits prisma/contract.json and contract.d.ts when prisma/contract.prisma changes (dev only)
-      prismaVitePlugin('prisma.config.ts'),
+      // Re-emits src/prisma/contract.json and contract.d.ts when contract.prisma changes (dev only)
+      prismaVitePlugin(),
       iconSprites(),
     ],
   }

@@ -28,6 +28,8 @@ jobs:
     runs-on: self-hosted
     env:
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      # Allocine's days and showtime hours are Paris time
+      TZ: Europe/Paris
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7

@@ -1,5 +1,5 @@
 import { parseArgs } from 'node:util'
-import { db } from '../prisma/db.ts'
+import { db } from '../src/prisma/db.ts'
 import { savePosterBlurHashes, scrapPosters, scrapShowtimes, scrapTicketing } from './scraper.ts'
 
 const { positionals } = parseArgs({ allowPositionals: true })
