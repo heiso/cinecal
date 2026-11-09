@@ -65,5 +65,14 @@
   },
   "prisma": {
     "seed": "tsx ./prisma/seed.ts"
+  },
+  "allowScripts": {
+    "@prisma/client": true,
+    "@prisma/engines": true,
+    "@swc/core": true,
+    "esbuild": true,
+    "fsevents": true,
+    "msw": true,
+    "prisma": true
   }
 }
