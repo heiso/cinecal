@@ -99,7 +99,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
             >
               {movie.src ? (
                 <ProgressiveImg
-                  className="block aspect-poster w-full rounded-xl object-cover"
+                  className="aspect-poster w-full rounded-xl"
                   key={movie.id}
                   src={movie.src}
                   srcLowDef={movie.srcLowDef}

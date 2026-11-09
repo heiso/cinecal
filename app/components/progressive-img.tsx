@@ -1,24 +1,28 @@
 import type { ComponentProps } from 'react'
 
-type ProgressiveImgProps = ComponentProps<'img'> & {
+type ProgressiveImgProps = Omit<ComponentProps<'img'>, 'className'> & {
+  /** Classes of the frame: size, margins, rounding */
+  className?: string
   srcLowDef: string
 }
 
 /**
- * The blurhash placeholder is the image's background, so it shows until the
- * poster has loaded, without JavaScript.
- * https://github.com/ascorbic/unpic-placeholder#blurhash
+ * The blurred blurhash placeholder sits under the image, so it shows until the
+ * poster has loaded, without JavaScript. It is a layer of its own because a CSS
+ * blur on the image would blur the poster too.
  */
-export function ProgressiveImg({ srcLowDef, style, alt, ...rest }: ProgressiveImgProps) {
+export function ProgressiveImg({ srcLowDef, className = '', alt, ...rest }: ProgressiveImgProps) {
   return (
-    <img
-      {...rest}
-      alt={alt}
-      style={
-        srcLowDef
-          ? { backgroundImage: `url('${srcLowDef}')`, backgroundSize: 'cover', ...style }
-          : style
-      }
-    />
+    <div className={`relative overflow-hidden ${className}`}>
+      {srcLowDef && (
+        <div
+          aria-hidden
+          // 40px blur like the original backdrop-blur-2xl, scaled up so it does not fade the edges
+          className="absolute inset-0 scale-125 bg-cover bg-center blur-2xl"
+          style={{ backgroundImage: `url('${srcLowDef}')` }}
+        />
+      )}
+      <img {...rest} alt={alt} className="absolute inset-0 h-full w-full object-cover" />
+    </div>
   )
 }
