@@ -110,7 +110,7 @@ Only [`deploy/compose.yml`](deploy/compose.yml) and a `.env` are needed on the s
 ```bash
 mkdir cinecal && cd cinecal
 curl -fsSLO https://raw.githubusercontent.com/heiso/cinecal/main/deploy/compose.yml
-curl -fsSL -o .env https://raw.githubusercontent.com/heiso/cinecal/main/deploy/.env.example
+curl -fsSL -o .env https://raw.githubusercontent.com/heiso/cinecal/main/deploy/.env.tpl
 ```
 
 Fill in `.env` (database password, public URL, ImageKit key), then start everything:

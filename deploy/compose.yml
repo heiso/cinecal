@@ -1,4 +1,4 @@
-# Runs Cinecal on a homelab: copy this file and .env.example (as .env) to a folder there.
+# Runs Cinecal on a homelab: copy this file and .env.tpl (as .env) to a folder there.
 # See "Hosting" in the README.
 name: cinecal
 
