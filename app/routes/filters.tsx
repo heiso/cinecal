@@ -1,7 +1,7 @@
 import { useEffect, useState, type ComponentProps } from 'react'
 import { Form, Link, useLocation, useNavigate, useSearchParams, useSubmit } from 'react-router'
 import { db } from '../db.server'
-import { CUSTOM_TAG_LABELS, DATE_FILTER, DATE_FILTER_LABELS } from '../filters'
+import { AFTER_WORK_LABEL, CUSTOM_TAG_LABELS, DATE_FILTER, DATE_FILTER_LABELS } from '../filters'
 import { getFilters, getWhereInputs } from '../filters.server'
 import { Icon } from '../ui/icon'
 import { Input } from '../ui/input'
@@ -59,6 +59,7 @@ function getFormValues(searchParams: URLSearchParams) {
     showtimeTags: searchParams.getAll('showtimeTags'),
     customTags: searchParams.getAll('customTags'),
     theaters: searchParams.getAll('theaters'),
+    afterWork: searchParams.has('afterWork'),
   }
 }
 
@@ -249,6 +250,16 @@ export default function Filters({ loaderData }: Route.ComponentProps) {
                 label={tag.name}
               />
             ))}
+        </ul>
+        <ul>
+          <Checkbox
+            id="afterWork"
+            name="afterWork"
+            value="on"
+            checked={values.afterWork}
+            onChange={(event) => setValue('afterWork', event.target.checked)}
+            label={AFTER_WORK_LABEL}
+          />
         </ul>
         <ul>
           {dates.length > 0 &&

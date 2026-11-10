@@ -47,18 +47,18 @@ export async function loader({ params, request }: Route.LoaderArgs) {
   }
 
   const theaters = await db.orm.public.Theater.where((theater) =>
-    theater.Showtimes.some((showtime) =>
-      and(showtime.movieId.eq(movieId), where.showtime(showtime)),
+    theater.Showtimes.some((showtime, tools) =>
+      and(showtime.movieId.eq(movieId), where.showtime(showtime, tools)),
     ),
   )
     .select('id', 'name', 'website', 'address')
     .include('Showtimes', (showtimes) =>
       showtimes
-        .where((showtime) =>
+        .where((showtime, tools) =>
           and(
             showtime.movieId.eq(movieId),
             showtime.date.gte(new Date()),
-            where.showtime(showtime),
+            where.showtime(showtime, tools),
           ),
         )
         .select('id', 'date', 'language', 'ticketingUrl', 'isPreview')

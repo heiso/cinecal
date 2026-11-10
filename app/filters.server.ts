@@ -1,4 +1,4 @@
-import { and, type ModelAccessor } from '@prisma/orm-postgres/orm-client'
+import { and, type ModelAccessor, type ModelCallbackTools } from '@prisma/orm-postgres/orm-client'
 import { add, endOfDay, endOfWeek, format, startOfDay, startOfWeek } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import type { Contract } from '../src/prisma/contract.d'
@@ -6,6 +6,17 @@ import { CUSTOM_TAG, DATE_FILTER } from './filters'
 
 type MovieFields = ModelAccessor<Contract, 'Movie', 'public'>
 type ShowtimeFields = ModelAccessor<Contract, 'Showtime', 'public'>
+type ShowtimeTools = ModelCallbackTools<Contract, 'Showtime', 'public'>
+
+/** The server's time zone (Europe/Paris in production), the one the date filters use too */
+const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone
+
+/** A showtime on Saturday or Sunday, or from 18:00 on a weekday */
+function afterWork(s: ShowtimeFields, fns: ShowtimeTools['fns']) {
+  const weekend = fns.raw`EXTRACT(ISODOW FROM ${s.date} AT TIME ZONE ${timeZone}) >= 6`
+  const evening = fns.raw`EXTRACT(HOUR FROM ${s.date} AT TIME ZONE ${timeZone}) >= 18`
+  return fns.or(weekend.returns('pg/bool@1'), evening.returns('pg/bool@1'))
+}
 
 export type Filters = ReturnType<typeof getFilters>
 
@@ -35,10 +46,12 @@ export function getFilters(request: Request) {
   const showtimeTags = getIds(search, 'showtimeTags')
   const theaters = getIds(search, 'theaters')
   const customTags = search.getAll('customTags').filter(isCustomTag)
+  const afterWork = search.has('afterWork')
 
   const count =
     Number(Boolean(title)) +
     Number(date !== DATE_FILTER.DEFAULT) +
+    Number(afterWork) +
     movieTags.length +
     showtimeTags.length +
     theaters.length +
@@ -50,6 +63,7 @@ export function getFilters(request: Request) {
     movieTags,
     showtimeTags,
     theaters,
+    afterWork,
     customTags: Object.fromEntries(
       Object.values(CUSTOM_TAG).map((tag) => [tag, customTags.includes(tag)]),
     ) as Record<CUSTOM_TAG, boolean>,
@@ -78,7 +92,7 @@ export function getWhereInputs(filters: Filters) {
   const startOfNextWeek = startOfWeek(nextWeek, { locale: fr })
   const endOfNextWeek = endOfWeek(nextWeek, { locale: fr })
 
-  const showtime = (s: ShowtimeFields) =>
+  const showtime = (s: ShowtimeFields, { fns }: ShowtimeTools) =>
     and(
       ...(filters.date === DATE_FILTER.TODAY
         ? [s.date.gte(now), s.date.lt(endOfToday)]
@@ -91,6 +105,7 @@ export function getWhereInputs(filters: Filters) {
       ...(filters.showtimeTags.length > 0
         ? [s.Tags.some((tag) => tag.id.in(filters.showtimeTags))]
         : []),
+      ...(filters.afterWork ? [afterWork(s, fns)] : []),
     )
 
   const movie = (m: MovieFields) =>

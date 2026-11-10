@@ -25,3 +25,5 @@ export const CUSTOM_TAG_LABELS: Record<CUSTOM_TAG, string> = {
   [CUSTOM_TAG.NEXT_RELEASE]: 'Prochainement',
   [CUSTOM_TAG.SCRAPED_RECENTLY]: 'Récemment ajouté',
 }
+
+export const AFTER_WORK_LABEL = 'Hors période de travail'

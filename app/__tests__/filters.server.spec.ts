@@ -25,6 +25,7 @@ describe('getFilters', () => {
       movieTags: [],
       showtimeTags: [],
       theaters: [],
+      afterWork: false,
       customTags: { NEW_RELEASE: false, NEXT_RELEASE: false, SCRAPED_RECENTLY: false },
       count: 0,
     })
@@ -34,7 +35,7 @@ describe('getFilters', () => {
     expect(
       getFilters(
         request(
-          '?title=creed&date=TODAY&movieTags=1&movieTags=x&showtimeTags=2&theaters=3&theaters=4&customTags=NEW_RELEASE&customTags=NOPE',
+          '?title=creed&date=TODAY&movieTags=1&movieTags=x&showtimeTags=2&theaters=3&theaters=4&customTags=NEW_RELEASE&customTags=NOPE&afterWork=on',
         ),
       ),
     ).toEqual({
@@ -43,8 +44,9 @@ describe('getFilters', () => {
       movieTags: [1],
       showtimeTags: [2],
       theaters: [3, 4],
+      afterWork: true,
       customTags: { NEW_RELEASE: true, NEXT_RELEASE: false, SCRAPED_RECENTLY: false },
-      count: 7,
+      count: 8,
     })
   })
 
@@ -80,6 +82,14 @@ describe('getWhereInputs', () => {
     const { sql, params } = movieQuery('?date=NEXT_WEEK')
     expect(sql).toContain('"showtimes"."date" > $1 AND "showtimes"."date" <= $2')
     expect(params).toEqual(['2026-11-15T23:00:00.000Z', '2026-11-22T22:59:59.999Z'])
+  })
+
+  it('keeps weekend showtimes and weekday ones from 18:00, in the server time zone', () => {
+    const { sql, params } = movieQuery('?afterWork=on')
+    expect(sql).toContain(
+      '(EXTRACT(ISODOW FROM "showtimes"."date" AT TIME ZONE $2) >= 6 OR EXTRACT(HOUR FROM "showtimes"."date" AT TIME ZONE $3) >= 18)',
+    )
+    expect(params).toEqual(['2026-11-09T12:00:00.000Z', 'Europe/Paris', 'Europe/Paris'])
   })
 
   it('matches the title literally and case-insensitively', () => {
