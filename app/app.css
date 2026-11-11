@@ -12,6 +12,11 @@
   --aspect-poster: 62 / 85;
 }
 
+/* The page under a modal dialog does not scroll */
+html:has(dialog:modal) {
+  overflow: hidden;
+}
+
 /* https://www.brailleinstitute.org/freefont/ */
 @font-face {
   font-family: 'Atkinson Hyperlegible';

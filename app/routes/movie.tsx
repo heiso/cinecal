@@ -3,7 +3,7 @@ import { add, format } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import { useEffect } from 'react'
 import { data, href, Link, useLocation, useNavigate } from 'react-router'
-import { ProgressiveImg } from '../components/progressive-img'
+import { PosterZoom } from '../components/poster-zoom'
 import { db } from '../db.server'
 import { env } from '../env.server'
 import { getFilters, getWhereInputs } from '../filters.server'
@@ -70,7 +70,7 @@ export async function loader({ params, request }: Route.LoaderArgs) {
 
   const url = new URL(href('/:movieId', { movieId: String(movie.id) }), env.PUBLIC_URL).toString()
 
-  const { src, srcLowDef } = getPosterSrc(
+  const { src, srcLowDef, srcFullSize } = getPosterSrc(
     movie.posterUrl,
     movie.posterBlurHash,
     movie.posterAllocineUrl,
@@ -123,6 +123,7 @@ export async function loader({ params, request }: Route.LoaderArgs) {
       title: movie.title,
       src,
       srcLowDef,
+      srcFullSize,
       duration: movie.duration,
       // A calendar date, "yyyy-MM-dd"
       releaseDate: movie.releaseDate?.slice(0, 4) ?? null,
@@ -232,11 +233,12 @@ export default function Movie({ loaderData }: Route.ComponentProps) {
             style={{ backgroundImage: `url('${movie.srcLowDef}')` }}
           ></div>
           {movie.src ? (
-            <ProgressiveImg
+            <PosterZoom
               // z-1 paints it above the blurred backdrop
-              className="z-1 m-auto aspect-poster w-1/2 rounded-xl"
+              className="relative z-1 m-auto w-1/2"
               src={movie.src}
               srcLowDef={movie.srcLowDef}
+              srcFullSize={movie.srcFullSize ?? movie.src}
               alt={movie.title}
             />
           ) : (

@@ -18,6 +18,8 @@ export function getPosterSrc(
     src: posterUrl
       ? `${imagekitUrl}/${posterUrl}/tr:w-${POSTER_WIDTH},ar-62-85`
       : posterAllocineUrl,
+    // The original, uncropped
+    srcFullSize: posterUrl ? `${imagekitUrl}/${posterUrl}` : posterAllocineUrl,
     srcLowDef: posterBlurHash
       ? blurhashToDataUri(
           posterBlurHash,
