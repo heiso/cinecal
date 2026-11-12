@@ -4,6 +4,7 @@ import { fr } from 'date-fns/locale'
 import { useEffect } from 'react'
 import { data, href, Link, useLocation, useNavigate } from 'react-router'
 import { PosterZoom } from '../components/poster-zoom'
+import { ShareButton } from '../components/share-button'
 import { db } from '../db.server'
 import { env } from '../env.server'
 import { getFilters, getWhereInputs } from '../filters.server'
@@ -247,7 +248,12 @@ export default function Movie({ loaderData }: Route.ComponentProps) {
         </div>
 
         <div className="relative z-1 space-y-4 pb-4">
-          <h1 className="inline-block text-3xl text-white">{movie.title}</h1>
+          {/* The title's font size on the line, so the share button centers on the title text */}
+          <div className="text-3xl">
+            {/* Inline, so the share button follows the last word of the title */}
+            <h1 className="inline text-white">{movie.title}</h1>
+            <ShareButton className="ml-3" title={movie.title} url={movie.url} />
+          </div>
 
           <div className="space-x-2">
             <span className="inline-block rounded-md border border-gray p-1 text-xs text-gray">
