@@ -222,7 +222,7 @@ export default function Movie({ loaderData }: Route.ComponentProps) {
       {movie.src && <meta property="og:image" content={movie.src} />}
       <div className="p-6 pb-28">
         <Link
-          to={{ pathname: '/', hash: movie.id.toString() }}
+          to={{ pathname: '/', search: location.search, hash: movie.id.toString() }}
           className="absolute z-10 w-fit fill-white"
         >
           <Icon id="cross-2" width="32px" height="32px" />

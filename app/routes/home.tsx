@@ -1,13 +1,21 @@
-import { Link, useLocation } from 'react-router'
+import { Link, redirect, useLocation } from 'react-router'
 import { PosterFalback } from '../components/poster-fallback'
 import { ProgressiveImg } from '../components/progressive-img'
 import { db } from '../db.server'
 import { getFilters, getWhereInputs } from '../filters.server'
 import { getPosterSrc } from '../poster.server'
+import { getSavedFilters } from '../saved-filters.server'
 import type { Route } from './+types/home'
 
 export async function loader({ request }: Route.LoaderArgs) {
   const filters = getFilters(request)
+
+  // Not a test on the query string: client navigations load "/_.data?_routes=…"
+  if (filters.count === 0) {
+    const savedFilters = await getSavedFilters(request)
+    if (savedFilters) throw redirect(`/?${savedFilters}`)
+  }
+
   const where = getWhereInputs(filters)
 
   const movies = await db.orm.public.Movie.where(where.movie)

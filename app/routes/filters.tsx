@@ -1,8 +1,17 @@
 import { useEffect, useState, type ComponentProps } from 'react'
-import { Form, Link, useLocation, useNavigate, useSearchParams, useSubmit } from 'react-router'
+import {
+  data,
+  Form,
+  Link,
+  useLocation,
+  useNavigate,
+  useSearchParams,
+  useSubmit,
+} from 'react-router'
 import { db } from '../db.server'
 import { AFTER_WORK_LABEL, CUSTOM_TAG_LABELS, DATE_FILTER, DATE_FILTER_LABELS } from '../filters'
 import { getFilters, getWhereInputs } from '../filters.server'
+import { saveFilters } from '../saved-filters.server'
 import { Icon } from '../ui/icon'
 import { Input } from '../ui/input'
 import type { Route } from './+types/filters'
@@ -37,7 +46,7 @@ export async function loader({ request }: Route.LoaderArgs) {
       .first(),
   ])
 
-  return {
+  const body = {
     dates: Object.values(DATE_FILTER).map((value) => ({ value, label: DATE_FILTER_LABELS[value] })),
     movieTags,
     showtimeTags,
@@ -49,6 +58,8 @@ export async function loader({ request }: Route.LoaderArgs) {
     resultCount: results.count,
     filterCount: filters.count,
   }
+
+  return data(body, { headers: { 'Set-Cookie': await saveFilters(filters) } })
 }
 
 function getFormValues(searchParams: URLSearchParams) {
