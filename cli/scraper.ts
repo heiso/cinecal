@@ -19,8 +19,6 @@ const EXCLUSION_LIST = ['Rex Studios', 'Sauvez le cinéma !']
 const IMAGEKIT_FOLDER = process.env.ENV === 'development' ? 'posters-dev' : 'posters-prod'
 const IMAGEKIT_URL = `https://ik.imagekit.io/cinecal/${IMAGEKIT_FOLDER}`
 const POSTER_RATIO = 62 / 85
-const SHOWTIMES_EXPIRATION_DATE = endOfDay(new Date())
-const TICKETING_DETAILS_EXPIRATION_DATE = add(new Date(), { days: 3 })
 // Poster cleanup only trusts the showtime state if the last complete scrape is
 // within this window. Showtimes run every 30min, so a healthy pipeline produces
 // a complete run well within a day; if none has succeeded for this long, skip
@@ -148,10 +146,11 @@ async function getAllocineTicketingDetails(url: string) {
   }
 
   const content = await res.text()
+  const expiresAt = add(new Date(), { days: 3 })
 
   await db.orm.public.ScrapedUrl.upsert({
-    create: { url, content, expiresAt: TICKETING_DETAILS_EXPIRATION_DATE, type: 'TICKETING' },
-    update: { content, expiresAt: TICKETING_DETAILS_EXPIRATION_DATE },
+    create: { url, content, expiresAt, type: 'TICKETING' },
+    update: { content, expiresAt },
   })
 
   return content
@@ -197,9 +196,11 @@ async function getAllocineShowtimes(url: string) {
     }
   }
 
+  const expiresAt = endOfDay(new Date())
+
   await db.orm.public.ScrapedUrl.upsert({
-    create: { url, content, expiresAt: SHOWTIMES_EXPIRATION_DATE, type: 'SHOWTIMES' },
-    update: { content, expiresAt: SHOWTIMES_EXPIRATION_DATE },
+    create: { url, content, expiresAt, type: 'SHOWTIMES' },
+    update: { content, expiresAt },
   })
 
   return { json, fromCache: false }

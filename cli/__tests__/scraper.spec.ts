@@ -1,8 +1,8 @@
 import { readFileSync } from 'node:fs'
-import { format } from 'date-fns'
+import { addDays, endOfDay, format } from 'date-fns'
 import { http, HttpResponse } from 'msw'
 import { setupServer } from 'msw/node'
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import { allocineShowtimesHandler, theaterShowtimeId } from './allocine-mock.ts'
 
 /**
@@ -140,4 +140,21 @@ describe.skipIf(!TEST_DATABASE_URL)('scrapShowtimes', () => {
     expect(await count('showtimes')).toBe(showtimes.length)
     expect((await db.orm.public.AppState.where({ id: 1 }).first())?.lastCompleteScrapeAt).toBeNull()
   }, 10_000)
+
+  it('caches showtimes until the end of the day they are fetched, not the day the scraper started', async () => {
+    // The scraper module was imported in beforeAll: the scheduler runs for days in one process
+    const tomorrow = addDays(new Date(), 1)
+    vi.useFakeTimers({ now: tomorrow, toFake: ['Date'] })
+    try {
+      await scrapShowtimes(0)
+    } finally {
+      vi.useRealTimers()
+    }
+
+    const scrapedUrls = await db.orm.public.ScrapedUrl.select('expiresAt').all()
+    expect(scrapedUrls.length).toBeGreaterThan(0)
+    for (const { expiresAt } of scrapedUrls) {
+      expect(expiresAt).toEqual(endOfDay(tomorrow))
+    }
+  })
 })
